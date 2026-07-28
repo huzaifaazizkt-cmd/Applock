@@ -2,6 +2,7 @@ package com.example.applock.service
 
 import android.accessibilityservice.AccessibilityService
 import android.content.Intent
+import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import com.example.applock.Design.screens.LockScreenActivity
 import com.example.applock.data.DataStoreManager
@@ -10,22 +11,27 @@ import kotlinx.coroutines.flow.first
 
 class AppLockService : AccessibilityService() {
 
+    private val TAG = "APPLOCK_DEBUG"
     private val scope = CoroutineScope(Dispatchers.IO)
 
-    private var lastApp = ""
+    override fun onServiceConnected() {
+        super.onServiceConnected()
+        Log.d(TAG, "✅ Service Connected")
+    }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
 
-        if (event?.eventType != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) return
+        if (event == null) return
+        if (event.eventType != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) return
 
         val packageName = event.packageName?.toString() ?: return
 
+        Log.d(TAG, "📱 App: $packageName")
+
+        // ❌ ignore own app
         if (packageName == this.packageName) return
 
-        if (packageName == lastApp) return
-        lastApp = packageName
-
-        // 🔥 LOOP FIX
+        // ❌ if lock screen already open
         if (AppLockServiceHolder.isLockScreenOpen) return
 
         scope.launch {
@@ -33,7 +39,12 @@ class AppLockService : AccessibilityService() {
             val lockedApps = DataStoreManager(this@AppLockService)
                 .lockedAppsFlow.first()
 
-            if (lockedApps.contains(packageName)) {
+            // ✅ LOCK CONDITION
+            if (lockedApps.contains(packageName)
+                && AppLockServiceHolder.currentUnlockedApp != packageName
+            ) {
+
+                Log.d(TAG, "🚫 LOCKING: $packageName")
 
                 AppLockServiceHolder.isLockScreenOpen = true
 
@@ -46,5 +57,7 @@ class AppLockService : AccessibilityService() {
         }
     }
 
-    override fun onInterrupt() {}
+    override fun onInterrupt() {
+        Log.d(TAG, "❌ Interrupted")
+    }
 }

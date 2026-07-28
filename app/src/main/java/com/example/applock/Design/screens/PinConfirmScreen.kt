@@ -76,7 +76,7 @@ fun PinConfirmScreen(
                     dataStore.savePin(pin)
                 }
 
-                navController.navigate("home")
+                navController.navigate("appList")
 
             } else {
                 error = "Enter your correct password"   // ❌ ERROR SHOW

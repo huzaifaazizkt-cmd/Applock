@@ -18,6 +18,14 @@ class LockScreenActivity : ComponentActivity() {
         setContent {
             UnlockScreen(
                 onUnlockSuccess = {
+
+                    // ✅ TEMP unlock
+                    targetPackage?.let {
+                        AppLockServiceHolder.currentUnlockedApp = it
+                    }
+
+                    AppLockServiceHolder.isLockScreenOpen = false
+
                     openApp()
                 }
             )
@@ -31,17 +39,17 @@ class LockScreenActivity : ComponentActivity() {
                 intent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 startActivity(intent)
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        } catch (_: Exception) {}
 
         finish()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    // ❗ IMPORTANT FIX
+    override fun onStop() {
+        super.onStop()
 
-        // 🔥 IMPORTANT FIX
+        // ✅ Reset when app goes background
+        AppLockServiceHolder.currentUnlockedApp = null
         AppLockServiceHolder.isLockScreenOpen = false
     }
 }
