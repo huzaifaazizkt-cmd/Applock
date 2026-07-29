@@ -6,7 +6,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.applock.Design.components.NumberPad
 
 
@@ -21,7 +23,7 @@ fun PinCreateScreen(onNext: (String) -> Unit) {
         verticalArrangement = Arrangement.Center
     ) {
 
-        Text("Set Passcode",    style = MaterialTheme.typography.headlineMedium)
+        Text("Set Passcode",    style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, fontSize = 20.sp)
 
         Spacer(modifier = Modifier.height(20.dp))
 
