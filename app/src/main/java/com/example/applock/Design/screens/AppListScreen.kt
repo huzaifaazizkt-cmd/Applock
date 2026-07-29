@@ -31,7 +31,9 @@ fun AppListScreen(context: Context) {
 
     val apps = remember {
         pm.getInstalledApplications(PackageManager.GET_META_DATA)
-            .filter { pm.getLaunchIntentForPackage(it.packageName) != null }
+            .filter {
+                it.packageName != context.packageName
+            }
     }
 
     val lockedApps by dataStore.lockedAppsFlow.collectAsState(initial = emptySet())
