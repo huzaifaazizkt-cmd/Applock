@@ -19,8 +19,11 @@
         <activity
             android:name=".Design.screens.LockScreenActivity"
             android:exported="true"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
-        <!-- ⚙️ Accessibility Service -->
+            android:launchMode="singleTask"
+            android:excludeFromRecents="true"
+            android:turnScreenOn="true"
+            android:showWhenLocked="true"
+            android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"/>
         <service
             android:name=".service.AppLockService"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"

@@ -1,7 +1,9 @@
 package com.example.applock.Design.screens
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.example.applock.service.AppLockServiceHolder
@@ -13,13 +15,27 @@ class LockScreenActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // 🔥 FORCE SHOW ON TOP (IMPORTANT)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            setShowWhenLocked(true)
+            setTurnScreenOn(true)
+        }
+
+        window.addFlags(
+            WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or
+                    WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or
+                    WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+                    WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+        )
+
         targetPackage = intent.getStringExtra("packageName")
+
+        AppLockServiceHolder.isLockScreenOpen = true
 
         setContent {
             UnlockScreen(
                 onUnlockSuccess = {
 
-                    // ✅ TEMP unlock
                     targetPackage?.let {
                         AppLockServiceHolder.currentUnlockedApp = it
                     }
@@ -44,12 +60,8 @@ class LockScreenActivity : ComponentActivity() {
         finish()
     }
 
-    // ❗ IMPORTANT FIX
-    override fun onStop() {
-        super.onStop()
-
-        // ✅ Reset when app goes background
-        AppLockServiceHolder.currentUnlockedApp = null
+    override fun onDestroy() {
+        super.onDestroy()
         AppLockServiceHolder.isLockScreenOpen = false
     }
 }

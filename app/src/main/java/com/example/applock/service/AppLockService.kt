@@ -14,11 +14,6 @@ class AppLockService : AccessibilityService() {
     private val TAG = "APPLOCK_DEBUG"
     private val scope = CoroutineScope(Dispatchers.IO)
 
-    override fun onServiceConnected() {
-        super.onServiceConnected()
-        Log.d(TAG, "✅ Service Connected")
-    }
-
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
 
         if (event == null) return
@@ -26,12 +21,12 @@ class AppLockService : AccessibilityService() {
 
         val packageName = event.packageName?.toString() ?: return
 
-        Log.d(TAG, "📱 App: $packageName")
+        Log.d(TAG, "App: $packageName")
 
-        // ❌ ignore own app
         if (packageName == this.packageName) return
+        if (packageName.contains("launcher")) return
+        if (packageName == "com.android.systemui") return
 
-        // ❌ if lock screen already open
         if (AppLockServiceHolder.isLockScreenOpen) return
 
         scope.launch {
@@ -39,25 +34,34 @@ class AppLockService : AccessibilityService() {
             val lockedApps = DataStoreManager(this@AppLockService)
                 .lockedAppsFlow.first()
 
-            // ✅ LOCK CONDITION
             if (lockedApps.contains(packageName)
                 && AppLockServiceHolder.currentUnlockedApp != packageName
             ) {
 
-                Log.d(TAG, "🚫 LOCKING: $packageName")
+                Log.d(TAG, "LOCKING: $packageName")
 
                 AppLockServiceHolder.isLockScreenOpen = true
 
-                val intent = Intent(this@AppLockService, LockScreenActivity::class.java)
-                intent.putExtra("packageName", packageName)
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                // 🔥 IMPORTANT → MAIN THREAD PE LAUNCH
+                withContext(Dispatchers.Main) {
 
-                startActivity(intent)
+                    try {
+                        val intent = Intent(this@AppLockService, LockScreenActivity::class.java)
+                        intent.putExtra("packageName", packageName)
+
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+
+                        startActivity(intent)
+
+                    } catch (e: Exception) {
+                        AppLockServiceHolder.isLockScreenOpen = false
+                    }
+                }
             }
         }
     }
 
-    override fun onInterrupt() {
-        Log.d(TAG, "❌ Interrupted")
-    }
+    override fun onInterrupt() {}
 }
