@@ -8,6 +8,6 @@ object AppLockServiceHolder {
     // Last unlocked app
     var currentUnlockedApp: String? = null
 
-    // App ko unlock kiye hue last time
+
     var lastUnlockTime: Long = 0L
 }

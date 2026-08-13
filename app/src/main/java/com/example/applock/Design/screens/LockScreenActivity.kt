@@ -24,7 +24,7 @@ class LockScreenActivity : ComponentActivity() {
         Log.d(TAG, "================================")
 
         // ------------------------------------------------
-        // Lock screen ko screen ke upar show karo
+
         // ------------------------------------------------
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
@@ -41,7 +41,7 @@ class LockScreenActivity : ComponentActivity() {
         )
 
         // ------------------------------------------------
-        // Kis app ko unlock karna hai
+
         // ------------------------------------------------
 
         targetPackage =
@@ -75,11 +75,10 @@ class LockScreenActivity : ComponentActivity() {
 
                     targetPackage?.let { packageName ->
 
-                        // Current app save karo
                         AppLockServiceHolder.currentUnlockedApp =
                             packageName
 
-                        // Unlock ka time save karo
+
                         AppLockServiceHolder.lastUnlockTime =
                             System.currentTimeMillis()
 
@@ -97,9 +96,6 @@ class LockScreenActivity : ComponentActivity() {
         }
     }
 
-    // ------------------------------------------------
-    // Original app open karo
-    // ------------------------------------------------
 
     private fun openApp() {
 
@@ -130,15 +126,6 @@ class LockScreenActivity : ComponentActivity() {
 
             if (appIntent != null) {
 
-                /*
-                 * TASK_ON_HOME ki wajah se:
-                 *
-                 * WhatsApp -> Back
-                 *        ↓
-                 * Home
-                 *
-                 * AppLock ki list nahi khulegi.
-                 */
 
                 appIntent.addFlags(
                     Intent.FLAG_ACTIVITY_NEW_TASK or
@@ -165,7 +152,7 @@ class LockScreenActivity : ComponentActivity() {
             )
         }
 
-        // LockScreen ko task se remove karo
+
         finishAndRemoveTask()
     }
 
@@ -178,13 +165,6 @@ class LockScreenActivity : ComponentActivity() {
             "LOCK SCREEN DESTROYED"
         )
 
-        AppLockServiceHolder.isLockScreenOpen = false
-    }
-}
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
         AppLockServiceHolder.isLockScreenOpen = false
     }
 }

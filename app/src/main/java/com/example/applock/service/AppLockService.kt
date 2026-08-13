@@ -131,20 +131,7 @@ class AppLockService : AccessibilityService() {
                 "HOME / LAUNCHER DETECTED"
             )
 
-            /*
-             * IMPORTANT:
-             *
-             * Yahan currentUnlockedApp ko
-             * immediately NULL nahi karna.
-             *
-             * Pehle 1.5 second wait hoga.
-             *
-             * Isse normal:
-             *
-             * WhatsApp -> Back -> Home
-             *
-             * par lock immediately trigger nahi hoga.
-             */
+
 
             handler.removeCallbacks(
                 resetUnlockedAppRunnable
