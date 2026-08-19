@@ -1,129 +1,447 @@
 package com.example.applock.Design.screens
 
+import android.app.Activity
+import androidx.biometric.BiometricManager
+import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Fingerprint
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.platform.LocalContext
+import androidx.fragment.app.FragmentActivity
+import com.example.applock.Design.components.NumberPad
 import com.example.applock.data.DataStoreManager
 import kotlinx.coroutines.flow.first
 
 @Composable
-fun UnlockScreen(onUnlockSuccess: () -> Unit) {
+fun UnlockScreen(
+    onUnlockSuccess: () -> Unit
+) {
 
-    val context = LocalContext.current
-    val dataStore = DataStoreManager(context)
+    val context =
+        LocalContext.current
 
-    var pin by remember { mutableStateOf("") }
-    var savedPin by remember { mutableStateOf("") }
+    val dataStore =
+        remember {
+            DataStoreManager(context)
+        }
 
-    LaunchedEffect(Unit) {
-        savedPin = dataStore.getPin().first() ?: "123456"
+    // --------------------------------
+    // ENTERED PIN
+    // --------------------------------
+
+    var enteredPin by remember {
+        mutableStateOf("")
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black)
-            .clickable { }
-            .padding(20.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
+    // --------------------------------
+    // SAVED PIN
+    // --------------------------------
 
-        // 🔹 Title
-        Text(
-            text = "Enter PIN",
-            color = Color.White,
-            fontSize = 24.sp
-        )
+    var savedPin by remember {
+        mutableStateOf("")
+    }
 
-        Spacer(modifier = Modifier.height(30.dp))
+    // --------------------------------
+    // ERROR
+    // --------------------------------
 
-        // 🔹 PIN Circles
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            repeat(6) { index ->
-                Box(
-                    modifier = Modifier
-                        .size(16.dp)
-                        .background(
-                            if (index < pin.length) Color.White else Color.Gray,
-                            shape = CircleShape
-                        )
-                )
-            }
+    var error by remember {
+        mutableStateOf("")
+    }
+
+    // --------------------------------
+    // FINGERPRINT ENABLED
+    // --------------------------------
+
+    var fingerprintEnabled by remember {
+        mutableStateOf(false)
+    }
+
+    // --------------------------------
+    // LOAD DATA
+    // --------------------------------
+
+    LaunchedEffect(Unit) {
+
+        savedPin =
+            dataStore
+                .getPin()
+                .first()
+                .orEmpty()
+
+        fingerprintEnabled =
+            dataStore
+                .getFingerprintEnabled()
+                .first()
+    }
+
+    // --------------------------------
+    // PIN LENGTH
+    // --------------------------------
+
+    val pinLength =
+        if (savedPin.isNotEmpty()) {
+            savedPin.length
+        } else {
+            6
         }
 
-        Spacer(modifier = Modifier.height(40.dp))
+    // --------------------------------
+    // CHECK PIN
+    // --------------------------------
 
-        // 🔹 Number Pad
-        val numbers = listOf(
-            listOf("1", "2", "3"),
-            listOf("4", "5", "6"),
-            listOf("7", "8", "9"),
-            listOf("", "0", "⌫")
-        )
+    fun checkPin() {
 
-        numbers.forEach { row ->
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(20.dp),
-                modifier = Modifier.padding(5.dp)
-            ) {
-                row.forEach { num ->
-                    Box(
-                        modifier = Modifier
-                            .size(70.dp)
-                            .clickable {
-                                when (num) {
-                                    "⌫" -> {
-                                        if (pin.isNotEmpty()) {
-                                            pin = pin.dropLast(1)
-                                        }
-                                    }
+        if (savedPin.isEmpty()) {
+            return
+        }
 
-                                    "" -> {}
+        if (enteredPin == savedPin) {
 
-                                    else -> {
-                                        if (pin.length < 6) {
-                                            pin += num
-                                        }
-                                    }
-                                }
-                            },
-                        contentAlignment = Alignment.Center
+            error = ""
+
+            onUnlockSuccess()
+
+        } else {
+
+            error =
+                "Enter your correct password"
+
+            enteredPin = ""
+        }
+    }
+
+    // --------------------------------
+    // BIOMETRIC
+    // --------------------------------
+
+    fun showBiometric() {
+
+        val activity =
+            context as? FragmentActivity
+                ?: return
+
+        val biometricManager =
+            BiometricManager.from(context)
+
+        val result =
+            biometricManager.canAuthenticate(
+                BiometricManager.Authenticators.BIOMETRIC_STRONG or
+                        BiometricManager.Authenticators.BIOMETRIC_WEAK
+            )
+
+        if (
+            result !=
+            BiometricManager.BIOMETRIC_SUCCESS
+        ) {
+
+            error =
+                "Fingerprint is not available"
+
+            return
+        }
+
+        val executor =
+            activity.mainExecutor
+
+        val biometricPrompt =
+            BiometricPrompt(
+                activity,
+                executor,
+
+                object :
+                    BiometricPrompt.AuthenticationCallback() {
+
+                    override fun onAuthenticationSucceeded(
+                        result:
+                        BiometricPrompt.AuthenticationResult
                     ) {
-                        Text(
-                            text = num,
-                            color = Color.White,
-                            fontSize = 22.sp
+
+                        super.onAuthenticationSucceeded(
+                            result
                         )
+
+                        error = ""
+
+                        onUnlockSuccess()
+                    }
+
+                    override fun onAuthenticationFailed() {
+
+                        super.onAuthenticationFailed()
+
+                        error =
+                            "Fingerprint not recognized"
+                    }
+
+                    override fun onAuthenticationError(
+                        errorCode: Int,
+                        errString: CharSequence
+                    ) {
+
+                        super.onAuthenticationError(
+                            errorCode,
+                            errString
+                        )
+
+                        // User ne "Use PIN"
+                        // ya cancel press kiya
+                        error = ""
                     }
                 }
+            )
+
+        val promptInfo =
+            BiometricPrompt.PromptInfo.Builder()
+                .setTitle("AppLock")
+                .setSubtitle("Scan your fingerprint")
+                .setDescription(
+                    "Use your fingerprint to unlock this app"
+                )
+                .setNegativeButtonText("Use PIN")
+                .setAllowedAuthenticators(
+                    BiometricManager.Authenticators.BIOMETRIC_STRONG or
+                            BiometricManager.Authenticators.BIOMETRIC_WEAK
+                )
+                .build()
+
+        biometricPrompt.authenticate(
+            promptInfo
+        )
+    }
+
+    // --------------------------------
+    // MAIN SCREEN
+    // --------------------------------
+
+    Box(
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(
+                    Color(0xFF29A0F0)
+                )
+    ) {
+
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 30.dp),
+
+            horizontalAlignment =
+                Alignment.CenterHorizontally,
+
+            verticalArrangement =
+                Arrangement.Center
+        ) {
+
+            Spacer(
+                modifier =
+                    Modifier.height(35.dp)
+            )
+
+            // --------------------------------
+            // TITLE
+            // --------------------------------
+
+            Text(
+                text = "Enter passcode",
+                color = Color.White,
+                fontSize = 25.sp,
+                fontWeight = FontWeight.Normal
+            )
+
+            Spacer(
+                modifier =
+                    Modifier.height(28.dp)
+            )
+
+            // --------------------------------
+            // FINGERPRINT BUTTON
+            // --------------------------------
+
+            if (fingerprintEnabled) {
+
+                Box(
+                    modifier =
+                        Modifier
+                            .size(65.dp)
+                            .background(
+                                Color(0xFF69B9F3),
+                                CircleShape
+                            )
+                            .clickable {
+
+                                showBiometric()
+                            },
+
+                    contentAlignment =
+                        Alignment.Center
+                ) {
+
+                    Icon(
+                        imageVector =
+                            Icons.Default.Fingerprint,
+
+                        contentDescription =
+                            "Fingerprint",
+
+                        tint =
+                            Color.White,
+
+                        modifier =
+                            Modifier.size(40.dp)
+                    )
+                }
+
+                Spacer(
+                    modifier =
+                        Modifier.height(18.dp)
+                )
             }
-        }
 
-        Spacer(modifier = Modifier.height(20.dp))
+            // --------------------------------
+            // DESCRIPTION
+            // --------------------------------
 
-        // 🔹 Unlock Button
-        Button(
-            onClick = {
-                if (pin == savedPin) {
-                    onUnlockSuccess()
-                } else {
-                    pin = ""
+            Text(
+                text =
+                    "Enter $pinLength - Digit pin",
+
+                color =
+                    Color.White,
+
+                fontSize =
+                    16.sp
+            )
+
+            Spacer(
+                modifier =
+                    Modifier.height(18.dp)
+            )
+
+            // --------------------------------
+            // PIN DOTS
+            // --------------------------------
+
+            Row(
+                horizontalArrangement =
+                    Arrangement.spacedBy(14.dp)
+            ) {
+
+                repeat(pinLength) { index ->
+
+                    Box(
+                        modifier =
+                            Modifier
+                                .size(14.dp)
+                                .background(
+                                    color =
+                                        if (
+                                            index <
+                                            enteredPin.length
+                                        ) {
+
+                                            Color.White
+
+                                        } else {
+
+                                            Color.White.copy(
+                                                alpha = 0.45f
+                                            )
+                                        },
+
+                                    shape =
+                                        CircleShape
+                                )
+                    )
                 }
             }
-        ) {
-            Text("Unlock")
+
+            Spacer(
+                modifier =
+                    Modifier.height(20.dp)
+            )
+
+            // --------------------------------
+            // ERROR
+            // --------------------------------
+
+            if (error.isNotEmpty()) {
+
+                Text(
+                    text = error,
+
+                    color = Color.White,
+
+                    fontSize = 14.sp,
+
+                    fontWeight =
+                        FontWeight.Medium
+                )
+            }
+
+            Spacer(
+                modifier =
+                    Modifier.height(35.dp)
+            )
+
+            // --------------------------------
+            // NUMBER PAD
+            // --------------------------------
+
+            NumberPad(
+
+                onNumberClick = { number ->
+
+                    if (
+                        enteredPin.length <
+                        pinLength
+                    ) {
+
+                        enteredPin += number
+
+                        error = ""
+
+                        if (
+                            enteredPin.length ==
+                            pinLength
+                        ) {
+
+                            checkPin()
+                        }
+                    }
+                },
+
+                onDelete = {
+
+                    if (
+                        enteredPin.isNotEmpty()
+                    ) {
+
+                        enteredPin =
+                            enteredPin.dropLast(1)
+
+                        error = ""
+                    }
+                },
+
+                buttonColor =
+                    Color(0xFF69B9F3)
+            )
         }
     }
 }
