@@ -7,10 +7,13 @@ import com.example.applock.navigation.NavGraph
 
 class MainActivity : ComponentActivity() {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(
+        savedInstanceState: Bundle?
+    ) {
         super.onCreate(savedInstanceState)
 
         setContent {
+
             NavGraph(this)
         }
     }

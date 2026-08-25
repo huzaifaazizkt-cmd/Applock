@@ -1,6 +1,7 @@
 package com.example.applock.Design.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -8,6 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -23,62 +25,109 @@ fun NumberPad(
         "1", "2", "3",
         "4", "5", "6",
         "7", "8", "9",
-        "", "0", "X"
+        "", "0", ""
     )
 
     Column(
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+        verticalArrangement =
+            Arrangement.spacedBy(10.dp)
     ) {
 
-        numbers.chunked(3).forEach { row ->
+        numbers
+            .chunked(3)
+            .forEach { row ->
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
+                Row(
+                    modifier =
+                        Modifier.fillMaxWidth(),
 
-                row.forEach { number ->
+                    horizontalArrangement =
+                        Arrangement.SpaceEvenly
+                ) {
 
-                    Box(
-                        modifier = Modifier
-                            .size(75.dp)
-                            .background(
-                                color = if (number.isEmpty()) {
-                                    Color.Transparent
-                                } else {
-                                    buttonColor
-                                },
-                                shape = CircleShape
+                    row.forEach { number ->
+
+                        if (number.isEmpty()) {
+
+                            // EMPTY SPACE
+
+                            Spacer(
+                                modifier =
+                                    Modifier.size(70.dp)
                             )
-                            .clickable(
-                                enabled = number.isNotEmpty()
+
+                        } else {
+
+                            // NUMBER BUTTON
+
+                            Box(
+                                modifier = Modifier
+                                    .size(70.dp)
+                                    .clip(CircleShape)
+                                    .background(
+                                        color =
+                                            Color.White.copy(
+                                                alpha = 0.08f
+                                            ),
+                                        shape =
+                                            CircleShape
+                                    )
+
+                                    .border(
+                                        width = 2.dp,
+                                        color =
+                                            buttonColor.copy(
+                                                alpha = 0.95f
+                                            ),
+                                        shape =
+                                            CircleShape
+                                    )
+
+                                    .clickable {
+                                        onNumberClick(number)
+                                    },
+
+                                contentAlignment =
+                                    Alignment.Center
                             ) {
 
-                                when (number) {
+                                // INNER CIRCLE
 
-                                    "X" -> {
-                                        onDelete()
-                                    }
+                                Box(
+                                    modifier = Modifier
+                                        .size(58.dp)
+                                        .background(
+                                            color =
+                                                buttonColor.copy(
+                                                    alpha = 0.75f
+                                                ),
+                                            shape =
+                                                CircleShape
+                                        )
+                                        .border(
+                                            width = 1.5.dp,
+                                            color =
+                                                Color.White.copy(
+                                                    alpha = 0.18f
+                                                ),
+                                            shape =
+                                                CircleShape
+                                        ),
 
-                                    else -> {
-                                        onNumberClick(number)
-                                    }
+                                    contentAlignment =
+                                        Alignment.Center
+                                ) {
+
+                                    Text(
+                                        text = number,
+                                        color = Color.White,
+                                        fontSize = 40.sp
+                                    )
                                 }
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-
-                        if (number.isNotEmpty()) {
-
-                            Text(
-                                text = number,
-                                color = Color.White,
-                                fontSize = 34.sp
-                            )
+                            }
                         }
                     }
                 }
             }
-        }
     }
 }

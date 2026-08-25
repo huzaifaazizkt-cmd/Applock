@@ -60,6 +60,7 @@ dependencies {
     // Material Components (XML theme ke liye REQUIRED)
     implementation("com.google.android.material:material:1.11.0")
     implementation("androidx.biometric:biometric:1.1.0")
+    implementation(libs.androidx.compose.foundation)
     // Debug
     debugImplementation("androidx.compose.ui:ui-tooling")
 }

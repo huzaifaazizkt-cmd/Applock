@@ -1,231 +1,1178 @@
 package com.example.applock.Design.screens
 
 import android.content.Context
+import android.content.Intent
+import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.LockOpen
-import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
+import com.example.applock.R
 import com.example.applock.data.DataStoreManager
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 
-@Composable
-fun AppListScreen(context: Context) {
 
-    val pm = context.packageManager
-    val scope = rememberCoroutineScope()
-    val dataStore = DataStoreManager(context)
+// =============================================================
+// APP ITEM
+// =============================================================
 
-    var selectedTab by remember {
-        mutableStateOf(0)
+data class AppItem(
+    val applicationInfo: ApplicationInfo,
+    val appName: String,
+    val searchName: String,
+    val iconBitmap: androidx.compose.ui.graphics.ImageBitmap?
+)
+
+
+// =============================================================
+// APP CACHE
+// =============================================================
+//
+// Apps + icons dono yahan preload honge.
+//
+// IMPORTANT:
+// AppListScreen dobara icons load nahi karegi.
+// =============================================================
+
+object AppListCache {
+
+    @Volatile
+    private var apps: List<AppItem>? = null
+
+    // Multiple screens agar ek waqt mein preload call karen
+    // to duplicate loading nahi hogi.
+    private val preloadMutex = Mutex()
+
+
+    // =========================================================
+    // GET CACHE
+    // =========================================================
+
+    fun getApps(): List<AppItem>? {
+        return apps
     }
 
-    val apps = remember {
-        pm.getInstalledApplications(PackageManager.GET_META_DATA)
-            .filter {
-                it.packageName != context.packageName
+
+    // =========================================================
+    // PRELOAD APPS + ICONS
+    // =========================================================
+
+    suspend fun preload(
+        context: Context
+    ) {
+
+        // Agar already complete cache available hai
+        if (apps != null) {
+            return
+        }
+
+        preloadMutex.withLock {
+
+
+            if (apps != null) {
+                return@withLock
+            }
+
+            try {
+
+                val appContext =
+                    context.applicationContext
+
+                val result =
+                    withContext(Dispatchers.IO) {
+
+                        val pm =
+                            appContext.packageManager
+
+
+                        // =================================================
+                        // ONLY LAUNCHER APPS
+                        // =================================================
+
+                        val launcherIntent =
+                            Intent(
+                                Intent.ACTION_MAIN
+                            ).apply {
+
+                                addCategory(
+                                    Intent.CATEGORY_LAUNCHER
+                                )
+                            }
+
+
+                        val launcherApps =
+                            pm.queryIntentActivities(
+                                launcherIntent,
+                                PackageManager.MATCH_ALL
+                            )
+
+
+                        launcherApps
+                            .mapNotNull { resolveInfo ->
+
+                                try {
+
+                                    val applicationInfo =
+                                        resolveInfo
+                                            .activityInfo
+                                            ?.applicationInfo
+                                            ?: return@mapNotNull null
+
+
+                                    val packageName =
+                                        applicationInfo.packageName
+
+
+                                    // =================================================
+                                    // REMOVE APPLOCK ITSELF
+                                    // =================================================
+
+                                    if (
+                                        packageName ==
+                                        appContext.packageName
+                                    ) {
+
+                                        return@mapNotNull null
+                                    }
+
+
+                                    // =================================================
+                                    // APP NAME
+                                    // =================================================
+
+                                    val appName =
+                                        resolveInfo
+                                            .loadLabel(pm)
+                                            .toString()
+
+
+                                    // =================================================
+                                    // LOAD ICON HERE
+                                    //
+                                    // Icon AppListScreen mein nahi,
+                                    // yahin preload hoga.
+                                    // =================================================
+
+                                    val iconBitmap =
+                                        try {
+
+                                            pm.getApplicationIcon(
+                                                applicationInfo
+                                            )
+                                                .toBitmap(
+                                                    64,
+                                                    64
+                                                )
+                                                .asImageBitmap()
+
+                                        } catch (e: Exception) {
+
+                                            null
+                                        }
+
+
+                                    AppItem(
+
+                                        applicationInfo =
+                                            applicationInfo,
+
+                                        appName =
+                                            appName,
+
+                                        searchName =
+                                            appName.lowercase(),
+
+                                        iconBitmap =
+                                            iconBitmap
+                                    )
+
+                                } catch (e: Exception) {
+
+                                    null
+                                }
+                            }
+                            .distinctBy {
+
+                                it.applicationInfo.packageName
+                            }
+                            .sortedBy {
+
+                                it.searchName
+                            }
+                    }
+
+
+                // =================================================
+                // COMPLETE CACHE SAVE
+                //
+                // Apps aur icons dono ready hain.
+                // =================================================
+
+                apps = result
+
+            } catch (e: Exception) {
+
+                e.printStackTrace()
+
+            }
+        }
+    }
+
+
+    // =========================================================
+    // UPDATE ICON
+    // =========================================================
+    //
+    // Ab normal flow mein iski zaroorat nahi hai,
+    // lekin existing code compatibility ke liye rakha hai.
+    // =========================================================
+
+    fun updateIcon(
+        packageName: String,
+        icon: androidx.compose.ui.graphics.ImageBitmap
+    ) {
+
+        val currentApps =
+            apps ?: return
+
+        apps =
+            currentApps.map { appItem ->
+
+                if (
+                    appItem.applicationInfo.packageName ==
+                    packageName
+                ) {
+
+                    appItem.copy(
+                        iconBitmap = icon
+                    )
+
+                } else {
+
+                    appItem
+                }
             }
     }
 
-    val lockedApps by dataStore.lockedAppsFlow.collectAsState(
-        initial = emptySet()
-    )
 
-    Column(
-        modifier = Modifier.fillMaxSize()
-    ) {
+    // =========================================================
+    // CLEAR CACHE
+    // =========================================================
 
-        // =================================================
-        // TITLE
-        // =================================================
+    fun clear() {
 
-        Text(
-            text = "App Lock",
-            style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(16.dp)
-        )
+        apps = null
+    }
+}
 
-        // =================================================
-        // TABS
-        // =================================================
 
-        TabRow(
-            selectedTabIndex = selectedTab
-        ) {
+// =============================================================
+// APP LIST SCREEN
+// =============================================================
 
-            Tab(
-                selected = selectedTab == 0,
-                onClick = {
-                    selectedTab = 0
-                },
-                text = {
-                    Text("Unlocked")
-                },
-                icon = {
-                    Icon(
-                        imageVector = Icons.Default.LockOpen,
-                        contentDescription = null
-                    )
-                }
-            )
+@Composable
+fun AppListScreen(
+    context: Context
+) {
 
-            Tab(
-                selected = selectedTab == 1,
-                onClick = {
-                    selectedTab = 1
-                },
-                text = {
-                    Text("Locked")
-                },
-                icon = {
-                    Icon(
-                        imageVector = Icons.Default.Lock,
-                        contentDescription = null
-                    )
-                }
+    val appContext =
+        remember {
+            context.applicationContext
+        }
+
+
+    val scope =
+        rememberCoroutineScope()
+
+
+    val dataStore =
+        remember {
+            DataStoreManager(
+                appContext
             )
         }
 
-        // =================================================
-        // FILTER APPS
-        // =================================================
 
-        val filteredApps =
-            when (selectedTab) {
+    // =========================================================
+    // TAB
+    // =========================================================
 
-                0 -> apps.filter {
-                    !lockedApps.contains(it.packageName)
+    var selectedTab by
+    remember {
+        mutableStateOf(0)
+    }
+
+
+    // =========================================================
+    // SEARCH
+    // =========================================================
+
+    var searchText by
+    remember {
+        mutableStateOf("")
+    }
+
+
+    // =========================================================
+    // APPS
+    // =========================================================
+
+    var apps by
+    remember {
+        mutableStateOf(
+            AppListCache.getApps()
+                ?: emptyList()
+        )
+    }
+
+
+    // =========================================================
+    // LOAD APP DATA
+    //
+    // Agar PinConfirmScreen se preload already complete hai:
+    // DIRECT CACHE SE APPS + ICONS SHOW.
+    //
+    // Agar preload abhi chal raha hai:
+    // AppListCache.preload() wait karega aur complete
+    // apps + icons return karega.
+    // =========================================================
+
+    LaunchedEffect(Unit) {
+
+        val cachedApps =
+            AppListCache.getApps()
+
+
+        if (cachedApps != null) {
+
+            // DIRECT SHOW
+            apps =
+                cachedApps
+
+        } else {
+
+            // Agar preload already chal raha hai to
+            // ye call wait karegi.
+            AppListCache.preload(
+                appContext
+            )
+
+
+            // Preload complete hone ke baad
+            // complete apps + icons mil jayenge.
+            AppListCache.getApps()
+                ?.let { loadedApps ->
+
+                    apps =
+                        loadedApps
+                }
+        }
+    }
+
+
+    // =========================================================
+    // LOCKED APPS
+    // =========================================================
+
+    val lockedApps by
+    dataStore.lockedAppsFlow.collectAsState(
+        initial = emptySet()
+    )
+
+
+    // =========================================================
+    // NORMALIZED SEARCH
+    // =========================================================
+
+    val normalizedSearch =
+        remember(searchText) {
+
+            searchText
+                .trim()
+                .lowercase()
+        }
+
+
+    // =========================================================
+    // FILTERED APPS
+    // =========================================================
+
+    val filteredApps =
+        remember(
+            apps,
+            lockedApps,
+            selectedTab,
+            normalizedSearch
+        ) {
+
+            val tabApps =
+
+                if (selectedTab == 0) {
+
+                    // UNLOCKED
+
+                    apps.filter { appItem ->
+
+                        !lockedApps.contains(
+                            appItem
+                                .applicationInfo
+                                .packageName
+                        )
+                    }
+
+                } else {
+
+                    // LOCKED
+
+                    apps.filter { appItem ->
+
+                        lockedApps.contains(
+                            appItem
+                                .applicationInfo
+                                .packageName
+                        )
+                    }
                 }
 
-                else -> apps.filter {
-                    lockedApps.contains(it.packageName)
+
+            if (
+                normalizedSearch.isEmpty()
+            ) {
+
+                tabApps
+
+            } else {
+
+                tabApps.filter { appItem ->
+
+                    appItem.searchName.contains(
+                        normalizedSearch
+                    )
+                }
+            }
+        }
+
+
+    // =========================================================
+    // MAIN UI
+    // =========================================================
+
+    Column(
+
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(
+                    Color.White
+                )
+    ) {
+
+
+        // =====================================================
+        // APP LOCK HEADING
+        // =====================================================
+
+        Text(
+
+            text = "App Lock",
+
+            color =
+                Color.Black,
+
+            fontSize =
+                20.sp,
+
+            modifier =
+                Modifier.padding(
+                    start = 60.dp,
+                    top = 10.dp
+                )
+        )
+
+
+
+        // =====================================================
+        // TABS
+        // =====================================================
+
+        TabRow(
+
+            selectedTabIndex =
+                selectedTab,
+
+            containerColor =
+                Color.White,
+
+            contentColor =
+                Color(0xFF0396FF),
+
+            modifier =
+                Modifier.padding(
+                    top = 18.dp
+                ),
+
+            indicator = { tabPositions ->
+
+                if (
+                    selectedTab <
+                    tabPositions.size
+                ) {
+
+                    TabRowDefaults.Indicator(
+
+                        modifier =
+                            Modifier.tabIndicatorOffset(
+                                tabPositions[
+                                    selectedTab
+                                ]
+                            ),
+
+                        color =
+                            Color(0xFF0396FF),
+
+                        height =
+                            2.dp
+                    )
+                }
+            }
+        ) {
+
+
+            // =================================================
+            // UNLOCKED
+            // =================================================
+
+            Tab(
+
+                selected =
+                    selectedTab == 0,
+
+                onClick = {
+
+                    selectedTab = 0
+                },
+
+                modifier =
+                    Modifier.height(
+                        42.dp
+                    )
+            ) {
+
+                Row(
+
+                    verticalAlignment =
+                        Alignment.CenterVertically,
+
+                    horizontalArrangement =
+                        Arrangement.Center
+                ) {
+
+                    Image(
+
+                        painter =
+                            painterResource(
+                                id =
+                                    R.drawable.unlock
+                            ),
+
+                        contentDescription =
+                            "Unlocked",
+
+                        colorFilter =
+                            ColorFilter.tint(
+
+                                if (
+                                    selectedTab == 0
+                                ) {
+
+                                    Color(
+                                        0xFF0396FF
+                                    )
+
+                                } else {
+
+                                    Color(
+                                        0xFFBDBDBD
+                                    )
+                                }
+                            ),
+
+                        modifier =
+                            Modifier.size(
+                                18.dp
+                            )
+                    )
+
+
+                    Spacer(
+                        modifier =
+                            Modifier.width(
+                                5.dp
+                            )
+                    )
+
+
+                    Text(
+
+                        text =
+                            "Unlocked",
+
+                        color =
+                            if (
+                                selectedTab == 0
+                            ) {
+
+                                Color(
+                                    0xFF0396FF
+                                )
+
+                            } else {
+
+                                Color(
+                                    0xFFBDBDBD
+                                )
+                            },
+
+                        fontSize =
+                            16.sp
+                    )
                 }
             }
 
-        // =================================================
-        // APP LIST
-        // =================================================
 
-        LazyColumn {
+            // =================================================
+            // LOCKED
+            // =================================================
+
+            Tab(
+
+                selected =
+                    selectedTab == 1,
+
+                onClick = {
+
+                    selectedTab = 1
+                },
+
+                modifier =
+                    Modifier.height(
+                        42.dp
+                    )
+            ) {
+
+                Row(
+
+                    verticalAlignment =
+                        Alignment.CenterVertically,
+
+                    horizontalArrangement =
+                        Arrangement.Center
+                ) {
+
+                    Image(
+
+                        painter =
+                            painterResource(
+                                id =
+                                    R.drawable.locked
+                            ),
+
+                        contentDescription =
+                            "Locked",
+
+                        colorFilter =
+                            ColorFilter.tint(
+
+                                if (
+                                    selectedTab == 1
+                                ) {
+
+                                    Color(
+                                        0xFF0396FF
+                                    )
+
+                                } else {
+
+                                    Color(
+                                        0xFFBDBDBD
+                                    )
+                                }
+                            ),
+
+                        modifier =
+                            Modifier.size(
+                                18.dp
+                            )
+                    )
+
+
+                    Spacer(
+                        modifier =
+                            Modifier.width(
+                                5.dp
+                            )
+                    )
+
+
+                    Text(
+
+                        text =
+                            "Locked",
+
+                        color =
+                            if (
+                                selectedTab == 1
+                            ) {
+
+                                Color(
+                                    0xFF0396FF
+                                )
+
+                            } else {
+
+                                Color(
+                                    0xFFBDBDBD
+                                )
+                            },
+
+                        fontSize =
+                            16.sp
+                    )
+                }
+            }
+        }
+
+
+        // =====================================================
+        // SEARCH BOX
+        // =====================================================
+
+        Box(
+
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        start = 14.dp,
+                        end = 14.dp,
+                        top = 15.dp
+                    )
+                    .height(39.dp)
+                    .background(
+
+                        color =
+                            Color(0xFFF7F7F7),
+
+                        shape =
+                            RoundedCornerShape(
+                                22.dp
+                            )
+                    )
+        ) {
+
+            Row(
+
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(
+                            start = 12.dp,
+                            end = 12.dp
+                        ),
+
+                verticalAlignment =
+                    Alignment.CenterVertically
+            ) {
+
+
+                Icon(
+
+                    imageVector =
+                        Icons.Default.Search,
+
+                    contentDescription =
+                        "Search",
+
+                    tint =
+                        Color(0xFFBDBDBD),
+
+                    modifier =
+                        Modifier.size(
+                            19.dp
+                        )
+                )
+
+
+                Spacer(
+                    modifier =
+                        Modifier.width(
+                            8.dp
+                        )
+                )
+
+
+                BasicTextField(
+
+                    value =
+                        searchText,
+
+                    onValueChange = {
+
+                        searchText =
+                            it
+                    },
+
+                    singleLine =
+                        true,
+
+                    textStyle =
+                        TextStyle(
+
+                            color =
+                                Color(0xFF555555),
+
+                            fontSize =
+                                14.sp
+                        ),
+
+                    cursorBrush =
+                        SolidColor(
+                            Color(0xFF0396FF)
+                        ),
+
+                    modifier =
+                        Modifier
+                            .weight(1f)
+                            .fillMaxHeight(),
+
+                    decorationBox = {
+                            innerTextField ->
+
+                        Box(
+
+                            modifier =
+                                Modifier.fillMaxSize(),
+
+                            contentAlignment =
+                                Alignment.CenterStart
+                        ) {
+
+                            if (
+                                searchText.isEmpty()
+                            ) {
+
+                                Text(
+
+                                    text =
+                                        "Search",
+
+                                    color =
+                                        Color(
+                                            0xFFBDBDBD
+                                        ),
+
+                                    fontSize =
+                                        14.sp
+                                )
+                            }
+
+                            innerTextField()
+                        }
+                    }
+                )
+            }
+        }
+
+
+        // =====================================================
+        // GENERAL
+        // =====================================================
+
+        Text(
+
+            text =
+                "General",
+
+            color =
+                Color(0xFF878585),
+
+            fontSize =
+                12.sp,
+
+            modifier =
+                Modifier.padding(
+                    start = 18.dp,
+                    top = 7.dp,
+                    bottom = 7.dp
+                )
+        )
+
+
+        // =====================================================
+        // APP LIST
+        // =====================================================
+
+        LazyColumn(
+
+            modifier =
+                Modifier.fillMaxWidth(),
+
+            verticalArrangement =
+                Arrangement.spacedBy(
+                    9.dp
+                ),
+
+            contentPadding =
+                PaddingValues(
+                    start = 14.dp,
+                    end = 14.dp,
+                    bottom = 16.dp
+                )
+        ) {
 
             items(
-                items = filteredApps,
-                key = {
-                    it.packageName
+
+                items =
+                    filteredApps,
+
+                key = { appItem ->
+
+                    appItem
+                        .applicationInfo
+                        .packageName
                 }
-            ) { app ->
+
+            ) { appItem ->
+
 
                 val appName =
-                    pm.getApplicationLabel(app).toString()
+                    appItem.appName
 
-                val icon =
-                    pm.getApplicationIcon(app)
+
+                val packageName =
+                    appItem
+                        .applicationInfo
+                        .packageName
+
 
                 val isLocked =
                     lockedApps.contains(
-                        app.packageName
+                        packageName
                     )
 
+
+                // =================================================
+                // APP ROW
+                // =================================================
+
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(12.dp),
+
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(46.dp)
+                            .shadow(
+
+                                elevation =
+                                    3.dp,
+
+                                shape =
+                                    RoundedCornerShape(
+                                        8.dp
+                                    )
+                            )
+                            .background(
+
+                                color =
+                                    Color.White,
+
+                                shape =
+                                    RoundedCornerShape(
+                                        8.dp
+                                    )
+                            )
+                            .padding(
+                                start = 9.dp,
+                                end = 5.dp
+                            ),
 
                     verticalAlignment =
                         Alignment.CenterVertically
                 ) {
 
+
                     // =================================================
-                    // APP ICON
-                    // NOT CLICKABLE
+                    // ICON
                     // =================================================
 
-                    Image(
-                        bitmap = icon
-                            .toBitmap()
-                            .asImageBitmap(),
+                    if (
+                        appItem.iconBitmap != null
+                    ) {
 
-                        contentDescription = null,
+                        Image(
 
-                        modifier = Modifier.size(40.dp)
-                    )
+                            bitmap =
+                                appItem.iconBitmap,
+
+                            contentDescription =
+                                null,
+
+                            modifier =
+                                Modifier.size(
+                                    32.dp
+                                )
+                        )
+
+                    } else {
+
+                        // Sirf exceptional case mein empty space.
+                        // Normal flow mein icon already preload hoga.
+
+                        Spacer(
+                            modifier =
+                                Modifier.size(
+                                    32.dp
+                                )
+                        )
+                    }
+
 
                     Spacer(
-                        modifier = Modifier.width(12.dp)
+                        modifier =
+                            Modifier.width(
+                                9.dp
+                            )
                     )
+
 
                     // =================================================
                     // APP NAME
-                    // NOT CLICKABLE
                     // =================================================
 
                     Text(
-                        text = appName,
-                        modifier = Modifier.weight(1f)
+
+                        text =
+                            appName,
+
+                        color =
+                            Color(0xFF555555),
+
+                        fontSize =
+                            13.sp,
+
+                        maxLines =
+                            1,
+
+                        modifier =
+                            Modifier.weight(
+                                1f
+                            )
                     )
 
+
                     // =================================================
-                    // LOCK / UNLOCK BUTTON
-                    // ONLY THIS IS CLICKABLE
+                    // LOCK / UNLOCK
                     // =================================================
 
                     IconButton(
+
                         onClick = {
 
                             scope.launch {
 
-                                if (isLocked) {
-
-                                    // 🔓 UNLOCK APP
+                                if (
+                                    isLocked
+                                ) {
 
                                     dataStore
                                         .removeLockedApp(
-                                            app.packageName
+                                            packageName
                                         )
 
                                 } else {
-
-                                    // 🔒 LOCK APP
 
                                     dataStore
                                         .saveLockedApp(
-                                            app.packageName
+                                            packageName
                                         )
                                 }
                             }
-                        }
+                        },
+
+                        modifier =
+                            Modifier.size(
+                                32.dp
+                            )
                     ) {
 
-                        Icon(
-                            imageVector =
-                                if (isLocked) {
-                                    Icons.Default.Lock
-                                } else {
-                                    Icons.Default.LockOpen
-                                },
+                        Image(
+
+                            painter =
+                                painterResource(
+
+                                    id =
+                                        if (
+                                            isLocked
+                                        ) {
+
+                                            R.drawable.locked
+
+                                        } else {
+
+                                            R.drawable.unlock
+                                        }
+                                ),
 
                             contentDescription =
-                                if (isLocked) {
+
+                                if (
+                                    isLocked
+                                ) {
+
                                     "Unlock $appName"
+
                                 } else {
+
                                     "Lock $appName"
-                                }
+                                },
+
+                            modifier =
+                                Modifier.size(
+                                    21.dp
+                                )
                         )
                     }
                 }
-
-                Divider()
             }
         }
     }

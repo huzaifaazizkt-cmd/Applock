@@ -2,12 +2,24 @@ package com.example.applock.service
 
 object AppLockServiceHolder {
 
-    // LockScreenActivity currently open hai
-    var isLockScreenOpen = false
+    @Volatile
+    var isLockScreenOpen: Boolean = false
 
-    // Last unlocked app
+    @Volatile
     var currentUnlockedApp: String? = null
 
-    // Last unlock time
+    @Volatile
     var lastUnlockTime: Long = 0L
+
+    fun clear() {
+
+        isLockScreenOpen =
+            false
+
+        currentUnlockedApp =
+            null
+
+        lastUnlockTime =
+            0L
+    }
 }

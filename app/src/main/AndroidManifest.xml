@@ -4,15 +4,32 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.applock">
 
+    <!-- ================================================= -->
+    <!-- PERMISSIONS -->
+    <!-- ================================================= -->
+
+    <!-- Show AppLock over other apps / Appear on top -->
+    <uses-permission
+        android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+
+    <!-- Get installed apps -->
     <uses-permission
         android:name="android.permission.QUERY_ALL_PACKAGES" />
-    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+
+    <!-- Biometric -->
+    <uses-permission
+        android:name="android.permission.USE_BIOMETRIC" />
+
+
     <application
         android:allowBackup="true"
         android:label="AppLock"
         android:theme="@style/Theme.AppLock">
 
+
+        <!-- ================================================= -->
         <!-- MAIN ACTIVITY -->
+        <!-- ================================================= -->
 
         <activity
             android:name=".MainActivity"
@@ -31,24 +48,28 @@
         </activity>
 
 
+        <!-- ================================================= -->
         <!-- LOCK SCREEN -->
+        <!-- ================================================= -->
+
         <activity
             android:name=".Design.screens.LockScreenActivity"
-            android:exported="true"
-            android:launchMode="singleTask"
+            android:exported="false"
             android:excludeFromRecents="true"
+            android:launchMode="singleTask"
             android:noHistory="false"
-            android:turnScreenOn="true"
             android:showWhenLocked="true"
-            android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" />
+            android:turnScreenOn="true" />
 
 
+        <!-- ================================================= -->
         <!-- ACCESSIBILITY SERVICE -->
+        <!-- ================================================= -->
+
         <service
             android:name=".service.AppLockService"
-            android:label="AppLock"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
-            android:exported="true">
+            android:exported="false">
 
             <intent-filter>
 
@@ -62,6 +83,7 @@
                 android:resource="@xml/accessibility_service_config" />
 
         </service>
+
 
     </application>
 
