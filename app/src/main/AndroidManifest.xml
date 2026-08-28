@@ -20,12 +20,31 @@
     <uses-permission
         android:name="android.permission.USE_BIOMETRIC" />
 
+    <!-- ================================================= -->
+    <!-- GALLERY / MEDIA PERMISSIONS -->
+    <!-- ================================================= -->
+
+    <!-- Android 13+ : Read Images -->
+    <uses-permission
+        android:name="android.permission.READ_MEDIA_IMAGES" />
+
+    <!-- Android 13+ : Read Videos -->
+    <uses-permission
+        android:name="android.permission.READ_MEDIA_VIDEO" />
+
+    <!-- Android 12 and below -->
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+
+    <!-- ================================================= -->
+    <!-- APPLICATION -->
+    <!-- ================================================= -->
 
     <application
         android:allowBackup="true"
         android:label="AppLock"
         android:theme="@style/Theme.AppLock">
-
 
         <!-- ================================================= -->
         <!-- MAIN ACTIVITY -->
@@ -47,7 +66,6 @@
 
         </activity>
 
-
         <!-- ================================================= -->
         <!-- LOCK SCREEN -->
         <!-- ================================================= -->
@@ -60,7 +78,6 @@
             android:noHistory="false"
             android:showWhenLocked="true"
             android:turnScreenOn="true" />
-
 
         <!-- ================================================= -->
         <!-- ACCESSIBILITY SERVICE -->
@@ -83,8 +100,6 @@
                 android:resource="@xml/accessibility_service_config" />
 
         </service>
-
-
     </application>
 
 </manifest>

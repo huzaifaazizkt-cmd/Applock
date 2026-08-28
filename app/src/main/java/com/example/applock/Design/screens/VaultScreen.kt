@@ -1,22 +1,59 @@
 package com.example.applock.Design.screens
 
+import android.app.Activity
+import android.content.ContentValues
+import android.content.Context
+import android.graphics.Bitmap
+import android.media.MediaMetadataRetriever
+import android.net.Uri
+import android.os.Build
+import android.provider.MediaStore
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.applock.R
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
 
+// =============================================================
+// VAULT MEDIA ITEM
+// =============================================================
+
+data class VaultMediaItem(
+    val uri: Uri,
+    val name: String,
+    val bucketName: String,
+    val isVideo: Boolean,
+    val isVaultFile: Boolean = false,
+    val vaultFilePath: String? = null
+)
 
 // =============================================================
 // VAULT SCREEN
@@ -25,180 +62,781 @@ import com.example.applock.R
 @Composable
 fun VaultScreen() {
 
-    // =========================================================
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+
     // 0 = PHOTOS
     // 1 = VIDEOS
-    // =========================================================
-
     var selectedTab by remember {
         mutableStateOf(0)
     }
 
+    // =========================================================
+    // GALLERY OPEN
+    // =========================================================
+
+    var galleryOpen by remember {
+        mutableStateOf(false)
+    }
+
+    // =========================================================
+    // SELECTED MEDIA
+    // =========================================================
+
+    var selectedMedia by remember {
+        mutableStateOf<Set<Uri>>(emptySet())
+    }
+
+    // =========================================================
+    // HIDDEN MEDIA
+    // =========================================================
+
+    var hiddenMedia by remember {
+        mutableStateOf(
+            loadHiddenMediaMetadata(context)
+        )
+    }
+
+    // =========================================================
+    // UNHIDE
+    // =========================================================
+
+    var mediaToUnhide by remember {
+        mutableStateOf<VaultMediaItem?>(null)
+    }
+
+    // =========================================================
+    // PENDING HIDE ITEMS
+    // =========================================================
+
+    var pendingCopiedItems by remember {
+        mutableStateOf<List<VaultMediaItem>>(emptyList())
+    }
+
+    // =========================================================
+    // ANDROID DELETE CONFIRMATION
+    //
+    // This is used only for deleting the ORIGINAL gallery
+    // media after the private vault copy has successfully
+    // been created.
+    // =========================================================
+
+    val deleteLauncher =
+        rememberLauncherForActivityResult(
+            ActivityResultContracts.StartIntentSenderForResult()
+        ) { result ->
+
+            if (result.resultCode == Activity.RESULT_OK) {
+
+                // =================================================
+                // USER ALLOWED DELETE
+                // =================================================
+
+                val newHidden =
+                    hiddenMedia.toMutableList()
+
+                pendingCopiedItems.forEach { copied ->
+
+                    val alreadyExists =
+                        newHidden.any {
+
+                            it.vaultFilePath ==
+                                    copied.vaultFilePath
+                        }
+
+                    if (!alreadyExists) {
+
+                        newHidden.add(copied)
+                    }
+                }
+
+                hiddenMedia =
+                    newHidden
+
+                saveHiddenMediaMetadata(
+                    context = context,
+                    mediaList = newHidden
+                )
+
+            } else {
+
+                // =================================================
+                // USER CANCELLED
+                //
+                // Original gallery media is still there, so remove
+                // the temporary private copies.
+                // =================================================
+
+                pendingCopiedItems.forEach { copied ->
+
+                    try {
+
+                        copied.vaultFilePath?.let { path ->
+
+                            File(path).delete()
+                        }
+
+                    } catch (e: Exception) {
+
+                        e.printStackTrace()
+                    }
+                }
+            }
+
+            pendingCopiedItems =
+                emptyList()
+
+            selectedMedia =
+                emptySet()
+
+            galleryOpen =
+                false
+        }
+
+    // =========================================================
+    // OPEN GALLERY
+    // =========================================================
+
+    fun openGallery() {
+
+        galleryOpen = true
+    }
+
+    // =========================================================
+    // GALLERY SCREEN
+    // =========================================================
+
+    if (galleryOpen) {
+
+        VaultGalleryScreen(
+
+            context = context,
+
+            isVideo =
+                selectedTab == 1,
+
+            hiddenMedia =
+                hiddenMedia,
+
+            selectedMedia =
+                selectedMedia,
+
+            onSelectionChange = { newSelection ->
+
+                selectedMedia =
+                    newSelection
+            },
+
+            onBack = {
+
+                galleryOpen =
+                    false
+
+                selectedMedia =
+                    emptySet()
+            },
+
+            onHide = {
+
+                coroutineScope.launch {
+
+                    // =================================================
+                    // LOAD CURRENT GALLERY MEDIA
+                    // =================================================
+
+                    val allMedia =
+                        loadVaultMedia(
+                            context = context,
+                            isVideo =
+                                selectedTab == 1
+                        )
+
+                    // =================================================
+                    // GET SELECTED MEDIA
+                    // =================================================
+
+                    val itemsToHide =
+                        allMedia.filter { media ->
+
+                            selectedMedia.contains(
+                                media.uri
+                            )
+                        }
+
+                    if (itemsToHide.isEmpty()) {
+
+                        selectedMedia =
+                            emptySet()
+
+                        galleryOpen =
+                            false
+
+                        return@launch
+                    }
+
+                    // =================================================
+                    // COPY FIRST TO PRIVATE VAULT
+                    // =================================================
+
+                    val copiedItems =
+                        withContext(Dispatchers.IO) {
+
+                            itemsToHide.mapNotNull { media ->
+
+                                copyMediaToVault(
+                                    context = context,
+                                    media = media
+                                )
+                            }
+                        }
+
+                    // =================================================
+                    // COPY FAILURE
+                    // =================================================
+
+                    if (
+                        copiedItems.size !=
+                        itemsToHide.size
+                    ) {
+
+                        copiedItems.forEach { copied ->
+
+                            try {
+
+                                copied.vaultFilePath?.let { path ->
+
+                                    File(path).delete()
+                                }
+
+                            } catch (e: Exception) {
+
+                                e.printStackTrace()
+                            }
+                        }
+
+                        selectedMedia =
+                            emptySet()
+
+                        return@launch
+                    }
+
+                    // =================================================
+                    // ANDROID 11+
+                    //
+                    // Ask Android to delete original gallery items.
+                    // =================================================
+
+                    if (
+                        Build.VERSION.SDK_INT >=
+                        Build.VERSION_CODES.R
+                    ) {
+
+                        try {
+
+                            val uris =
+                                itemsToHide.map {
+                                    it.uri
+                                }
+
+                            val pendingIntent =
+                                MediaStore.createDeleteRequest(
+                                    context.contentResolver,
+                                    uris
+                                )
+
+                            pendingCopiedItems =
+                                copiedItems
+
+                            deleteLauncher.launch(
+
+                                IntentSenderRequest.Builder(
+                                    pendingIntent.intentSender
+                                ).build()
+                            )
+
+                        } catch (e: Exception) {
+
+                            e.printStackTrace()
+
+                            // =================================================
+                            // FALLBACK
+                            // =================================================
+
+                            val deleteSuccess =
+                                withContext(
+                                    Dispatchers.IO
+                                ) {
+
+                                    itemsToHide.all { media ->
+
+                                        try {
+
+                                            context.contentResolver
+                                                .delete(
+                                                    media.uri,
+                                                    null,
+                                                    null
+                                                ) > 0
+
+                                        } catch (deleteError: Exception) {
+
+                                            deleteError.printStackTrace()
+
+                                            false
+                                        }
+                                    }
+                                }
+
+                            if (deleteSuccess) {
+
+                                val newHidden =
+                                    hiddenMedia.toMutableList()
+
+                                copiedItems.forEach { copied ->
+
+                                    if (
+                                        newHidden.none {
+
+                                            it.vaultFilePath ==
+                                                    copied.vaultFilePath
+                                        }
+                                    ) {
+
+                                        newHidden.add(
+                                            copied
+                                        )
+                                    }
+                                }
+
+                                hiddenMedia =
+                                    newHidden
+
+                                saveHiddenMediaMetadata(
+                                    context = context,
+                                    mediaList = newHidden
+                                )
+
+                            } else {
+
+                                copiedItems.forEach { copied ->
+
+                                    try {
+
+                                        copied.vaultFilePath?.let { path ->
+
+                                            File(path).delete()
+                                        }
+
+                                    } catch (deleteError: Exception) {
+
+                                        deleteError.printStackTrace()
+                                    }
+                                }
+                            }
+
+                            pendingCopiedItems =
+                                emptyList()
+
+                            selectedMedia =
+                                emptySet()
+
+                            galleryOpen =
+                                false
+                        }
+
+                    } else {
+
+                        // =================================================
+                        // ANDROID 10 AND BELOW
+                        // =================================================
+
+                        val deleteSuccess =
+                            withContext(
+                                Dispatchers.IO
+                            ) {
+
+                                itemsToHide.all { media ->
+
+                                    try {
+
+                                        context.contentResolver
+                                            .delete(
+                                                media.uri,
+                                                null,
+                                                null
+                                            ) > 0
+
+                                    } catch (e: Exception) {
+
+                                        e.printStackTrace()
+
+                                        false
+                                    }
+                                }
+                            }
+
+                        if (deleteSuccess) {
+
+                            val newHidden =
+                                hiddenMedia.toMutableList()
+
+                            copiedItems.forEach { copied ->
+
+                                if (
+                                    newHidden.none {
+
+                                        it.vaultFilePath ==
+                                                copied.vaultFilePath
+                                    }
+                                ) {
+
+                                    newHidden.add(
+                                        copied
+                                    )
+                                }
+                            }
+
+                            hiddenMedia =
+                                newHidden
+
+                            saveHiddenMediaMetadata(
+                                context = context,
+                                mediaList = newHidden
+                            )
+
+                        } else {
+
+                            copiedItems.forEach { copied ->
+
+                                try {
+
+                                    copied.vaultFilePath?.let { path ->
+
+                                        File(path).delete()
+                                    }
+
+                                } catch (e: Exception) {
+
+                                    e.printStackTrace()
+                                }
+                            }
+                        }
+
+                        selectedMedia =
+                            emptySet()
+
+                        galleryOpen =
+                            false
+                    }
+                }
+            }
+        )
+
+        return
+    }
+
+    // =============================================================
+    // NORMAL VAULT SCREEN
+    // =============================================================
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(Color.White)
     ) {
 
-        // =====================================================
-        // MAIN CONTENT
-        // =====================================================
-
         Column(
-            modifier = Modifier
-                .fillMaxSize()
+            modifier =
+                Modifier.fillMaxSize()
         ) {
 
             // =================================================
-            // VAULT HEADING
+            // HEADING
             // =================================================
 
             Text(
                 text = "Vault",
-
                 color = Color.Black,
-
                 fontSize = 20.sp,
-
-                modifier = Modifier
-                    .padding(
+                modifier =
+                    Modifier.padding(
                         start = 60.dp,
                         top = 10.dp
                     )
             )
 
-
             // =================================================
-            // PHOTOS / VIDEOS TAB ROW
-            //
-            // AppListScreen ke Unlocked / Locked jaisa
+            // TABS
             // =================================================
 
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        top = 18.dp
-                    )
-                    .height(42.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(top = 18.dp)
+                        .height(42.dp),
 
                 verticalAlignment =
                     Alignment.CenterVertically
             ) {
 
-                // =============================================
-                // PHOTOS TAB
-                // =============================================
-
                 VaultTab(
-                    selected = selectedTab == 0,
+                    selected =
+                        selectedTab == 0,
 
-                    icon = R.drawable.imageicon,
+                    icon =
+                        R.drawable.imageicon,
 
-                    text = "Photos",
+                    text =
+                        "Photos",
 
                     onClick = {
+
                         selectedTab = 0
+
+                        selectedMedia =
+                            emptySet()
                     },
 
-                    modifier = Modifier
-                        .weight(1f)
+                    modifier =
+                        Modifier.weight(1f)
                 )
 
-
-                // =============================================
-                // VIDEOS TAB
-                // =============================================
-
                 VaultTab(
-                    selected = selectedTab == 1,
+                    selected =
+                        selectedTab == 1,
 
-                    icon = R.drawable.vedioicon,
+                    icon =
+                        R.drawable.vedioicon,
 
-                    text = "Videos",
+                    text =
+                        "Videos",
 
                     onClick = {
+
                         selectedTab = 1
+
+                        selectedMedia =
+                            emptySet()
                     },
 
-                    modifier = Modifier
-                        .weight(1f)
+                    modifier =
+                        Modifier.weight(1f)
                 )
             }
-
 
             // =================================================
             // CONTENT
             // =================================================
 
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
+                modifier =
+                    Modifier.fillMaxSize()
             ) {
 
-                when (selectedTab) {
+                val currentHidden =
+                    hiddenMedia.filter {
 
-                    // =========================================
-                    // PHOTOS
-                    // =========================================
-
-                    0 -> {
-
-                        PhotosVaultContent()
+                        it.isVideo ==
+                                (selectedTab == 1)
                     }
 
+                if (currentHidden.isEmpty()) {
 
-                    // =========================================
-                    // VIDEOS
-                    // =========================================
+                    if (selectedTab == 0) {
 
-                    1 -> {
+                        PhotosVaultContent()
+
+                    } else {
 
                         VideosVaultContent()
                     }
+
+                } else {
+
+                    VaultHiddenMediaGrid(
+
+                        mediaList =
+                            currentHidden,
+
+                        onMediaClick = { media ->
+
+                            mediaToUnhide =
+                                media
+                        }
+                    )
                 }
             }
         }
 
-
         // =====================================================
         // PLUS BUTTON
-        //
-        // Bottom navigation se 50dp uper
         // =====================================================
+
         Box(
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(
-                    end = 15.dp,
-                    bottom = 29.dp
-                )
-                .size(50.dp)
-                .clip(CircleShape)
-                .clickable {
 
-                    // Yahan baad mein image/video picker open karenge.
+            modifier =
+                Modifier
+                    .align(
+                        Alignment.BottomEnd
+                    )
+                    .padding(
+                        end = 15.dp,
+                        bottom = 29.dp
+                    )
+                    .size(50.dp)
+                    .clip(CircleShape)
+                    .clickable {
 
-                },
+                        openGallery()
+                    },
 
-            contentAlignment = Alignment.Center
+            contentAlignment =
+                Alignment.Center
         ) {
 
             Image(
-                painter = painterResource(
-                    id = R.drawable.plus
-                ),
+                painter =
+                    painterResource(
+                        id = R.drawable.plus
+                    ),
 
-                contentDescription = "Add",
+                contentDescription =
+                    "Add",
 
-                modifier = Modifier.size(50.dp)
+                modifier =
+                    Modifier.size(50.dp)
+            )
+        }
+
+        // =====================================================
+        // UNHIDE DIALOG
+        // =====================================================
+
+        mediaToUnhide?.let { media ->
+
+            AlertDialog(
+
+                onDismissRequest = {
+
+                    mediaToUnhide =
+                        null
+                },
+
+                title = {
+
+                    Text(
+                        text =
+                            if (media.isVideo) {
+
+                                "Unhide Video"
+
+                            } else {
+
+                                "Unhide Image"
+                            }
+                    )
+                },
+
+                text = {
+
+                    Text(
+                        text =
+                            if (media.isVideo) {
+
+                                "Do you want to unhide this video?"
+
+                            } else {
+
+                                "Do you want to unhide this image?"
+                            }
+                    )
+                },
+
+                confirmButton = {
+
+                    TextButton(
+
+                        onClick = {
+
+                            coroutineScope.launch {
+
+                                val success =
+                                    withContext(
+                                        Dispatchers.IO
+                                    ) {
+
+                                        restoreMediaToGallery(
+                                            context =
+                                                context,
+
+                                            media =
+                                                media
+                                        )
+                                    }
+
+                                if (success) {
+
+                                    val updated =
+                                        hiddenMedia.filterNot {
+
+                                            it.vaultFilePath ==
+                                                    media.vaultFilePath
+                                        }
+
+                                    hiddenMedia =
+                                        updated
+
+                                    saveHiddenMediaMetadata(
+                                        context =
+                                            context,
+
+                                        mediaList =
+                                            updated
+                                    )
+                                }
+
+                                mediaToUnhide =
+                                    null
+                            }
+                        }
+                    ) {
+
+                        Text(
+                            text = "Unhide",
+                            color =
+                                Color(0xFF0396FF)
+                        )
+                    }
+                },
+
+                dismissButton = {
+
+                    TextButton(
+
+                        onClick = {
+
+                            mediaToUnhide =
+                                null
+                        }
+                    ) {
+
+                        Text(
+                            text = "Cancel",
+                            color =
+                                Color(0xFF818181)
+                        )
+                    }
+                }
             )
         }
     }
 }
 
-
+// =============================================================
+// TAB
+// =============================================================
 
 @Composable
 private fun VaultTab(
@@ -215,26 +853,23 @@ private fun VaultTab(
     val unselectedColor =
         Color(0xFFBDBDBD)
 
-
     Column(
-        modifier = modifier
-            .fillMaxHeight()
-            .clickable {
-                onClick()
-            },
+        modifier =
+            modifier
+                .fillMaxHeight()
+                .clickable {
+                    onClick()
+                },
 
         horizontalAlignment =
             Alignment.CenterHorizontally
     ) {
 
-        // =====================================================
-        // ICON + TEXT
-        // =====================================================
-
         Row(
-            modifier = Modifier
-                .height(40.dp)
-                .fillMaxWidth(),
+            modifier =
+                Modifier
+                    .height(40.dp)
+                    .fillMaxWidth(),
 
             verticalAlignment =
                 Alignment.CenterVertically,
@@ -243,15 +878,9 @@ private fun VaultTab(
                 Arrangement.Center
         ) {
 
-            // =================================================
-            // ICON
-            // =================================================
-
             Image(
                 painter =
-                    painterResource(
-                        id = icon
-                    ),
+                    painterResource(id = icon),
 
                 contentDescription =
                     text,
@@ -259,8 +888,11 @@ private fun VaultTab(
                 colorFilter =
                     ColorFilter.tint(
                         if (selected) {
+
                             selectedColor
+
                         } else {
+
                             unselectedColor
                         }
                     ),
@@ -269,24 +901,21 @@ private fun VaultTab(
                     Modifier.size(18.dp)
             )
 
-
             Spacer(
                 modifier =
                     Modifier.width(5.dp)
             )
-
-
-            // =================================================
-            // TEXT
-            // =================================================
 
             Text(
                 text = text,
 
                 color =
                     if (selected) {
+
                         selectedColor
+
                     } else {
+
                         unselectedColor
                     },
 
@@ -295,37 +924,35 @@ private fun VaultTab(
             )
         }
 
-
-        // =====================================================
-        // SELECTED TAB LINE
-        // =====================================================
-
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(2.dp)
-                .background(
-                    if (selected) {
-                        selectedColor
-                    } else {
-                        Color.Transparent
-                    }
-                )
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(2.dp)
+                    .background(
+                        if (selected) {
+
+                            selectedColor
+
+                        } else {
+
+                            Color.Transparent
+                        }
+                    )
         )
     }
 }
 
-
 // =============================================================
-// PHOTOS CONTENT
+// EMPTY PHOTOS
 // =============================================================
 
 @Composable
 private fun PhotosVaultContent() {
 
     Box(
-        modifier = Modifier
-            .fillMaxSize(),
+        modifier =
+            Modifier.fillMaxSize(),
 
         contentAlignment =
             Alignment.Center
@@ -335,10 +962,6 @@ private fun PhotosVaultContent() {
             horizontalAlignment =
                 Alignment.CenterHorizontally
         ) {
-
-            // =================================================
-            // IMAGE CLICK
-            // =================================================
 
             Image(
                 painter =
@@ -353,19 +976,14 @@ private fun PhotosVaultContent() {
                     Modifier.size(80.dp)
             )
 
-
             Spacer(
                 modifier =
                     Modifier.height(12.dp)
             )
 
-
-            // =================================================
-            // TEXT
-            // =================================================
-
             Text(
-                text = """Click "+" To add image""",
+                text =
+                    """Click "+" To add image""",
 
                 color =
                     Color(0xFF9E9E9E),
@@ -377,17 +995,16 @@ private fun PhotosVaultContent() {
     }
 }
 
-
 // =============================================================
-// VIDEOS CONTENT
+// EMPTY VIDEOS
 // =============================================================
 
 @Composable
 private fun VideosVaultContent() {
 
     Box(
-        modifier = Modifier
-            .fillMaxSize(),
+        modifier =
+            Modifier.fillMaxSize(),
 
         contentAlignment =
             Alignment.Center
@@ -397,14 +1014,6 @@ private fun VideosVaultContent() {
             horizontalAlignment =
                 Alignment.CenterHorizontally
         ) {
-
-            // =================================================
-            // VIDEO CLICK ICON
-            //
-            // IMPORTANT:
-            // Yahan vedioicon nahi,
-            // aapka vedioClick use hoga.
-            // =================================================
 
             Image(
                 painter =
@@ -419,19 +1028,14 @@ private fun VideosVaultContent() {
                     Modifier.size(80.dp)
             )
 
-
             Spacer(
                 modifier =
                     Modifier.height(12.dp)
             )
 
-
-            // =================================================
-            // TEXT
-            // =================================================
-
             Text(
-                text = """Click "+" To add video""",
+                text =
+                    """Click "+" To add video""",
 
                 color =
                     Color(0xFF9E9E9E),
@@ -439,6 +1043,1830 @@ private fun VideosVaultContent() {
                 fontSize =
                     14.sp
             )
+        }
+    }
+}
+
+// =============================================================
+// HIDDEN GRID
+// =============================================================
+
+@Composable
+private fun VaultHiddenMediaGrid(
+    mediaList: List<VaultMediaItem>,
+    onMediaClick:
+        (VaultMediaItem) -> Unit
+) {
+
+    LazyVerticalGrid(
+
+        columns =
+            GridCells.Fixed(4),
+
+        modifier =
+            Modifier.fillMaxSize(),
+
+        contentPadding =
+            PaddingValues(
+                start = 8.dp,
+                end = 8.dp,
+                top = 12.dp,
+                bottom = 90.dp
+            ),
+
+        horizontalArrangement =
+            Arrangement.spacedBy(3.dp),
+
+        verticalArrangement =
+            Arrangement.spacedBy(3.dp)
+    ) {
+
+        items(
+
+            items =
+                mediaList,
+
+            key = { media ->
+
+                media.vaultFilePath
+                    ?: media.uri.toString()
+            }
+
+        ) { media ->
+
+            VaultHiddenMediaItem(
+
+                media =
+                    media,
+
+                onClick = {
+
+                    onMediaClick(
+                        media
+                    )
+                }
+            )
+        }
+    }
+}
+
+// =============================================================
+// HIDDEN ITEM
+// =============================================================
+
+@Composable
+private fun VaultHiddenMediaItem(
+    media: VaultMediaItem,
+    onClick: () -> Unit
+) {
+
+    val context =
+        LocalContext.current
+
+    var bitmap by remember(
+        media.uri,
+        media.vaultFilePath
+    ) {
+
+        mutableStateOf<Bitmap?>(null)
+    }
+
+    LaunchedEffect(
+        media.uri,
+        media.vaultFilePath
+    ) {
+
+        bitmap =
+            loadVaultThumbnail(
+                context =
+                    context,
+
+                uri =
+                    if (media.isVaultFile) {
+
+                        Uri.fromFile(
+                            File(
+                                media.vaultFilePath
+                                    ?: ""
+                            )
+                        )
+
+                    } else {
+
+                        media.uri
+                    },
+
+                isVideo =
+                    media.isVideo
+            )
+    }
+
+    Box(
+
+        modifier =
+            Modifier
+                .aspectRatio(1f)
+                .clip(
+                    RoundedCornerShape(1.dp)
+                )
+                .clickable {
+                    onClick()
+                }
+    ) {
+
+        bitmap?.let { loadedBitmap ->
+
+            Image(
+
+                bitmap =
+                    loadedBitmap.asImageBitmap(),
+
+                contentDescription =
+                    null,
+
+                contentScale =
+                    ContentScale.Crop,
+
+                modifier =
+                    Modifier.fillMaxSize()
+            )
+        }
+
+        Image(
+
+            painter =
+                painterResource(
+                    id =
+                        R.drawable.locked
+                ),
+
+            contentDescription =
+                "Hidden",
+
+            colorFilter =
+                ColorFilter.tint(
+                    Color.White
+                ),
+
+            modifier =
+                Modifier
+                    .align(
+                        Alignment.TopEnd
+                    )
+                    .padding(5.dp)
+                    .size(17.dp)
+        )
+    }
+}
+
+// =============================================================
+// GALLERY SCREEN
+// =============================================================
+
+@Composable
+private fun VaultGalleryScreen(
+    context: Context,
+    isVideo: Boolean,
+    hiddenMedia: List<VaultMediaItem>,
+    selectedMedia: Set<Uri>,
+    onSelectionChange:
+        (Set<Uri>) -> Unit,
+    onBack: () -> Unit,
+    onHide: () -> Unit
+) {
+
+    var mediaList by remember {
+
+        mutableStateOf(
+            emptyList<VaultMediaItem>()
+        )
+    }
+
+    var selectedAlbum by remember {
+
+        mutableStateOf("All")
+    }
+
+    var albumDropdownOpen by remember {
+
+        mutableStateOf(false)
+    }
+
+    var showHideDialog by remember {
+
+        mutableStateOf(false)
+    }
+
+    // =========================================================
+    // LOAD GALLERY MEDIA
+    // =========================================================
+
+    LaunchedEffect(
+        isVideo,
+        hiddenMedia
+    ) {
+
+        mediaList =
+            loadVaultMedia(
+                context =
+                    context,
+
+                isVideo =
+                    isVideo
+            )
+                .filterNot { media ->
+
+                    hiddenMedia.any {
+
+                        it.name == media.name &&
+                                it.isVideo ==
+                                media.isVideo &&
+                                it.isVaultFile
+                    }
+                }
+    }
+
+    // =========================================================
+    // ALBUMS
+    // =========================================================
+
+    val albums =
+        remember(mediaList) {
+
+            listOf("All") +
+
+                    mediaList
+                        .map {
+                            it.bucketName
+                        }
+                        .filter {
+                            it.isNotBlank()
+                        }
+                        .distinct()
+                        .sorted()
+        }
+
+    // =========================================================
+    // FILTER
+    // =========================================================
+
+    val filteredMedia =
+        remember(
+            mediaList,
+            selectedAlbum
+        ) {
+
+            if (
+                selectedAlbum == "All"
+            ) {
+
+                mediaList
+
+            } else {
+
+                mediaList.filter {
+
+                    it.bucketName ==
+                            selectedAlbum
+                }
+            }
+        }
+
+    // =========================================================
+    // ALL SELECTED
+    // =========================================================
+
+    val allSelected =
+        filteredMedia.isNotEmpty() &&
+                filteredMedia.all {
+
+                    selectedMedia.contains(
+                        it.uri
+                    )
+                }
+
+    // =========================================================
+    // SCREEN
+    // =========================================================
+
+    Box(
+
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(Color.White)
+    ) {
+
+        Column(
+            modifier =
+                Modifier.fillMaxSize()
+        ) {
+
+            // =================================================
+            // TOP BAR
+            // =================================================
+
+            Row(
+
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(70.dp)
+                        .padding(
+                            start = 15.dp,
+                            end = 15.dp
+                        ),
+
+                verticalAlignment =
+                    Alignment.CenterVertically
+            ) {
+
+                Image(
+
+                    painter =
+                        painterResource(
+                            id =
+                                R.drawable.backarrow
+                        ),
+
+                    contentDescription =
+                        "Back",
+
+                    modifier =
+                        Modifier
+                            .size(24.dp)
+                            .clickable {
+                                onBack()
+                            }
+                )
+
+                Spacer(
+                    modifier =
+                        Modifier.width(25.dp)
+                )
+
+                Row(
+
+                    modifier =
+                        Modifier.clickable {
+
+                            albumDropdownOpen =
+                                !albumDropdownOpen
+                        },
+
+                    verticalAlignment =
+                        Alignment.CenterVertically
+                ) {
+
+                    Text(
+
+                        text =
+                            selectedAlbum,
+
+                        color =
+                            Color(0xFF333333),
+
+                        fontSize =
+                            16.sp
+                    )
+
+                    Spacer(
+                        modifier =
+                            Modifier.width(3.dp)
+                    )
+
+                    Image(
+
+                        painter =
+                            painterResource(
+                                id =
+                                    R.drawable.dropdown
+                            ),
+
+                        contentDescription =
+                            "Albums",
+
+                        modifier =
+                            Modifier.size(14.dp)
+                    )
+                }
+
+                Spacer(
+                    modifier =
+                        Modifier.weight(1f)
+                )
+            }
+
+            // =================================================
+            // ALBUM DROPDOWN
+            // =================================================
+
+            if (albumDropdownOpen) {
+
+                Column(
+
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(
+                                start = 55.dp,
+                                end = 55.dp
+                            )
+                            .background(
+                                Color.White,
+                                RoundedCornerShape(8.dp)
+                            )
+                            .border(
+                                width = 1.dp,
+
+                                color =
+                                    Color(0xFFE0E0E0),
+
+                                shape =
+                                    RoundedCornerShape(8.dp)
+                            )
+                ) {
+
+                    albums.forEach { album ->
+
+                        Row(
+
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+
+                                        selectedAlbum =
+                                            album
+
+                                        albumDropdownOpen =
+                                            false
+                                    }
+                                    .padding(
+                                        horizontal = 14.dp,
+                                        vertical = 11.dp
+                                    ),
+
+                            verticalAlignment =
+                                Alignment.CenterVertically
+                        ) {
+
+                            Text(
+
+                                text =
+                                    album,
+
+                                color =
+                                    if (
+                                        album ==
+                                        selectedAlbum
+                                    ) {
+
+                                        Color(
+                                            0xFF0396FF
+                                        )
+
+                                    } else {
+
+                                        Color(
+                                            0xFF333333
+                                        )
+                                    },
+
+                                fontSize =
+                                    14.sp
+                            )
+                        }
+                    }
+                }
+            }
+
+            // =================================================
+            // GRID
+            // =================================================
+
+            LazyVerticalGrid(
+
+                columns =
+                    GridCells.Fixed(4),
+
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+
+                contentPadding =
+                    PaddingValues(
+                        start = 8.dp,
+                        end = 8.dp,
+                        top = 8.dp,
+                        bottom = 8.dp
+                    ),
+
+                horizontalArrangement =
+                    Arrangement.spacedBy(3.dp),
+
+                verticalArrangement =
+                    Arrangement.spacedBy(3.dp)
+            ) {
+
+                items(
+
+                    items =
+                        filteredMedia,
+
+                    key = { media ->
+
+                        media.uri.toString()
+                    }
+
+                ) { media ->
+
+                    VaultGalleryItem(
+
+                        media =
+                            media,
+
+                        selected =
+                            selectedMedia.contains(
+                                media.uri
+                            ),
+
+                        onClick = {
+
+                            val newSet =
+                                selectedMedia
+                                    .toMutableSet()
+
+                            if (
+                                newSet.contains(
+                                    media.uri
+                                )
+                            ) {
+
+                                newSet.remove(
+                                    media.uri
+                                )
+
+                            } else {
+
+                                newSet.add(
+                                    media.uri
+                                )
+                            }
+
+                            onSelectionChange(
+                                newSet
+                            )
+                        }
+                    )
+                }
+            }
+
+            // =================================================
+            // BOTTOM BAR
+            // =================================================
+
+            Row(
+
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(65.dp)
+                        .background(
+                            Color.White
+                        )
+                        .padding(
+                            horizontal = 45.dp
+                        ),
+
+                horizontalArrangement =
+                    Arrangement.SpaceBetween,
+
+                verticalAlignment =
+                    Alignment.CenterVertically
+            ) {
+
+                // =================================================
+                // SELECT ALL
+                // =================================================
+
+                Image(
+
+                    painter =
+                        painterResource(
+                            id =
+                                R.drawable.allimage
+                        ),
+
+                    contentDescription =
+                        "Select All",
+
+                    colorFilter =
+                        ColorFilter.tint(
+
+                            if (allSelected) {
+
+                                Color(
+                                    0xFF0396FF
+                                )
+
+                            } else {
+
+                                Color(
+                                    0xFF818181
+                                )
+                            }
+                        ),
+
+                    modifier =
+                        Modifier
+                            .size(28.dp)
+                            .clickable {
+
+                                val newSet =
+                                    selectedMedia
+                                        .toMutableSet()
+
+                                if (
+                                    allSelected
+                                ) {
+
+                                    filteredMedia.forEach {
+
+                                        newSet.remove(
+                                            it.uri
+                                        )
+                                    }
+
+                                } else {
+
+                                    filteredMedia.forEach {
+
+                                        newSet.add(
+                                            it.uri
+                                        )
+                                    }
+                                }
+
+                                onSelectionChange(
+                                    newSet
+                                )
+                            }
+                )
+
+                // =================================================
+                // HIDE
+                // =================================================
+
+                Image(
+
+                    painter =
+                        painterResource(
+                            id =
+                                R.drawable.locked
+                        ),
+
+                    contentDescription =
+                        "Hide",
+
+                    colorFilter =
+                        ColorFilter.tint(
+
+                            if (
+                                selectedMedia.isNotEmpty()
+                            ) {
+
+                                Color(
+                                    0xFF0396FF
+                                )
+
+                            } else {
+
+                                Color(
+                                    0xFF818181
+                                )
+                            }
+                        ),
+
+                    modifier =
+                        Modifier
+                            .size(28.dp)
+                            .clickable {
+
+                                if (
+                                    selectedMedia.isNotEmpty()
+                                ) {
+
+                                    showHideDialog =
+                                        true
+                                }
+                            }
+                )
+            }
+        }
+
+        // =====================================================
+        // HIDE CONFIRMATION
+        // =====================================================
+
+        if (showHideDialog) {
+
+            AlertDialog(
+
+                onDismissRequest = {
+
+                    showHideDialog =
+                        false
+                },
+
+                title = {
+
+                    Text(
+                        text =
+                            if (isVideo) {
+
+                                "Hide Video"
+
+                            } else {
+
+                                "Hide Image"
+                            }
+                    )
+                },
+
+                text = {
+
+                    Text(
+                        text =
+                            if (isVideo) {
+
+                                "Are you sure you want to hide these videos?"
+
+                            } else {
+
+                                "Are you sure you want to hide these images?"
+                            }
+                    )
+                },
+
+                confirmButton = {
+
+                    TextButton(
+
+                        onClick = {
+
+                            showHideDialog =
+                                false
+
+                            onHide()
+                        }
+                    ) {
+
+                        Text(
+                            text = "Hide",
+                            color =
+                                Color(0xFF0396FF)
+                        )
+                    }
+                },
+
+                dismissButton = {
+
+                    TextButton(
+
+                        onClick = {
+
+                            showHideDialog =
+                                false
+                        }
+                    ) {
+
+                        Text(
+                            text = "Cancel",
+                            color =
+                                Color(0xFF818181)
+                        )
+                    }
+                }
+            )
+        }
+    }
+}
+
+// =============================================================
+// GALLERY ITEM
+// =============================================================
+
+@Composable
+private fun VaultGalleryItem(
+    media: VaultMediaItem,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+
+    val context =
+        LocalContext.current
+
+    var bitmap by remember(
+        media.uri
+    ) {
+
+        mutableStateOf<Bitmap?>(null)
+    }
+
+    LaunchedEffect(
+        media.uri
+    ) {
+
+        bitmap =
+            loadVaultThumbnail(
+                context =
+                    context,
+
+                uri =
+                    media.uri,
+
+                isVideo =
+                    media.isVideo
+            )
+    }
+
+    Box(
+
+        modifier =
+            Modifier
+                .aspectRatio(1f)
+                .clip(
+                    RoundedCornerShape(1.dp)
+                )
+                .clickable {
+                    onClick()
+                }
+    ) {
+
+        bitmap?.let { loadedBitmap ->
+
+            Image(
+
+                bitmap =
+                    loadedBitmap.asImageBitmap(),
+
+                contentDescription =
+                    null,
+
+                contentScale =
+                    ContentScale.Crop,
+
+                modifier =
+                    Modifier.fillMaxSize()
+            )
+        }
+
+        Box(
+
+            modifier =
+                Modifier
+                    .align(
+                        Alignment.TopEnd
+                    )
+                    .padding(5.dp)
+                    .size(16.dp)
+                    .clip(
+                        CircleShape
+                    )
+                    .background(
+
+                        if (selected) {
+
+                            Color(
+                                0xFF0396FF
+                            )
+
+                        } else {
+
+                            Color.Transparent
+                        }
+                    )
+                    .border(
+
+                        width = 1.dp,
+
+                        color =
+                            if (selected) {
+
+                                Color(
+                                    0xFF0396FF
+                                )
+
+                            } else {
+
+                                Color(
+                                    0xFF818181
+                                )
+                            },
+
+                        shape =
+                            CircleShape
+                    ),
+
+            contentAlignment =
+                Alignment.Center
+        ) {
+
+            if (selected) {
+
+                Text(
+
+                    text = "✓",
+
+                    color =
+                        Color.White,
+
+                    fontSize =
+                        11.sp
+                )
+            }
+        }
+    }
+}
+
+// =============================================================
+// LOAD MEDIA
+// =============================================================
+
+private suspend fun loadVaultMedia(
+    context: Context,
+    isVideo: Boolean
+): List<VaultMediaItem> {
+
+    return withContext(
+        Dispatchers.IO
+    ) {
+
+        val result =
+            mutableListOf<VaultMediaItem>()
+
+        val collection =
+            if (isVideo) {
+
+                MediaStore.Video.Media
+                    .EXTERNAL_CONTENT_URI
+
+            } else {
+
+                MediaStore.Images.Media
+                    .EXTERNAL_CONTENT_URI
+            }
+
+        val projection =
+            arrayOf(
+
+                MediaStore.MediaColumns._ID,
+
+                MediaStore.MediaColumns.DISPLAY_NAME,
+
+                MediaStore.MediaColumns.BUCKET_DISPLAY_NAME
+            )
+
+        val sortOrder =
+            "${MediaStore.MediaColumns.DATE_ADDED} DESC"
+
+        try {
+
+            context.contentResolver.query(
+
+                collection,
+
+                projection,
+
+                null,
+
+                null,
+
+                sortOrder
+
+            )?.use { cursor ->
+
+                val idIndex =
+                    cursor.getColumnIndexOrThrow(
+                        MediaStore.MediaColumns._ID
+                    )
+
+                val nameIndex =
+                    cursor.getColumnIndexOrThrow(
+                        MediaStore.MediaColumns.DISPLAY_NAME
+                    )
+
+                val bucketIndex =
+                    cursor.getColumnIndex(
+                        MediaStore.MediaColumns.BUCKET_DISPLAY_NAME
+                    )
+
+                while (
+                    cursor.moveToNext()
+                ) {
+
+                    val id =
+                        cursor.getLong(
+                            idIndex
+                        )
+
+                    val name =
+                        cursor.getString(
+                            nameIndex
+                        ) ?: ""
+
+                    val bucket =
+                        if (
+                            bucketIndex >= 0
+                        ) {
+
+                            cursor.getString(
+                                bucketIndex
+                            ) ?: "Unknown"
+
+                        } else {
+
+                            "Unknown"
+                        }
+
+                    val uri =
+                        Uri.withAppendedPath(
+                            collection,
+                            id.toString()
+                        )
+
+                    result.add(
+
+                        VaultMediaItem(
+
+                            uri =
+                                uri,
+
+                            name =
+                                name,
+
+                            bucketName =
+                                bucket,
+
+                            isVideo =
+                                isVideo
+                        )
+                    )
+                }
+            }
+
+        } catch (e: Exception) {
+
+            e.printStackTrace()
+        }
+
+        result
+    }
+}
+
+// =============================================================
+// COPY TO PRIVATE VAULT
+// =============================================================
+
+private fun copyMediaToVault(
+    context: Context,
+    media: VaultMediaItem
+): VaultMediaItem? {
+
+    return try {
+
+        val vaultDir =
+            File(
+
+                context.filesDir,
+
+                if (media.isVideo) {
+
+                    "vault_videos"
+
+                } else {
+
+                    "vault_photos"
+                }
+            )
+
+        if (!vaultDir.exists()) {
+
+            vaultDir.mkdirs()
+        }
+
+        val extension =
+            media.name
+                .substringAfterLast(
+                    ".",
+                    if (media.isVideo) {
+
+                        "mp4"
+
+                    } else {
+
+                        "jpg"
+                    }
+                )
+
+        val safeName =
+            "${System.currentTimeMillis()}_${media.uri.lastPathSegment ?: media.name.hashCode()}.$extension"
+
+        val vaultFile =
+            File(
+                vaultDir,
+                safeName
+            )
+
+        context.contentResolver
+            .openInputStream(
+                media.uri
+            )
+            ?.use { input ->
+
+                vaultFile.outputStream()
+                    .use { output ->
+
+                        input.copyTo(
+                            output
+                        )
+                    }
+            }
+            ?: return null
+
+        // =====================================================
+        // IMPORTANT:
+        // bucketName is copied here.
+        //
+        // This is the original Gallery album name.
+        // It is later used by restoreMediaToGallery().
+        // =====================================================
+
+        VaultMediaItem(
+
+            uri =
+                Uri.parse(
+                    "vault://${vaultFile.absolutePath}"
+                ),
+
+            name =
+                media.name,
+
+            bucketName =
+                media.bucketName,
+
+            isVideo =
+                media.isVideo,
+
+            isVaultFile =
+                true,
+
+            vaultFilePath =
+                vaultFile.absolutePath
+        )
+
+    } catch (e: Exception) {
+
+        e.printStackTrace()
+
+        null
+    }
+}
+
+// =============================================================
+// SAVE HIDDEN MEDIA
+// =============================================================
+
+private fun saveHiddenMediaMetadata(
+    context: Context,
+    mediaList: List<VaultMediaItem>
+) {
+
+    val prefs =
+        context.getSharedPreferences(
+            "vault_hidden_media",
+            Context.MODE_PRIVATE
+        )
+
+    val editor =
+        prefs.edit()
+
+    editor.clear()
+
+    mediaList.forEachIndexed { index, media ->
+
+        editor.putString(
+            "uri_$index",
+            media.uri.toString()
+        )
+
+        editor.putString(
+            "name_$index",
+            media.name
+        )
+
+        // =====================================================
+        // ORIGINAL ALBUM IS SAVED
+        // =====================================================
+
+        editor.putString(
+            "bucket_$index",
+            media.bucketName
+        )
+
+        editor.putBoolean(
+            "video_$index",
+            media.isVideo
+        )
+
+        editor.putBoolean(
+            "vault_$index",
+            media.isVaultFile
+        )
+
+        editor.putString(
+            "path_$index",
+            media.vaultFilePath
+        )
+    }
+
+    editor.putInt(
+        "count",
+        mediaList.size
+    )
+
+    editor.apply()
+}
+
+// =============================================================
+// LOAD HIDDEN MEDIA
+// =============================================================
+
+private fun loadHiddenMediaMetadata(
+    context: Context
+): List<VaultMediaItem> {
+
+    val prefs =
+        context.getSharedPreferences(
+            "vault_hidden_media",
+            Context.MODE_PRIVATE
+        )
+
+    val count =
+        prefs.getInt(
+            "count",
+            0
+        )
+
+    val result =
+        mutableListOf<VaultMediaItem>()
+
+    for (index in 0 until count) {
+
+        val uriString =
+            prefs.getString(
+                "uri_$index",
+                null
+            )
+
+        if (uriString != null) {
+
+            val isVideo =
+                prefs.getBoolean(
+                    "video_$index",
+                    false
+                )
+
+            val isVault =
+                prefs.getBoolean(
+                    "vault_$index",
+                    true
+                )
+
+            val path =
+                prefs.getString(
+                    "path_$index",
+                    null
+                )
+
+            if (
+                isVault &&
+                path != null &&
+                !File(path).exists()
+            ) {
+
+                continue
+            }
+
+            result.add(
+
+                VaultMediaItem(
+
+                    uri =
+                        Uri.parse(
+                            uriString
+                        ),
+
+                    name =
+                        prefs.getString(
+                            "name_$index",
+                            "Media"
+                        ) ?: "Media",
+
+                    // =================================================
+                    // ORIGINAL ALBUM
+                    // =================================================
+
+                    bucketName =
+                        prefs.getString(
+                            "bucket_$index",
+                            "Pictures"
+                        ) ?: "Pictures",
+
+                    isVideo =
+                        isVideo,
+
+                    isVaultFile =
+                        isVault,
+
+                    vaultFilePath =
+                        path
+                )
+            )
+        }
+    }
+
+    return result
+}
+
+// =============================================================
+// RESTORE MEDIA TO ORIGINAL GALLERY ALBUM
+// =============================================================
+
+private fun restoreMediaToGallery(
+    context: Context,
+    media: VaultMediaItem
+): Boolean {
+
+    return try {
+
+        val file =
+            File(
+                media.vaultFilePath
+                    ?: return false
+            )
+
+        if (!file.exists()) {
+
+            return false
+        }
+
+        // =====================================================
+        // COLLECTION
+        // =====================================================
+
+        val collection =
+            if (media.isVideo) {
+
+                MediaStore.Video.Media
+                    .EXTERNAL_CONTENT_URI
+
+            } else {
+
+                MediaStore.Images.Media
+                    .EXTERNAL_CONTENT_URI
+            }
+
+        // =====================================================
+        // MIME TYPE
+        // =====================================================
+
+        val mimeType =
+            if (media.isVideo) {
+
+                getVideoMimeType(
+                    media.name
+                )
+
+            } else {
+
+                getImageMimeType(
+                    media.name
+                )
+            }
+
+        // =====================================================
+        // ORIGINAL ALBUM
+        //
+        // bucketName was saved when the media was hidden.
+        //
+        // Example:
+        //
+        // Camera
+        // Screenshots
+        // WhatsApp Images
+        // Download
+        //
+        // It will NOT use AppLock here.
+        // =====================================================
+
+        val originalAlbum =
+            media.bucketName
+                .trim()
+                .ifBlank {
+
+                    if (media.isVideo) {
+                        "Movies"
+                    } else {
+                        "Pictures"
+                    }
+                }
+
+        // =====================================================
+        // SAFE ALBUM NAME
+        // =====================================================
+
+        val safeAlbum =
+            originalAlbum
+                .replace(
+                    "/",
+                    "_"
+                )
+                .replace(
+                    "\\",
+                    "_"
+                )
+                .trim()
+                .ifBlank {
+
+                    if (media.isVideo) {
+                        "Movies"
+                    } else {
+                        "Pictures"
+                    }
+                }
+
+        // =====================================================
+        // ORIGINAL GALLERY PATH
+        //
+        // PHOTO:
+        // Pictures/<original album>
+        //
+        // VIDEO:
+        // Movies/<original album>
+        // =====================================================
+
+        val relativePath =
+            if (
+                Build.VERSION.SDK_INT >=
+                Build.VERSION_CODES.Q
+            ) {
+
+                if (media.isVideo) {
+
+                    "Movies/$safeAlbum"
+
+                } else {
+
+                    "Pictures/$safeAlbum"
+                }
+
+            } else {
+
+                null
+            }
+
+        // =====================================================
+        // CONTENT VALUES
+        // =====================================================
+
+        val values =
+            ContentValues().apply {
+
+                put(
+                    MediaStore.MediaColumns.DISPLAY_NAME,
+                    media.name
+                )
+
+                put(
+                    MediaStore.MediaColumns.MIME_TYPE,
+                    mimeType
+                )
+
+                // =================================================
+                // Android 10+
+                // =================================================
+
+                if (
+                    Build.VERSION.SDK_INT >=
+                    Build.VERSION_CODES.Q
+                ) {
+
+                    put(
+                        MediaStore.MediaColumns.RELATIVE_PATH,
+                        relativePath
+                    )
+
+                    put(
+                        MediaStore.MediaColumns.IS_PENDING,
+                        1
+                    )
+                }
+            }
+
+        // =====================================================
+        // INSERT INTO GALLERY
+        // =====================================================
+
+        val newUri =
+            context.contentResolver.insert(
+                collection,
+                values
+            ) ?: return false
+
+        try {
+
+            // =================================================
+            // COPY VAULT FILE TO GALLERY
+            // =================================================
+
+            context.contentResolver
+                .openOutputStream(
+                    newUri
+                )
+                ?.use { output ->
+
+                    file.inputStream()
+                        .use { input ->
+
+                            input.copyTo(
+                                output
+                            )
+                        }
+                }
+                ?: throw Exception(
+                    "Unable to open gallery output stream"
+                )
+
+            // =================================================
+            // MAKE MEDIA VISIBLE
+            // =================================================
+
+            if (
+                Build.VERSION.SDK_INT >=
+                Build.VERSION_CODES.Q
+            ) {
+
+                val completeValues =
+                    ContentValues().apply {
+
+                        put(
+                            MediaStore.MediaColumns.IS_PENDING,
+                            0
+                        )
+                    }
+
+                context.contentResolver.update(
+                    newUri,
+                    completeValues,
+                    null,
+                    null
+                )
+            }
+
+            // =================================================
+            // DELETE PRIVATE VAULT COPY
+            // =================================================
+
+            if (file.exists()) {
+
+                file.delete()
+            }
+
+            true
+
+        } catch (e: Exception) {
+
+            e.printStackTrace()
+
+            // =================================================
+            // DELETE PARTIALLY CREATED MEDIA
+            // =================================================
+
+            try {
+
+                context.contentResolver.delete(
+                    newUri,
+                    null,
+                    null
+                )
+
+            } catch (deleteError: Exception) {
+
+                deleteError.printStackTrace()
+            }
+
+            false
+        }
+
+    } catch (e: Exception) {
+
+        e.printStackTrace()
+
+        false
+    }
+}
+
+// =============================================================
+// IMAGE MIME
+// =============================================================
+
+private fun getImageMimeType(
+    fileName: String
+): String {
+
+    return when (
+        fileName
+            .substringAfterLast(
+                ".",
+                ""
+            )
+            .lowercase()
+    ) {
+
+        "png" ->
+            "image/png"
+
+        "webp" ->
+            "image/webp"
+
+        "gif" ->
+            "image/gif"
+
+        "heic" ->
+            "image/heic"
+
+        "heif" ->
+            "image/heif"
+
+        else ->
+            "image/jpeg"
+    }
+}
+
+// =============================================================
+// VIDEO MIME
+// =============================================================
+
+private fun getVideoMimeType(
+    fileName: String
+): String {
+
+    return when (
+        fileName
+            .substringAfterLast(
+                ".",
+                ""
+            )
+            .lowercase()
+    ) {
+
+        "mkv" ->
+            "video/x-matroska"
+
+        "webm" ->
+            "video/webm"
+
+        "3gp" ->
+            "video/3gpp"
+
+        "avi" ->
+            "video/x-msvideo"
+
+        else ->
+            "video/mp4"
+    }
+}
+
+// =============================================================
+// THUMBNAIL
+// =============================================================
+
+private suspend fun loadVaultThumbnail(
+    context: Context,
+    uri: Uri,
+    isVideo: Boolean
+): Bitmap? {
+
+    return withContext(
+        Dispatchers.IO
+    ) {
+
+        try {
+
+            if (isVideo) {
+
+                val retriever =
+                    MediaMetadataRetriever()
+
+                try {
+
+                    if (
+                        uri.scheme == "file"
+                    ) {
+
+                        retriever.setDataSource(
+                            uri.path
+                        )
+
+                    } else if (
+                        uri.scheme == "vault"
+                    ) {
+
+                        retriever.setDataSource(
+                            uri.schemeSpecificPart
+                        )
+
+                    } else {
+
+                        retriever.setDataSource(
+                            context,
+                            uri
+                        )
+                    }
+
+                    retriever.getFrameAtTime(
+                        0L,
+                        MediaMetadataRetriever
+                            .OPTION_CLOSEST_SYNC
+                    )
+
+                } finally {
+
+                    retriever.release()
+                }
+
+            } else {
+
+                if (
+                    uri.scheme == "file"
+                ) {
+
+                    android.graphics.BitmapFactory
+                        .decodeFile(
+                            uri.path
+                        )
+
+                } else if (
+                    uri.scheme == "vault"
+                ) {
+
+                    android.graphics.BitmapFactory
+                        .decodeFile(
+                            uri.schemeSpecificPart
+                        )
+
+                } else if (
+                    Build.VERSION.SDK_INT >=
+                    Build.VERSION_CODES.Q
+                ) {
+
+                    context.contentResolver
+                        .loadThumbnail(
+
+                            uri,
+
+                            android.util.Size(
+                                300,
+                                300
+                            ),
+
+                            null
+                        )
+
+                } else {
+
+                    context.contentResolver
+                        .openInputStream(
+                            uri
+                        )
+                        ?.use { inputStream ->
+
+                            android.graphics.BitmapFactory
+                                .decodeStream(
+                                    inputStream
+                                )
+                        }
+                }
+            }
+
+        } catch (e: Exception) {
+
+            e.printStackTrace()
+
+            null
         }
     }
 }

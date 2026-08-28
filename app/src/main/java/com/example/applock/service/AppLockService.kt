@@ -20,36 +20,21 @@ class AppLockService : AccessibilityService() {
 
     private val TAG = "APPLOCK_DEBUG"
 
-    // =========================================================
-    // COROUTINE
-    // =========================================================
-
-    private val serviceJob =
-        SupervisorJob()
+    private val serviceJob = SupervisorJob()
 
     private val scope =
         CoroutineScope(
             Dispatchers.IO + serviceJob
         )
 
-
-    // =========================================================
-    // MAIN HANDLER
-    // =========================================================
-
     private val handler =
-        Handler(
-            Looper.getMainLooper()
-        )
-
-
-    // =========================================================
-    // LAST PACKAGE
-    // =========================================================
+        Handler(Looper.getMainLooper())
 
     @Volatile
     private var lastPackageName: String? = null
 
+    @Volatile
+    private var checkingPackage: String? = null
 
     // =========================================================
     // RESET UNLOCKED APP
@@ -63,13 +48,34 @@ class AppLockService : AccessibilityService() {
                 "RESET UNLOCKED APP"
             )
 
-            AppLockServiceHolder.currentUnlockedApp =
-                null
+            AppLockServiceHolder.currentUnlockedApp = null
 
-            AppLockServiceHolder.lastUnlockTime =
-                0L
+            AppLockServiceHolder.lastUnlockTime = 0L
         }
 
+    // =========================================================
+    // CREATE
+    // =========================================================
+
+    override fun onCreate() {
+
+        super.onCreate()
+
+        Log.d(
+            TAG,
+            "================================"
+        )
+
+        Log.d(
+            TAG,
+            "ACCESSIBILITY SERVICE CREATED"
+        )
+
+        Log.d(
+            TAG,
+            "================================"
+        )
+    }
 
     // =========================================================
     // SERVICE CONNECTED
@@ -99,24 +105,62 @@ class AppLockService : AccessibilityService() {
             "================================"
         )
 
+        try {
 
-        // =====================================================
-        // RESET TEMP STATE
-        // =====================================================
+            val info =
+                serviceInfo
 
-        lastPackageName =
-            null
+            Log.d(
+                TAG,
+                "EVENT TYPES = ${info.eventTypes}"
+            )
 
-        AppLockServiceHolder.isLockScreenOpen =
-            false
+            Log.d(
+                TAG,
+                "FEEDBACK TYPE = ${info.feedbackType}"
+            )
 
+            Log.d(
+                TAG,
+                "NOTIFICATION TIMEOUT = ${info.notificationTimeout}"
+            )
+
+            Log.d(
+                TAG,
+                "SERVICE FLAGS = ${info.flags}"
+            )
+
+        } catch (e: Exception) {
+
+            Log.e(
+                TAG,
+                "SERVICE INFO ERROR",
+                e
+            )
+        }
+
+        handler.removeCallbacks(
+            resetUnlockedAppRunnable
+        )
+
+        lastPackageName = null
+
+        checkingPackage = null
+
+        /*
+         * Do not call AppLockServiceHolder.clear().
+         *
+         * Android can reconnect the accessibility service
+         * while the application is still running.
+         */
+
+        AppLockServiceHolder.isLockScreenOpen = false
 
         Log.d(
             TAG,
             "SERVICE INITIALIZATION COMPLETE"
         )
     }
-
 
     // =========================================================
     // ACCESSIBILITY EVENT
@@ -126,30 +170,26 @@ class AppLockService : AccessibilityService() {
         event: AccessibilityEvent?
     ) {
 
-        // =====================================================
-        // NULL CHECK
-        // =====================================================
-
         if (event == null) {
             return
         }
 
-
-        // =====================================================
-        // ONLY WINDOW STATE CHANGED
-        // =====================================================
+        // -----------------------------------------------------
+        // WINDOW EVENTS ONLY
+        // -----------------------------------------------------
 
         if (
             event.eventType !=
-            AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
+            AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED &&
+            event.eventType !=
+            AccessibilityEvent.TYPE_WINDOWS_CHANGED
         ) {
             return
         }
 
-
-        // =====================================================
+        // -----------------------------------------------------
         // PACKAGE
-        // =====================================================
+        // -----------------------------------------------------
 
         val packageName =
             event.packageName
@@ -157,17 +197,14 @@ class AppLockService : AccessibilityService() {
                 ?.trim()
                 ?: return
 
-
         if (packageName.isEmpty()) {
             return
         }
-
 
         Log.d(
             TAG,
             "CURRENT PACKAGE = $packageName"
         )
-
 
         // =====================================================
         // SYSTEM UI
@@ -177,9 +214,9 @@ class AppLockService : AccessibilityService() {
             packageName ==
             "com.android.systemui"
         ) {
+
             return
         }
-
 
         // =====================================================
         // HOME / LAUNCHER
@@ -197,17 +234,14 @@ class AppLockService : AccessibilityService() {
                 "HOME / LAUNCHER DETECTED"
             )
 
-
             handler.removeCallbacks(
                 resetUnlockedAppRunnable
             )
-
 
             handler.postDelayed(
                 resetUnlockedAppRunnable,
                 700L
             )
-
 
             AppLockServiceHolder.isLockScreenOpen =
                 false
@@ -215,9 +249,11 @@ class AppLockService : AccessibilityService() {
             lastPackageName =
                 packageName
 
+            checkingPackage =
+                null
+
             return
         }
-
 
         // =====================================================
         // APPLOCK ITSELF
@@ -239,9 +275,8 @@ class AppLockService : AccessibilityService() {
             return
         }
 
-
         // =====================================================
-        // LOCK SCREEN ALREADY OPEN
+        // LOCK SCREEN OPEN
         // =====================================================
 
         if (
@@ -256,17 +291,53 @@ class AppLockService : AccessibilityService() {
             return
         }
 
+        // =====================================================
+        // ALREADY UNLOCKED
+        // =====================================================
+
+        if (
+            AppLockServiceHolder.currentUnlockedApp ==
+            packageName
+        ) {
+
+            Log.d(
+                TAG,
+                "APP ALREADY UNLOCKED = $packageName"
+            )
+
+            return
+        }
 
         // =====================================================
-        // SAVE LAST PACKAGE
+        // DUPLICATE CHECK
         // =====================================================
+
+        if (
+            checkingPackage ==
+            packageName
+        ) {
+
+            Log.d(
+                TAG,
+                "ALREADY CHECKING = $packageName"
+            )
+
+            return
+        }
 
         lastPackageName =
             packageName
 
+        checkingPackage =
+            packageName
+
+        Log.d(
+            TAG,
+            "STARTING LOCK CHECK = $packageName"
+        )
 
         // =====================================================
-        // CHECK LOCKED APPS
+        // DATASTORE CHECK
         // =====================================================
 
         scope.launch {
@@ -278,22 +349,19 @@ class AppLockService : AccessibilityService() {
                         this@AppLockService
                     )
 
-
                 val lockedApps =
                     dataStore
                         .lockedAppsFlow
                         .first()
-
 
                 Log.d(
                     TAG,
                     "LOCKED APPS = $lockedApps"
                 )
 
-
-                // =================================================
-                // APP NOT LOCKED
-                // =================================================
+                // -------------------------------------------------
+                // NOT LOCKED
+                // -------------------------------------------------
 
                 if (
                     !lockedApps.contains(
@@ -306,65 +374,63 @@ class AppLockService : AccessibilityService() {
                         "APP NOT LOCKED = $packageName"
                     )
 
+                    checkingPackage =
+                        null
+
                     return@launch
                 }
 
-
-                // =================================================
+                // -------------------------------------------------
                 // ALREADY UNLOCKED
-                // =================================================
+                // -------------------------------------------------
 
                 if (
-                    AppLockServiceHolder
-                        .currentUnlockedApp ==
+                    AppLockServiceHolder.currentUnlockedApp ==
                     packageName
                 ) {
 
-                    Log.d(
-                        TAG,
-                        "APP ALREADY UNLOCKED = $packageName"
-                    )
+                    checkingPackage =
+                        null
 
                     return@launch
                 }
 
-
-                // =================================================
-                // CANCEL OLD RESET
-                // =================================================
-
-                handler.removeCallbacks(
-                    resetUnlockedAppRunnable
-                )
-
-
-                // =================================================
-                // EXTRA PROTECTION
-                // =================================================
+                // -------------------------------------------------
+                // LOCK SCREEN ALREADY OPEN
+                // -------------------------------------------------
 
                 if (
                     AppLockServiceHolder.isLockScreenOpen
                 ) {
 
-                    Log.d(
-                        TAG,
-                        "LOCK SCREEN ALREADY STARTING"
-                    )
+                    checkingPackage =
+                        null
 
                     return@launch
                 }
 
+                // -------------------------------------------------
+                // CANCEL RESET
+                // -------------------------------------------------
 
-                // =================================================
+                handler.removeCallbacks(
+                    resetUnlockedAppRunnable
+                )
+
+                // -------------------------------------------------
                 // MARK LOCK SCREEN OPEN
-                // =================================================
+                // -------------------------------------------------
 
                 AppLockServiceHolder.isLockScreenOpen =
                     true
 
+                Log.d(
+                    TAG,
+                    "OPENING LOCK SCREEN FOR = $packageName"
+                )
 
                 // =================================================
-                // OPEN LOCK SCREEN
+                // START ACTIVITY
                 // =================================================
 
                 withContext(
@@ -391,21 +457,18 @@ class AppLockService : AccessibilityService() {
                                 )
                             }
 
-
                         Log.d(
                             TAG,
                             "STARTING LOCK SCREEN"
                         )
 
-
                         startActivity(
                             lockIntent
                         )
 
-
                         Log.d(
                             TAG,
-                            "LOCK SCREEN STARTED"
+                            "LOCK SCREEN STARTED = $packageName"
                         )
 
                     } catch (e: Exception) {
@@ -419,6 +482,9 @@ class AppLockService : AccessibilityService() {
                         AppLockServiceHolder.isLockScreenOpen =
                             false
                     }
+
+                    checkingPackage =
+                        null
                 }
 
             } catch (e: Exception) {
@@ -431,10 +497,12 @@ class AppLockService : AccessibilityService() {
 
                 AppLockServiceHolder.isLockScreenOpen =
                     false
+
+                checkingPackage =
+                    null
             }
         }
     }
-
 
     // =========================================================
     // INTERRUPT
@@ -447,7 +515,6 @@ class AppLockService : AccessibilityService() {
             "ACCESSIBILITY SERVICE INTERRUPTED"
         )
     }
-
 
     // =========================================================
     // UNBIND
@@ -462,18 +529,27 @@ class AppLockService : AccessibilityService() {
             "ACCESSIBILITY SERVICE UNBOUND"
         )
 
+        handler.removeCallbacks(
+            resetUnlockedAppRunnable
+        )
+
+        checkingPackage =
+            null
+
+        lastPackageName =
+            null
+
         return super.onUnbind(
             intent
         )
     }
-
 
     // =========================================================
     // REBIND
     // =========================================================
 
     override fun onRebind(
-        intent: Intent?
+        intent: Intent
     ) {
 
         super.onRebind(
@@ -482,10 +558,28 @@ class AppLockService : AccessibilityService() {
 
         Log.d(
             TAG,
+            "================================"
+        )
+
+        Log.d(
+            TAG,
             "ACCESSIBILITY SERVICE REBOUND"
         )
-    }
 
+        Log.d(
+            TAG,
+            "================================"
+        )
+
+        checkingPackage =
+            null
+
+        lastPackageName =
+            null
+
+        AppLockServiceHolder.isLockScreenOpen =
+            false
+    }
 
     // =========================================================
     // DESTROY
@@ -498,17 +592,20 @@ class AppLockService : AccessibilityService() {
             "ACCESSIBILITY SERVICE DESTROYED"
         )
 
-
         handler.removeCallbacks(
             resetUnlockedAppRunnable
         )
 
+        checkingPackage =
+            null
 
-        AppLockServiceHolder.clear()
+        lastPackageName =
+            null
 
+        AppLockServiceHolder.isLockScreenOpen =
+            false
 
         scope.cancel()
-
 
         super.onDestroy()
     }

@@ -18,7 +18,6 @@ class LockScreenActivity : FragmentActivity() {
     private var targetPackage: String? =
         null
 
-
     // =========================================================
     // CREATE
     // =========================================================
@@ -30,7 +29,6 @@ class LockScreenActivity : FragmentActivity() {
         super.onCreate(
             savedInstanceState
         )
-
 
         Log.d(
             TAG,
@@ -47,7 +45,6 @@ class LockScreenActivity : FragmentActivity() {
             "================================"
         )
 
-
         // =====================================================
         // SHOW WHEN LOCKED
         // =====================================================
@@ -57,23 +54,22 @@ class LockScreenActivity : FragmentActivity() {
             Build.VERSION_CODES.O_MR1
         ) {
 
-            setShowWhenLocked(true)
+            setShowWhenLocked(
+                true
+            )
 
-            setTurnScreenOn(true)
+            setTurnScreenOn(
+                true
+            )
         }
-
 
         window.addFlags(
 
             WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or
-
                     WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or
-
                     WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
-
                     WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
         )
-
 
         // =====================================================
         // TARGET APP
@@ -84,21 +80,31 @@ class LockScreenActivity : FragmentActivity() {
                 "packageName"
             )
 
-
         Log.d(
             TAG,
             "TARGET APP = $targetPackage"
         )
 
+        if (
+            targetPackage.isNullOrEmpty()
+        ) {
+
+            Log.e(
+                TAG,
+                "TARGET PACKAGE IS NULL"
+            )
+
+            goHome()
+
+            return
+        }
 
         // =====================================================
         // LOCK SCREEN OPEN
         // =====================================================
 
-        AppLockServiceHolder
-            .isLockScreenOpen =
+        AppLockServiceHolder.isLockScreenOpen =
             true
-
 
         // =====================================================
         // BACK = HOME
@@ -108,7 +114,8 @@ class LockScreenActivity : FragmentActivity() {
 
             this,
 
-            object : OnBackPressedCallback(true) {
+            object :
+                OnBackPressedCallback(true) {
 
                 override fun handleOnBackPressed() {
 
@@ -122,7 +129,6 @@ class LockScreenActivity : FragmentActivity() {
             }
         )
 
-
         // =====================================================
         // UNLOCK SCREEN
         // =====================================================
@@ -132,6 +138,9 @@ class LockScreenActivity : FragmentActivity() {
             UnlockScreen(
 
                 onUnlockSuccess = {
+
+                    val packageName =
+                        targetPackage
 
                     Log.d(
                         TAG,
@@ -145,51 +154,43 @@ class LockScreenActivity : FragmentActivity() {
 
                     Log.d(
                         TAG,
+                        "PACKAGE = $packageName"
+                    )
+
+                    Log.d(
+                        TAG,
                         "================================"
                     )
 
-
-                    val packageName =
-                        targetPackage
-
-
                     if (
-                        !packageName.isNullOrEmpty()
+                        packageName.isNullOrEmpty()
                     ) {
 
-                        // -----------------------------------------
-                        // Save unlocked app
-                        // -----------------------------------------
+                        goHome()
 
-                        AppLockServiceHolder
-                            .currentUnlockedApp =
-                            packageName
-
-
-                        AppLockServiceHolder
-                            .lastUnlockTime =
-                            System.currentTimeMillis()
-
-
-                        Log.d(
-                            TAG,
-                            "UNLOCKED APP = $packageName"
-                        )
+                        return@UnlockScreen
                     }
 
+                    // =================================================
+                    // SAVE UNLOCKED APP
+                    // =================================================
 
-                    // -----------------------------------------
-                    // Lock screen no longer active
-                    // -----------------------------------------
+                    AppLockServiceHolder.currentUnlockedApp =
+                        packageName
 
-                    AppLockServiceHolder
-                        .isLockScreenOpen =
+                    AppLockServiceHolder.lastUnlockTime =
+                        System.currentTimeMillis()
+
+                    // =================================================
+                    // CLOSE LOCK SCREEN STATE
+                    // =================================================
+
+                    AppLockServiceHolder.isLockScreenOpen =
                         false
 
-
-                    // -----------------------------------------
-                    // Open target
-                    // -----------------------------------------
+                    // =================================================
+                    // OPEN TARGET APP
+                    // =================================================
 
                     openApp()
                 }
@@ -197,6 +198,35 @@ class LockScreenActivity : FragmentActivity() {
         }
     }
 
+    // =========================================================
+    // NEW INTENT
+    // =========================================================
+
+    override fun onNewIntent(
+        intent: Intent
+    ) {
+
+        super.onNewIntent(
+            intent
+        )
+
+        setIntent(
+            intent
+        )
+
+        targetPackage =
+            intent.getStringExtra(
+                "packageName"
+            )
+
+        Log.d(
+            TAG,
+            "NEW TARGET PACKAGE = $targetPackage"
+        )
+
+        AppLockServiceHolder.isLockScreenOpen =
+            true
+    }
 
     // =========================================================
     // GO HOME
@@ -206,26 +236,10 @@ class LockScreenActivity : FragmentActivity() {
 
         Log.d(
             TAG,
-            "================================"
-        )
-
-        Log.d(
-            TAG,
             "GO HOME"
         )
 
-        Log.d(
-            TAG,
-            "================================"
-        )
-
-
-        // -----------------------------------------------------
-        // Clear state
-        // -----------------------------------------------------
-
         AppLockServiceHolder.clear()
-
 
         try {
 
@@ -241,22 +255,13 @@ class LockScreenActivity : FragmentActivity() {
                     addFlags(
 
                         Intent.FLAG_ACTIVITY_NEW_TASK or
-
                                 Intent.FLAG_ACTIVITY_CLEAR_TOP or
-
                                 Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
                     )
                 }
 
-
             startActivity(
                 homeIntent
-            )
-
-
-            Log.d(
-                TAG,
-                "ANDROID HOME STARTED"
             )
 
         } catch (e: Exception) {
@@ -267,7 +272,6 @@ class LockScreenActivity : FragmentActivity() {
                 e
             )
         }
-
 
         try {
 
@@ -282,10 +286,8 @@ class LockScreenActivity : FragmentActivity() {
             )
         }
 
-
         finishAndRemoveTask()
     }
-
 
     // =========================================================
     // OPEN TARGET APP
@@ -295,7 +297,6 @@ class LockScreenActivity : FragmentActivity() {
 
         val packageName =
             targetPackage
-
 
         if (
             packageName.isNullOrEmpty()
@@ -311,7 +312,6 @@ class LockScreenActivity : FragmentActivity() {
             return
         }
 
-
         try {
 
             Log.d(
@@ -319,13 +319,11 @@ class LockScreenActivity : FragmentActivity() {
                 "OPENING APP = $packageName"
             )
 
-
             val appIntent =
                 packageManager
                     .getLaunchIntentForPackage(
                         packageName
                     )
-
 
             if (
                 appIntent == null
@@ -341,25 +339,21 @@ class LockScreenActivity : FragmentActivity() {
                 return
             }
 
-
             appIntent.addFlags(
 
-                Intent.FLAG_ACTIVITY_CLEAR_TOP or
-
+                Intent.FLAG_ACTIVITY_NEW_TASK or
+                        Intent.FLAG_ACTIVITY_CLEAR_TOP or
                         Intent.FLAG_ACTIVITY_SINGLE_TOP
             )
-
 
             startActivity(
                 appIntent
             )
 
-
             Log.d(
                 TAG,
                 "TARGET APP STARTED = $packageName"
             )
-
 
         } catch (e: Exception) {
 
@@ -374,11 +368,6 @@ class LockScreenActivity : FragmentActivity() {
             return
         }
 
-
-        // -----------------------------------------------------
-        // Close LockScreenActivity
-        // -----------------------------------------------------
-
         try {
 
             finishAffinity()
@@ -392,10 +381,8 @@ class LockScreenActivity : FragmentActivity() {
             )
         }
 
-
         finishAndRemoveTask()
     }
-
 
     // =========================================================
     // DESTROY
@@ -408,6 +395,16 @@ class LockScreenActivity : FragmentActivity() {
             "LOCK SCREEN DESTROYED"
         )
 
+        /*
+         * Do not clear currentUnlockedApp here.
+         *
+         * It is required by AccessibilityService so that
+         * the just-unlocked application is not immediately
+         * locked again.
+         */
+
+        AppLockServiceHolder.isLockScreenOpen =
+            false
 
         super.onDestroy()
     }

@@ -176,12 +176,6 @@ object AppListCache {
                                             .toString()
 
 
-                                    // =================================================
-                                    // LOAD ICON HERE
-                                    //
-                                    // Icon AppListScreen mein nahi,
-                                    // yahin preload hoga.
-                                    // =================================================
 
                                     val iconBitmap =
                                         try {
@@ -354,18 +348,6 @@ fun AppListScreen(
                 ?: emptyList()
         )
     }
-
-
-    // =========================================================
-    // LOAD APP DATA
-    //
-    // Agar PinConfirmScreen se preload already complete hai:
-    // DIRECT CACHE SE APPS + ICONS SHOW.
-    //
-    // Agar preload abhi chal raha hai:
-    // AppListCache.preload() wait karega aur complete
-    // apps + icons return karega.
-    // =========================================================
 
     LaunchedEffect(Unit) {
 
