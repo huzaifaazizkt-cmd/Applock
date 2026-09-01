@@ -1,4 +1,4 @@
-package com.example.applock.service
+package com.example.applock.service.com.example.applock.service
 
 import android.accessibilityservice.AccessibilityService
 import android.content.Intent
@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import com.example.applock.Design.screens.LockScreenActivity
 import com.example.applock.data.DataStoreManager
+import com.example.applock.service.AppLockServiceHolder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob

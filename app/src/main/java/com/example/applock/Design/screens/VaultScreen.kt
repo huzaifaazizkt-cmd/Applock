@@ -1,8 +1,11 @@
+
 package com.example.applock.Design.screens
 
+import android.Manifest
 import android.app.Activity
 import android.content.ContentValues
 import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
 import android.net.Uri
@@ -36,6 +39,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import com.example.applock.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -65,8 +69,11 @@ fun VaultScreen() {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
+    // =========================================================
     // 0 = PHOTOS
     // 1 = VIDEOS
+    // =========================================================
+
     var selectedTab by remember {
         mutableStateOf(0)
     }
@@ -114,11 +121,136 @@ fun VaultScreen() {
     }
 
     // =========================================================
-    // ANDROID DELETE CONFIRMATION
+    // MEDIA PERMISSION
     //
-    // This is used only for deleting the ORIGINAL gallery
-    // media after the private vault copy has successfully
-    // been created.
+    // Android 13+:
+    // Photos -> READ_MEDIA_IMAGES
+    // Videos -> READ_MEDIA_VIDEO
+    //
+    // Android 12 and below:
+    // READ_EXTERNAL_STORAGE
+    // =========================================================
+
+    val mediaPermissionLauncher =
+        rememberLauncherForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()
+        ) { permissions ->
+
+            val granted =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+
+                    val requiredPermission =
+                        if (selectedTab == 0) {
+
+                            Manifest.permission.READ_MEDIA_IMAGES
+
+                        } else {
+
+                            Manifest.permission.READ_MEDIA_VIDEO
+                        }
+
+                    permissions[requiredPermission] == true ||
+                            ContextCompat.checkSelfPermission(
+                                context,
+                                requiredPermission
+                            ) == PackageManager.PERMISSION_GRANTED
+
+                } else {
+
+                    permissions[Manifest.permission.READ_EXTERNAL_STORAGE] == true ||
+                            ContextCompat.checkSelfPermission(
+                                context,
+                                Manifest.permission.READ_EXTERNAL_STORAGE
+                            ) == PackageManager.PERMISSION_GRANTED
+                }
+
+            if (granted) {
+
+                galleryOpen = true
+            }
+        }
+
+    // =========================================================
+    // CHECK MEDIA PERMISSION
+    // =========================================================
+
+    fun hasMediaPermission(): Boolean {
+
+        return if (
+            Build.VERSION.SDK_INT >=
+            Build.VERSION_CODES.TIRAMISU
+        ) {
+
+            val permission =
+                if (selectedTab == 0) {
+
+                    Manifest.permission.READ_MEDIA_IMAGES
+
+                } else {
+
+                    Manifest.permission.READ_MEDIA_VIDEO
+                }
+
+            ContextCompat.checkSelfPermission(
+                context,
+                permission
+            ) == PackageManager.PERMISSION_GRANTED
+
+        } else {
+
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED
+        }
+    }
+
+    // =========================================================
+    // OPEN GALLERY
+    // =========================================================
+
+    fun openGallery() {
+
+        if (hasMediaPermission()) {
+
+            // Permission already granted
+            galleryOpen = true
+
+        } else {
+
+            // Request correct permission
+            if (
+                Build.VERSION.SDK_INT >=
+                Build.VERSION_CODES.TIRAMISU
+            ) {
+
+                val permission =
+                    if (selectedTab == 0) {
+
+                        Manifest.permission.READ_MEDIA_IMAGES
+
+                    } else {
+
+                        Manifest.permission.READ_MEDIA_VIDEO
+                    }
+
+                mediaPermissionLauncher.launch(
+                    arrayOf(permission)
+                )
+
+            } else {
+
+                mediaPermissionLauncher.launch(
+                    arrayOf(
+                        Manifest.permission.READ_EXTERNAL_STORAGE
+                    )
+                )
+            }
+        }
+    }
+
+    // =========================================================
+    // ANDROID DELETE CONFIRMATION
     // =========================================================
 
     val deleteLauncher =
@@ -127,10 +259,6 @@ fun VaultScreen() {
         ) { result ->
 
             if (result.resultCode == Activity.RESULT_OK) {
-
-                // =================================================
-                // USER ALLOWED DELETE
-                // =================================================
 
                 val newHidden =
                     hiddenMedia.toMutableList()
@@ -150,8 +278,7 @@ fun VaultScreen() {
                     }
                 }
 
-                hiddenMedia =
-                    newHidden
+                hiddenMedia = newHidden
 
                 saveHiddenMediaMetadata(
                     context = context,
@@ -159,13 +286,6 @@ fun VaultScreen() {
                 )
 
             } else {
-
-                // =================================================
-                // USER CANCELLED
-                //
-                // Original gallery media is still there, so remove
-                // the temporary private copies.
-                // =================================================
 
                 pendingCopiedItems.forEach { copied ->
 
@@ -183,24 +303,10 @@ fun VaultScreen() {
                 }
             }
 
-            pendingCopiedItems =
-                emptyList()
-
-            selectedMedia =
-                emptySet()
-
-            galleryOpen =
-                false
+            pendingCopiedItems = emptyList()
+            selectedMedia = emptySet()
+            galleryOpen = false
         }
-
-    // =========================================================
-    // OPEN GALLERY
-    // =========================================================
-
-    fun openGallery() {
-
-        galleryOpen = true
-    }
 
     // =========================================================
     // GALLERY SCREEN
@@ -223,37 +329,24 @@ fun VaultScreen() {
 
             onSelectionChange = { newSelection ->
 
-                selectedMedia =
-                    newSelection
+                selectedMedia = newSelection
             },
 
             onBack = {
 
-                galleryOpen =
-                    false
-
-                selectedMedia =
-                    emptySet()
+                galleryOpen = false
+                selectedMedia = emptySet()
             },
 
             onHide = {
 
                 coroutineScope.launch {
 
-                    // =================================================
-                    // LOAD CURRENT GALLERY MEDIA
-                    // =================================================
-
                     val allMedia =
                         loadVaultMedia(
                             context = context,
-                            isVideo =
-                                selectedTab == 1
+                            isVideo = selectedTab == 1
                         )
-
-                    // =================================================
-                    // GET SELECTED MEDIA
-                    // =================================================
 
                     val itemsToHide =
                         allMedia.filter { media ->
@@ -265,17 +358,14 @@ fun VaultScreen() {
 
                     if (itemsToHide.isEmpty()) {
 
-                        selectedMedia =
-                            emptySet()
-
-                        galleryOpen =
-                            false
+                        selectedMedia = emptySet()
+                        galleryOpen = false
 
                         return@launch
                     }
 
                     // =================================================
-                    // COPY FIRST TO PRIVATE VAULT
+                    // COPY TO PRIVATE VAULT
                     // =================================================
 
                     val copiedItems =
@@ -291,7 +381,7 @@ fun VaultScreen() {
                         }
 
                     // =================================================
-                    // COPY FAILURE
+                    // COPY FAILED
                     // =================================================
 
                     if (
@@ -314,16 +404,13 @@ fun VaultScreen() {
                             }
                         }
 
-                        selectedMedia =
-                            emptySet()
+                        selectedMedia = emptySet()
 
                         return@launch
                     }
 
                     // =================================================
                     // ANDROID 11+
-                    //
-                    // Ask Android to delete original gallery items.
                     // =================================================
 
                     if (
@@ -358,10 +445,6 @@ fun VaultScreen() {
 
                             e.printStackTrace()
 
-                            // =================================================
-                            // FALLBACK
-                            // =================================================
-
                             val deleteSuccess =
                                 withContext(
                                     Dispatchers.IO
@@ -378,7 +461,9 @@ fun VaultScreen() {
                                                     null
                                                 ) > 0
 
-                                        } catch (deleteError: Exception) {
+                                        } catch (
+                                            deleteError: Exception
+                                        ) {
 
                                             deleteError.printStackTrace()
 
@@ -402,14 +487,11 @@ fun VaultScreen() {
                                         }
                                     ) {
 
-                                        newHidden.add(
-                                            copied
-                                        )
+                                        newHidden.add(copied)
                                     }
                                 }
 
-                                hiddenMedia =
-                                    newHidden
+                                hiddenMedia = newHidden
 
                                 saveHiddenMediaMetadata(
                                     context = context,
@@ -427,21 +509,18 @@ fun VaultScreen() {
                                             File(path).delete()
                                         }
 
-                                    } catch (deleteError: Exception) {
+                                    } catch (
+                                        deleteError: Exception
+                                    ) {
 
                                         deleteError.printStackTrace()
                                     }
                                 }
                             }
 
-                            pendingCopiedItems =
-                                emptyList()
-
-                            selectedMedia =
-                                emptySet()
-
-                            galleryOpen =
-                                false
+                            pendingCopiedItems = emptyList()
+                            selectedMedia = emptySet()
+                            galleryOpen = false
                         }
 
                     } else {
@@ -490,14 +569,11 @@ fun VaultScreen() {
                                     }
                                 ) {
 
-                                    newHidden.add(
-                                        copied
-                                    )
+                                    newHidden.add(copied)
                                 }
                             }
 
-                            hiddenMedia =
-                                newHidden
+                            hiddenMedia = newHidden
 
                             saveHiddenMediaMetadata(
                                 context = context,
@@ -522,11 +598,8 @@ fun VaultScreen() {
                             }
                         }
 
-                        selectedMedia =
-                            emptySet()
-
-                        galleryOpen =
-                            false
+                        selectedMedia = emptySet()
+                        galleryOpen = false
                     }
                 }
             }
@@ -594,9 +667,7 @@ fun VaultScreen() {
                     onClick = {
 
                         selectedTab = 0
-
-                        selectedMedia =
-                            emptySet()
+                        selectedMedia = emptySet()
                     },
 
                     modifier =
@@ -616,9 +687,7 @@ fun VaultScreen() {
                     onClick = {
 
                         selectedTab = 1
-
-                        selectedMedia =
-                            emptySet()
+                        selectedMedia = emptySet()
                     },
 
                     modifier =
@@ -662,8 +731,7 @@ fun VaultScreen() {
 
                         onMediaClick = { media ->
 
-                            mediaToUnhide =
-                                media
+                            mediaToUnhide = media
                         }
                     )
                 }
@@ -720,8 +788,7 @@ fun VaultScreen() {
 
                 onDismissRequest = {
 
-                    mediaToUnhide =
-                        null
+                    mediaToUnhide = null
                 },
 
                 title = {
@@ -768,11 +835,8 @@ fun VaultScreen() {
                                     ) {
 
                                         restoreMediaToGallery(
-                                            context =
-                                                context,
-
-                                            media =
-                                                media
+                                            context = context,
+                                            media = media
                                         )
                                     }
 
@@ -785,20 +849,15 @@ fun VaultScreen() {
                                                     media.vaultFilePath
                                         }
 
-                                    hiddenMedia =
-                                        updated
+                                    hiddenMedia = updated
 
                                     saveHiddenMediaMetadata(
-                                        context =
-                                            context,
-
-                                        mediaList =
-                                            updated
+                                        context = context,
+                                        mediaList = updated
                                     )
                                 }
 
-                                mediaToUnhide =
-                                    null
+                                mediaToUnhide = null
                             }
                         }
                     ) {
@@ -817,8 +876,7 @@ fun VaultScreen() {
 
                         onClick = {
 
-                            mediaToUnhide =
-                                null
+                            mediaToUnhide = null
                         }
                     ) {
 
@@ -888,11 +946,8 @@ private fun VaultTab(
                 colorFilter =
                     ColorFilter.tint(
                         if (selected) {
-
                             selectedColor
-
                         } else {
-
                             unselectedColor
                         }
                     ),
@@ -911,11 +966,8 @@ private fun VaultTab(
 
                 color =
                     if (selected) {
-
                         selectedColor
-
                     } else {
-
                         unselectedColor
                     },
 
@@ -931,11 +983,8 @@ private fun VaultTab(
                     .height(2.dp)
                     .background(
                         if (selected) {
-
                             selectedColor
-
                         } else {
-
                             Color.Transparent
                         }
                     )
@@ -1101,9 +1150,7 @@ private fun VaultHiddenMediaGrid(
 
                 onClick = {
 
-                    onMediaClick(
-                        media
-                    )
+                    onMediaClick(media)
                 }
             )
         }
@@ -1127,7 +1174,6 @@ private fun VaultHiddenMediaItem(
         media.uri,
         media.vaultFilePath
     ) {
-
         mutableStateOf<Bitmap?>(null)
     }
 
@@ -1138,16 +1184,14 @@ private fun VaultHiddenMediaItem(
 
         bitmap =
             loadVaultThumbnail(
-                context =
-                    context,
+                context = context,
 
                 uri =
                     if (media.isVaultFile) {
 
                         Uri.fromFile(
                             File(
-                                media.vaultFilePath
-                                    ?: ""
+                                media.vaultFilePath ?: ""
                             )
                         )
 
@@ -1196,8 +1240,7 @@ private fun VaultHiddenMediaItem(
 
             painter =
                 painterResource(
-                    id =
-                        R.drawable.locked
+                    id = R.drawable.locked
                 ),
 
             contentDescription =
@@ -1236,24 +1279,20 @@ private fun VaultGalleryScreen(
 ) {
 
     var mediaList by remember {
-
         mutableStateOf(
             emptyList<VaultMediaItem>()
         )
     }
 
     var selectedAlbum by remember {
-
         mutableStateOf("All")
     }
 
     var albumDropdownOpen by remember {
-
         mutableStateOf(false)
     }
 
     var showHideDialog by remember {
-
         mutableStateOf(false)
     }
 
@@ -1268,22 +1307,18 @@ private fun VaultGalleryScreen(
 
         mediaList =
             loadVaultMedia(
-                context =
-                    context,
+                context = context,
+                isVideo = isVideo
+            ).filterNot { media ->
 
-                isVideo =
-                    isVideo
-            )
-                .filterNot { media ->
+                hiddenMedia.any {
 
-                    hiddenMedia.any {
-
-                        it.name == media.name &&
-                                it.isVideo ==
-                                media.isVideo &&
-                                it.isVaultFile
-                    }
+                    it.name == media.name &&
+                            it.isVideo ==
+                            media.isVideo &&
+                            it.isVaultFile
                 }
+            }
     }
 
     // =========================================================
@@ -1294,7 +1329,6 @@ private fun VaultGalleryScreen(
         remember(mediaList) {
 
             listOf("All") +
-
                     mediaList
                         .map {
                             it.bucketName
@@ -1316,9 +1350,7 @@ private fun VaultGalleryScreen(
             selectedAlbum
         ) {
 
-            if (
-                selectedAlbum == "All"
-            ) {
+            if (selectedAlbum == "All") {
 
                 mediaList
 
@@ -1385,8 +1417,7 @@ private fun VaultGalleryScreen(
 
                     painter =
                         painterResource(
-                            id =
-                                R.drawable.backarrow
+                            id = R.drawable.backarrow
                         ),
 
                     contentDescription =
@@ -1439,8 +1470,7 @@ private fun VaultGalleryScreen(
 
                         painter =
                             painterResource(
-                                id =
-                                    R.drawable.dropdown
+                                id = R.drawable.dropdown
                             ),
 
                         contentDescription =
@@ -1478,10 +1508,8 @@ private fun VaultGalleryScreen(
                             )
                             .border(
                                 width = 1.dp,
-
                                 color =
                                     Color(0xFFE0E0E0),
-
                                 shape =
                                     RoundedCornerShape(8.dp)
                             )
@@ -1522,15 +1550,11 @@ private fun VaultGalleryScreen(
                                         selectedAlbum
                                     ) {
 
-                                        Color(
-                                            0xFF0396FF
-                                        )
+                                        Color(0xFF0396FF)
 
                                     } else {
 
-                                        Color(
-                                            0xFF333333
-                                        )
+                                        Color(0xFF333333)
                                     },
 
                                 fontSize =
@@ -1633,9 +1657,7 @@ private fun VaultGalleryScreen(
                     Modifier
                         .fillMaxWidth()
                         .height(65.dp)
-                        .background(
-                            Color.White
-                        )
+                        .background(Color.White)
                         .padding(
                             horizontal = 45.dp
                         ),
@@ -1655,8 +1677,7 @@ private fun VaultGalleryScreen(
 
                     painter =
                         painterResource(
-                            id =
-                                R.drawable.allimage
+                            id = R.drawable.allimage
                         ),
 
                     contentDescription =
@@ -1667,15 +1688,11 @@ private fun VaultGalleryScreen(
 
                             if (allSelected) {
 
-                                Color(
-                                    0xFF0396FF
-                                )
+                                Color(0xFF0396FF)
 
                             } else {
 
-                                Color(
-                                    0xFF818181
-                                )
+                                Color(0xFF818181)
                             }
                         ),
 
@@ -1688,9 +1705,7 @@ private fun VaultGalleryScreen(
                                     selectedMedia
                                         .toMutableSet()
 
-                                if (
-                                    allSelected
-                                ) {
+                                if (allSelected) {
 
                                     filteredMedia.forEach {
 
@@ -1723,8 +1738,7 @@ private fun VaultGalleryScreen(
 
                     painter =
                         painterResource(
-                            id =
-                                R.drawable.locked
+                            id = R.drawable.locked
                         ),
 
                     contentDescription =
@@ -1737,15 +1751,11 @@ private fun VaultGalleryScreen(
                                 selectedMedia.isNotEmpty()
                             ) {
 
-                                Color(
-                                    0xFF0396FF
-                                )
+                                Color(0xFF0396FF)
 
                             } else {
 
-                                Color(
-                                    0xFF818181
-                                )
+                                Color(0xFF818181)
                             }
                         ),
 
@@ -1785,11 +1795,8 @@ private fun VaultGalleryScreen(
                     Text(
                         text =
                             if (isVideo) {
-
                                 "Hide Video"
-
                             } else {
-
                                 "Hide Image"
                             }
                     )
@@ -1816,9 +1823,7 @@ private fun VaultGalleryScreen(
 
                         onClick = {
 
-                            showHideDialog =
-                                false
-
+                            showHideDialog = false
                             onHide()
                         }
                     ) {
@@ -1837,8 +1842,7 @@ private fun VaultGalleryScreen(
 
                         onClick = {
 
-                            showHideDialog =
-                                false
+                            showHideDialog = false
                         }
                     ) {
 
@@ -1871,7 +1875,6 @@ private fun VaultGalleryItem(
     var bitmap by remember(
         media.uri
     ) {
-
         mutableStateOf<Bitmap?>(null)
     }
 
@@ -1881,14 +1884,9 @@ private fun VaultGalleryItem(
 
         bitmap =
             loadVaultThumbnail(
-                context =
-                    context,
-
-                uri =
-                    media.uri,
-
-                isVideo =
-                    media.isVideo
+                context = context,
+                uri = media.uri,
+                isVideo = media.isVideo
             )
     }
 
@@ -1932,16 +1930,12 @@ private fun VaultGalleryItem(
                     )
                     .padding(5.dp)
                     .size(16.dp)
-                    .clip(
-                        CircleShape
-                    )
+                    .clip(CircleShape)
                     .background(
 
                         if (selected) {
 
-                            Color(
-                                0xFF0396FF
-                            )
+                            Color(0xFF0396FF)
 
                         } else {
 
@@ -1955,15 +1949,11 @@ private fun VaultGalleryItem(
                         color =
                             if (selected) {
 
-                                Color(
-                                    0xFF0396FF
-                                )
+                                Color(0xFF0396FF)
 
                             } else {
 
-                                Color(
-                                    0xFF818181
-                                )
+                                Color(0xFF818181)
                             },
 
                         shape =
@@ -2078,9 +2068,7 @@ private suspend fun loadVaultMedia(
                         ) ?: ""
 
                     val bucket =
-                        if (
-                            bucketIndex >= 0
-                        ) {
+                        if (bucketIndex >= 0) {
 
                             cursor.getString(
                                 bucketIndex
@@ -2101,17 +2089,13 @@ private suspend fun loadVaultMedia(
 
                         VaultMediaItem(
 
-                            uri =
-                                uri,
+                            uri = uri,
 
-                            name =
-                                name,
+                            name = name,
 
-                            bucketName =
-                                bucket,
+                            bucketName = bucket,
 
-                            isVideo =
-                                isVideo
+                            isVideo = isVideo
                         )
                     )
                 }
@@ -2158,18 +2142,14 @@ private fun copyMediaToVault(
         }
 
         val extension =
-            media.name
-                .substringAfterLast(
-                    ".",
-                    if (media.isVideo) {
-
-                        "mp4"
-
-                    } else {
-
-                        "jpg"
-                    }
-                )
+            media.name.substringAfterLast(
+                ".",
+                if (media.isVideo) {
+                    "mp4"
+                } else {
+                    "jpg"
+                }
+            )
 
         val safeName =
             "${System.currentTimeMillis()}_${media.uri.lastPathSegment ?: media.name.hashCode()}.$extension"
@@ -2189,20 +2169,11 @@ private fun copyMediaToVault(
                 vaultFile.outputStream()
                     .use { output ->
 
-                        input.copyTo(
-                            output
-                        )
+                        input.copyTo(output)
                     }
+
             }
             ?: return null
-
-        // =====================================================
-        // IMPORTANT:
-        // bucketName is copied here.
-        //
-        // This is the original Gallery album name.
-        // It is later used by restoreMediaToGallery().
-        // =====================================================
 
         VaultMediaItem(
 
@@ -2266,10 +2237,6 @@ private fun saveHiddenMediaMetadata(
             "name_$index",
             media.name
         )
-
-        // =====================================================
-        // ORIGINAL ALBUM IS SAVED
-        // =====================================================
 
         editor.putString(
             "bucket_$index",
@@ -2365,19 +2332,13 @@ private fun loadHiddenMediaMetadata(
                 VaultMediaItem(
 
                     uri =
-                        Uri.parse(
-                            uriString
-                        ),
+                        Uri.parse(uriString),
 
                     name =
                         prefs.getString(
                             "name_$index",
                             "Media"
                         ) ?: "Media",
-
-                    // =================================================
-                    // ORIGINAL ALBUM
-                    // =================================================
 
                     bucketName =
                         prefs.getString(
@@ -2402,7 +2363,7 @@ private fun loadHiddenMediaMetadata(
 }
 
 // =============================================================
-// RESTORE MEDIA TO ORIGINAL GALLERY ALBUM
+// RESTORE MEDIA TO GALLERY
 // =============================================================
 
 private fun restoreMediaToGallery(
@@ -2419,13 +2380,8 @@ private fun restoreMediaToGallery(
             )
 
         if (!file.exists()) {
-
             return false
         }
-
-        // =====================================================
-        // COLLECTION
-        // =====================================================
 
         val collection =
             if (media.isVideo) {
@@ -2438,10 +2394,6 @@ private fun restoreMediaToGallery(
                 MediaStore.Images.Media
                     .EXTERNAL_CONTENT_URI
             }
-
-        // =====================================================
-        // MIME TYPE
-        // =====================================================
 
         val mimeType =
             if (media.isVideo) {
@@ -2457,21 +2409,6 @@ private fun restoreMediaToGallery(
                 )
             }
 
-        // =====================================================
-        // ORIGINAL ALBUM
-        //
-        // bucketName was saved when the media was hidden.
-        //
-        // Example:
-        //
-        // Camera
-        // Screenshots
-        // WhatsApp Images
-        // Download
-        //
-        // It will NOT use AppLock here.
-        // =====================================================
-
         val originalAlbum =
             media.bucketName
                 .trim()
@@ -2484,20 +2421,10 @@ private fun restoreMediaToGallery(
                     }
                 }
 
-        // =====================================================
-        // SAFE ALBUM NAME
-        // =====================================================
-
         val safeAlbum =
             originalAlbum
-                .replace(
-                    "/",
-                    "_"
-                )
-                .replace(
-                    "\\",
-                    "_"
-                )
+                .replace("/", "_")
+                .replace("\\", "_")
                 .trim()
                 .ifBlank {
 
@@ -2507,16 +2434,6 @@ private fun restoreMediaToGallery(
                         "Pictures"
                     }
                 }
-
-        // =====================================================
-        // ORIGINAL GALLERY PATH
-        //
-        // PHOTO:
-        // Pictures/<original album>
-        //
-        // VIDEO:
-        // Movies/<original album>
-        // =====================================================
 
         val relativePath =
             if (
@@ -2538,10 +2455,6 @@ private fun restoreMediaToGallery(
                 null
             }
 
-        // =====================================================
-        // CONTENT VALUES
-        // =====================================================
-
         val values =
             ContentValues().apply {
 
@@ -2554,10 +2467,6 @@ private fun restoreMediaToGallery(
                     MediaStore.MediaColumns.MIME_TYPE,
                     mimeType
                 )
-
-                // =================================================
-                // Android 10+
-                // =================================================
 
                 if (
                     Build.VERSION.SDK_INT >=
@@ -2576,10 +2485,6 @@ private fun restoreMediaToGallery(
                 }
             }
 
-        // =====================================================
-        // INSERT INTO GALLERY
-        // =====================================================
-
         val newUri =
             context.contentResolver.insert(
                 collection,
@@ -2587,10 +2492,6 @@ private fun restoreMediaToGallery(
             ) ?: return false
 
         try {
-
-            // =================================================
-            // COPY VAULT FILE TO GALLERY
-            // =================================================
 
             context.contentResolver
                 .openOutputStream(
@@ -2601,18 +2502,12 @@ private fun restoreMediaToGallery(
                     file.inputStream()
                         .use { input ->
 
-                            input.copyTo(
-                                output
-                            )
+                            input.copyTo(output)
                         }
                 }
                 ?: throw Exception(
                     "Unable to open gallery output stream"
                 )
-
-            // =================================================
-            // MAKE MEDIA VISIBLE
-            // =================================================
 
             if (
                 Build.VERSION.SDK_INT >=
@@ -2636,12 +2531,7 @@ private fun restoreMediaToGallery(
                 )
             }
 
-            // =================================================
-            // DELETE PRIVATE VAULT COPY
-            // =================================================
-
             if (file.exists()) {
-
                 file.delete()
             }
 
@@ -2650,10 +2540,6 @@ private fun restoreMediaToGallery(
         } catch (e: Exception) {
 
             e.printStackTrace()
-
-            // =================================================
-            // DELETE PARTIALLY CREATED MEDIA
-            // =================================================
 
             try {
 
@@ -2773,17 +2659,13 @@ private suspend fun loadVaultThumbnail(
 
                 try {
 
-                    if (
-                        uri.scheme == "file"
-                    ) {
+                    if (uri.scheme == "file") {
 
                         retriever.setDataSource(
                             uri.path
                         )
 
-                    } else if (
-                        uri.scheme == "vault"
-                    ) {
+                    } else if (uri.scheme == "vault") {
 
                         retriever.setDataSource(
                             uri.schemeSpecificPart
@@ -2810,18 +2692,14 @@ private suspend fun loadVaultThumbnail(
 
             } else {
 
-                if (
-                    uri.scheme == "file"
-                ) {
+                if (uri.scheme == "file") {
 
                     android.graphics.BitmapFactory
                         .decodeFile(
                             uri.path
                         )
 
-                } else if (
-                    uri.scheme == "vault"
-                ) {
+                } else if (uri.scheme == "vault") {
 
                     android.graphics.BitmapFactory
                         .decodeFile(
@@ -2870,3 +2748,4 @@ private suspend fun loadVaultThumbnail(
         }
     }
 }
+

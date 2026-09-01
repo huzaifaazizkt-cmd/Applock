@@ -27,16 +27,20 @@ import kotlin.math.sqrt
 
 @Composable
 fun UnlockScreen(
-    onUnlockSuccess: () -> Unit
+    onUnlockSuccess: () -> Unit,
+    onIntruderCapture: (Long) -> Unit = {}
 ) {
 
-    val context = LocalContext.current
+    val context =
+        LocalContext.current
 
-    val dataStore = remember {
-        DataStoreManager(context)
-    }
+    val dataStore =
+        remember {
+            DataStoreManager(context)
+        }
 
-    val scope = rememberCoroutineScope()
+    val scope =
+        rememberCoroutineScope()
 
 
     // =========================================================
@@ -121,20 +125,195 @@ fun UnlockScreen(
 
 
     // =========================================================
-    // CLEAR PATTERN ERROR
+    // REGISTER WRONG ATTEMPT
     // =========================================================
 
-    fun clearPatternError() {
+    fun registerWrongAttempt() {
 
-        clearErrorJob?.cancel()
+        scope.launch {
 
-        clearErrorJob = null
+            try {
 
-        patternError = false
+                // =================================================
+                // CHECK INTRUDER ENABLED
+                // =================================================
 
-        error = ""
+                val enabled =
+                    dataStore
+                        .getIntruderEnabled()
+                        .first()
 
-        enteredPattern = emptyList()
+                if (!enabled) {
+
+                    return@launch
+                }
+
+
+                // =================================================
+                // GET CURRENT ATTEMPTS
+                // =================================================
+
+                val currentAttempts =
+                    dataStore
+                        .getIntruderWrongAttempts()
+                        .first()
+
+
+                val newAttempts =
+                    currentAttempts + 1
+
+
+                android.util.Log.d(
+                    "INTRUDER_DEBUG",
+                    "WRONG ATTEMPT = $newAttempts / 3"
+                )
+
+
+                // =================================================
+                // THIRD WRONG ATTEMPT
+                // =================================================
+
+                if (
+                    newAttempts >= 3
+                ) {
+
+                    // -------------------------------------------------
+                    // RESET COUNTER
+                    // -------------------------------------------------
+
+                    dataStore
+                        .resetIntruderWrongAttempts()
+
+
+                    // -------------------------------------------------
+                    // GET OBSERVATION TIME
+                    // -------------------------------------------------
+
+                    val observationTime =
+                        dataStore
+                            .getIntruderObservationTime()
+                            .first()
+
+
+                    android.util.Log.d(
+                        "INTRUDER_DEBUG",
+                        "OBSERVATION TIME = $observationTime"
+                    )
+
+
+                    // =================================================
+                    // NEVER
+                    // =================================================
+
+                    if (
+                        observationTime.equals(
+                            "Never",
+                            ignoreCase = true
+                        )
+                    ) {
+
+                        android.util.Log.d(
+                            "INTRUDER_DEBUG",
+                            "OBSERVATION TIME = NEVER - NO CAPTURE"
+                        )
+
+                        return@launch
+                    }
+
+
+                    // =================================================
+                    // DELAY
+                    // =================================================
+
+                    val delayMillis =
+                        when (
+                            observationTime.lowercase()
+                        ) {
+
+                            "5 seconds" ->
+                                5_000L
+
+                            "15 seconds" ->
+                                15_000L
+
+                            "30 seconds" ->
+                                30_000L
+
+                            "immediately" ->
+                                0L
+
+                            else ->
+                                0L
+                        }
+
+
+                    android.util.Log.d(
+                        "INTRUDER_DEBUG",
+                        "THREE WRONG ATTEMPTS - CAPTURE"
+                    )
+
+
+                    // =================================================
+                    // WAIT ACCORDING TO SETTING
+                    // =================================================
+
+                    if (
+                        delayMillis > 0L
+                    ) {
+
+                        android.util.Log.d(
+                            "INTRUDER_DEBUG",
+                            "WAITING = $delayMillis ms"
+                        )
+
+                        delay(
+                            delayMillis
+                        )
+                    }
+
+
+                    // =================================================
+                    // CAMERA TRIGGER
+                    // =================================================
+
+                    android.util.Log.d(
+                        "INTRUDER_DEBUG",
+                        "TRIGGERING INTRUDER CAMERA"
+                    )
+
+                    onIntruderCapture(
+                        System.currentTimeMillis()
+                    )
+
+                } else {
+
+                    // =================================================
+                    // SAVE 1 OR 2 WRONG ATTEMPTS
+                    // =================================================
+
+                    dataStore
+                        .saveIntruderWrongAttempts(
+                            newAttempts
+                        )
+
+
+                    android.util.Log.d(
+                        "INTRUDER_DEBUG",
+                        "ATTEMPT SAVED = $newAttempts"
+                    )
+                }
+
+            } catch (
+                e: Exception
+            ) {
+
+                android.util.Log.e(
+                    "INTRUDER_DEBUG",
+                    "WRONG ATTEMPT ERROR",
+                    e
+                )
+            }
+        }
     }
 
 
@@ -144,30 +323,51 @@ fun UnlockScreen(
 
     fun showPatternError() {
 
-        // Cancel previous timer
+        // -----------------------------------------------------
+        // REGISTER WRONG ATTEMPT
+        // -----------------------------------------------------
+
+        registerWrongAttempt()
+
+
+        // -----------------------------------------------------
+        // CANCEL PREVIOUS TIMER
+        // -----------------------------------------------------
+
         clearErrorJob?.cancel()
 
-        // Show red error state
-        patternError = true
 
-        error = "Pattern does not match"
+        // -----------------------------------------------------
+        // SHOW ERROR
+        // -----------------------------------------------------
+
+        patternError =
+            true
+
+        error =
+            "Pattern does not match"
 
 
-        clearErrorJob = scope.launch {
+        clearErrorJob =
+            scope.launch {
 
-            // Error stays visible for exactly 1.5 seconds
-            delay(1500)
+                delay(
+                    1500
+                )
 
 
-            // Return everything to normal
-            enteredPattern = emptyList()
+                enteredPattern =
+                    emptyList()
 
-            patternError = false
+                patternError =
+                    false
 
-            error = ""
+                error =
+                    ""
 
-            clearErrorJob = null
-        }
+                clearErrorJob =
+                    null
+            }
     }
 
 
@@ -179,20 +379,62 @@ fun UnlockScreen(
         pin: String
     ) {
 
-        if (pin == savedPin) {
+        // =====================================================
+        // CORRECT PIN
+        // =====================================================
 
-            error = ""
+        if (
+            pin ==
+            savedPin
+        ) {
 
-            enteredPin = ""
+            error =
+                ""
+
+            enteredPin =
+                ""
+
+
+            // -------------------------------------------------
+            // CORRECT LOGIN = RESET COUNTER
+            // -------------------------------------------------
+
+            scope.launch {
+
+                try {
+
+                    dataStore
+                        .resetIntruderWrongAttempts()
+
+                } catch (
+                    e: Exception
+                ) {
+
+                    android.util.Log.e(
+                        "INTRUDER_DEBUG",
+                        "RESET ERROR",
+                        e
+                    )
+                }
+            }
+
 
             onUnlockSuccess()
 
         } else {
 
+            // =================================================
+            // WRONG PIN
+            // =================================================
+
+            registerWrongAttempt()
+
+
             error =
                 "Enter your correct password"
 
-            enteredPin = ""
+            enteredPin =
+                ""
         }
     }
 
@@ -202,9 +444,12 @@ fun UnlockScreen(
     // =========================================================
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(backgroundColor)
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(
+                    backgroundColor
+                )
     ) {
 
 
@@ -213,9 +458,12 @@ fun UnlockScreen(
         // =====================================================
 
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 30.dp),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(
+                        horizontal = 30.dp
+                    ),
 
             horizontalAlignment =
                 Alignment.CenterHorizontally,
@@ -231,9 +479,15 @@ fun UnlockScreen(
 
             Text(
                 text =
-                    if (authType == "pattern") {
+                    if (
+                        authType ==
+                        "pattern"
+                    ) {
+
                         "Draw pattern"
+
                     } else {
+
                         "Enter passcode"
                     },
 
@@ -255,22 +509,26 @@ fun UnlockScreen(
 
 
             // =================================================
-            // PIN MODE
+            // PIN
             // =================================================
 
-            if (authType == "pin") {
+            if (
+                authType ==
+                "pin"
+            ) {
 
                 val pinLength =
-                    if (savedPin.isNotEmpty()) {
+                    if (
+                        savedPin.isNotEmpty()
+                    ) {
+
                         savedPin.length
+
                     } else {
+
                         6
                     }
 
-
-                // ---------------------------------------------
-                // PIN HEADING
-                // ---------------------------------------------
 
                 Text(
                     text =
@@ -290,35 +548,40 @@ fun UnlockScreen(
                 )
 
 
-                // ---------------------------------------------
-                // PIN DOTS
-                // ---------------------------------------------
-
                 Row(
                     horizontalArrangement =
-                        Arrangement.spacedBy(14.dp)
+                        Arrangement.spacedBy(
+                            14.dp
+                        )
                 ) {
 
-                    repeat(pinLength) { index ->
+                    repeat(
+                        pinLength
+                    ) { index ->
 
                         Box(
-                            modifier = Modifier
-                                .size(14.dp)
-                                .background(
+                            modifier =
+                                Modifier
+                                    .size(14.dp)
+                                    .background(
 
-                                    if (
-                                        index <
-                                        enteredPin.length
-                                    ) {
-                                        Color.White
-                                    } else {
-                                        Color.White.copy(
-                                            alpha = 0.45f
-                                        )
-                                    },
+                                        if (
+                                            index <
+                                            enteredPin.length
+                                        ) {
 
-                                    CircleShape
-                                )
+                                            Color.White
+
+                                        } else {
+
+                                            Color.White.copy(
+                                                alpha =
+                                                    0.45f
+                                            )
+                                        },
+
+                                        CircleShape
+                                    )
                         )
                     }
                 }
@@ -330,11 +593,9 @@ fun UnlockScreen(
                 )
 
 
-                // ---------------------------------------------
-                // PIN ERROR
-                // ---------------------------------------------
-
-                if (error.isNotEmpty()) {
+                if (
+                    error.isNotEmpty()
+                ) {
 
                     Text(
                         text =
@@ -355,13 +616,10 @@ fun UnlockScreen(
                 )
 
 
-                // ---------------------------------------------
-                // NUMBER PAD
-                // ---------------------------------------------
-
                 NumberPad(
 
-                    onNumberClick = { number ->
+                    onNumberClick = {
+                            number ->
 
                         if (
                             enteredPin.length <
@@ -369,7 +627,8 @@ fun UnlockScreen(
                         ) {
 
                             val newPin =
-                                enteredPin + number
+                                enteredPin +
+                                        number
 
                             enteredPin =
                                 newPin
@@ -377,9 +636,6 @@ fun UnlockScreen(
                             error =
                                 ""
 
-
-                            // AUTO CHECK
-                            // No Continue button.
 
                             if (
                                 newPin.length ==
@@ -401,7 +657,9 @@ fun UnlockScreen(
                         ) {
 
                             enteredPin =
-                                enteredPin.dropLast(1)
+                                enteredPin.dropLast(
+                                    1
+                                )
 
                             error =
                                 ""
@@ -415,14 +673,17 @@ fun UnlockScreen(
             }
 
 
+            // =================================================
+            // PATTERN
+            // =================================================
 
             else {
 
-
                 Box(
-                    modifier = Modifier
-                        .height(24.dp)
-                        .fillMaxWidth(),
+                    modifier =
+                        Modifier
+                            .height(24.dp)
+                            .fillMaxWidth(),
 
                     contentAlignment =
                         Alignment.Center
@@ -447,10 +708,6 @@ fun UnlockScreen(
                 }
 
 
-                // =================================================
-                // PATTERN GRID
-                // =================================================
-
                 UnlockPatternGrid(
 
                     selectedDots =
@@ -460,17 +717,16 @@ fun UnlockScreen(
                         patternError,
 
 
-                    onPatternChanged = { dots ->
+                    onPatternChanged = {
+                            dots ->
 
                         enteredPattern =
                             dots
 
 
-                        // ---------------------------------
-                        // NEW PATTERN STARTED
-                        // ---------------------------------
-
-                        if (patternError) {
+                        if (
+                            patternError
+                        ) {
 
                             clearErrorJob?.cancel()
 
@@ -486,11 +742,8 @@ fun UnlockScreen(
                     },
 
 
-                    onPatternFinished = { pattern ->
-
-                        // ---------------------------------
-                        // SAVED PATTERN
-                        // ---------------------------------
+                    onPatternFinished = {
+                            pattern ->
 
                         val originalPattern =
                             savedPattern
@@ -500,9 +753,9 @@ fun UnlockScreen(
                                 }
 
 
-                        // ---------------------------------
+                        // =========================================
                         // WRONG PATTERN
-                        // ---------------------------------
+                        // =========================================
 
                         if (
                             pattern !=
@@ -515,9 +768,9 @@ fun UnlockScreen(
                         }
 
 
-                        // ---------------------------------
+                        // =========================================
                         // CORRECT PATTERN
-                        // ---------------------------------
+                        // =========================================
 
                         clearErrorJob?.cancel()
 
@@ -534,9 +787,29 @@ fun UnlockScreen(
                             emptyList()
 
 
-                        // ---------------------------------
-                        // AUTO UNLOCK
-                        // ---------------------------------
+                        // =========================================
+                        // RESET COUNTER
+                        // =========================================
+
+                        scope.launch {
+
+                            try {
+
+                                dataStore
+                                    .resetIntruderWrongAttempts()
+
+                            } catch (
+                                e: Exception
+                            ) {
+
+                                android.util.Log.e(
+                                    "INTRUDER_DEBUG",
+                                    "RESET ERROR",
+                                    e
+                                )
+                            }
+                        }
+
 
                         onUnlockSuccess()
                     },
@@ -558,7 +831,7 @@ fun UnlockScreen(
 
 
 // =============================================================
-// UNLOCK PATTERN GRID
+// PATTERN GRID
 // =============================================================
 
 @Composable
@@ -594,169 +867,155 @@ private fun UnlockPatternGrid(
 
 
     Box(
-        modifier = Modifier
-            .size(300.dp)
+        modifier =
+            Modifier
+                .size(300.dp)
+                .pointerInput(Unit) {
 
-            .pointerInput(Unit) {
+                    var currentDots =
+                        mutableListOf<Int>()
 
-                var currentDots =
-                    mutableListOf<Int>()
-
-                var patternFinished =
-                    false
-
-
-                detectDragGestures(
-
-                    // =================================================
-                    // START DRAWING
-                    // =================================================
-
-                    onDragStart = { offset ->
-
-                        currentDots =
-                            mutableListOf()
-
-                        patternFinished =
-                            false
+                    var patternFinished =
+                        false
 
 
-                        val dot =
-                            findUnlockDot(
+                    detectDragGestures(
 
-                                touch =
-                                    offset,
+                        onDragStart = {
+                                offset ->
 
-                                width =
-                                    size.width.toFloat(),
-
-                                height =
-                                    size.height.toFloat()
-                            )
-
-
-                        if (
-                            dot != null
-                        ) {
-
-                            currentDots.add(
-                                dot
-                            )
-
-                            latestOnPatternChanged(
-                                currentDots.toList()
-                            )
-                        }
-                    },
-
-
-                    // =================================================
-                    // DRAG
-                    // =================================================
-
-                    onDrag = { change, _ ->
-
-                        change.consume()
-
-
-                        val dot =
-                            findUnlockDot(
-
-                                touch =
-                                    change.position,
-
-                                width =
-                                    size.width.toFloat(),
-
-                                height =
-                                    size.height.toFloat()
-                            )
-
-
-                        if (
-                            dot != null &&
-                            !currentDots.contains(
-                                dot
-                            )
-                        ) {
-
-                            currentDots.add(
-                                dot
-                            )
-
-                            latestOnPatternChanged(
-                                currentDots.toList()
-                            )
-                        }
-                    },
-
-
-                    // =================================================
-                    // END
-                    // =================================================
-
-                    onDragEnd = {
-
-                        if (
-                            !patternFinished
-                        ) {
+                            currentDots =
+                                mutableListOf()
 
                             patternFinished =
-                                true
+                                false
 
 
-                            val finalPattern =
-                                currentDots.toList()
+                            val dot =
+                                findUnlockDot(
+
+                                    touch =
+                                        offset,
+
+                                    width =
+                                        size.width
+                                            .toFloat(),
+
+                                    height =
+                                        size.height
+                                            .toFloat()
+                                )
 
 
                             if (
-                                finalPattern.isNotEmpty()
+                                dot != null
                             ) {
 
-                                latestOnPatternFinished(
-                                    finalPattern
+                                currentDots.add(
+                                    dot
+                                )
+
+                                latestOnPatternChanged(
+                                    currentDots.toList()
                                 )
                             }
-                        }
-                    },
+                        },
 
 
-                    // =================================================
-                    // CANCEL
-                    // =================================================
+                        onDrag = {
+                                change,
+                                _ ->
 
-                    onDragCancel = {
-
-                        if (
-                            !patternFinished
-                        ) {
-
-                            patternFinished =
-                                true
+                            change.consume()
 
 
-                            val finalPattern =
-                                currentDots.toList()
+                            val dot =
+                                findUnlockDot(
+
+                                    touch =
+                                        change.position,
+
+                                    width =
+                                        size.width
+                                            .toFloat(),
+
+                                    height =
+                                        size.height
+                                            .toFloat()
+                                )
 
 
                             if (
-                                finalPattern.isNotEmpty()
+                                dot != null &&
+                                !currentDots.contains(
+                                    dot
+                                )
                             ) {
 
-                                latestOnPatternFinished(
-                                    finalPattern
+                                currentDots.add(
+                                    dot
+                                )
+
+                                latestOnPatternChanged(
+                                    currentDots.toList()
                                 )
                             }
+                        },
+
+
+                        onDragEnd = {
+
+                            if (
+                                !patternFinished
+                            ) {
+
+                                patternFinished =
+                                    true
+
+
+                                val finalPattern =
+                                    currentDots.toList()
+
+
+                                if (
+                                    finalPattern.isNotEmpty()
+                                ) {
+
+                                    latestOnPatternFinished(
+                                        finalPattern
+                                    )
+                                }
+                            }
+                        },
+
+
+                        onDragCancel = {
+
+                            if (
+                                !patternFinished
+                            ) {
+
+                                patternFinished =
+                                    true
+
+
+                                val finalPattern =
+                                    currentDots.toList()
+
+
+                                if (
+                                    finalPattern.isNotEmpty()
+                                ) {
+
+                                    latestOnPatternFinished(
+                                        finalPattern
+                                    )
+                                }
+                            }
                         }
-                    }
-                )
-            }
+                    )
+                }
     ) {
-
-
-        // =========================================================
-        // CANVAS
-        // =========================================================
 
         Canvas(
             modifier =
@@ -765,7 +1024,6 @@ private fun UnlockPatternGrid(
 
             val positions =
                 getUnlockPositions(
-
                     width =
                         size.width,
 
@@ -773,10 +1031,6 @@ private fun UnlockPatternGrid(
                         size.height
                 )
 
-
-            // =====================================================
-            // CONNECTING LINES
-            // =====================================================
 
             if (
                 selectedDots.size >= 2
@@ -790,9 +1044,14 @@ private fun UnlockPatternGrid(
                     drawLine(
 
                         color =
-                            if (isError) {
+                            if (
+                                isError
+                            ) {
+
                                 errorColor
+
                             } else {
+
                                 Color.White
                             },
 
@@ -813,10 +1072,6 @@ private fun UnlockPatternGrid(
             }
 
 
-            // =====================================================
-            // DOTS
-            // =====================================================
-
             positions.forEachIndexed {
                     index,
                     position ->
@@ -826,10 +1081,6 @@ private fun UnlockPatternGrid(
                         index
                     )
 
-
-                // =================================================
-                // OUTER CIRCLE
-                // =================================================
 
                 drawCircle(
 
@@ -844,10 +1095,6 @@ private fun UnlockPatternGrid(
                 )
 
 
-                // =================================================
-                // GAP
-                // =================================================
-
                 drawCircle(
 
                     color =
@@ -861,10 +1108,6 @@ private fun UnlockPatternGrid(
                 )
 
 
-                // =================================================
-                // INNER DOT
-                // =================================================
-
                 drawCircle(
 
                     color =
@@ -875,11 +1118,9 @@ private fun UnlockPatternGrid(
 
                                 errorColor
 
-
                             selected ->
 
                                 Color.White
-
 
                             else ->
 
@@ -899,8 +1140,7 @@ private fun UnlockPatternGrid(
 
 
 // =============================================================
-// DOT POSITIONS
-// EXACT SAME POSITION AS CONFIRM SCREEN
+// POSITIONS
 // =============================================================
 
 private fun getUnlockPositions(
@@ -947,7 +1187,6 @@ private fun getUnlockPositions(
 
 // =============================================================
 // FIND DOT
-// SAME TOUCH RANGE AS CONFIRM SCREEN
 // =============================================================
 
 private fun findUnlockDot(
@@ -958,7 +1197,6 @@ private fun findUnlockDot(
 
     val positions =
         getUnlockPositions(
-
             width =
                 width,
 

@@ -1,3 +1,6 @@
+
+
+
 package com.example.applock.Design.screens
 
 import android.content.Context
@@ -17,7 +20,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.applock.R
-
+import com.example.applock.Design.screens.AppListScreen
+import com.example.applock.Design.screens.SettingsScreen
+import com.example.applock.Design.screens.VaultScreen
 
 // =============================================================
 // MAIN SCREEN
@@ -25,11 +30,15 @@ import com.example.applock.R
 
 @Composable
 fun MainScreen(
-    context: Context
+    context: Context,
+    onIntruderClick: () -> Unit,
+    openSettings: Boolean = false
 ) {
 
     var selectedTab by remember {
-        mutableStateOf(0)
+        mutableStateOf(
+            if (openSettings) 2 else 0
+        )
     }
 
 
@@ -79,7 +88,9 @@ fun MainScreen(
 
                 2 -> {
 
-                    SettingsScreen()
+                    SettingsScreen(
+                        onIntruderClick = onIntruderClick
+                    )
                 }
             }
         }
@@ -208,13 +219,9 @@ private fun AppLockBottomNavigation(
 
 @Composable
 private fun BottomNavigationItem(
-
     selected: Boolean,
-
     icon: Int,
-
     text: String,
-
     onClick: () -> Unit
 ) {
 
@@ -224,10 +231,6 @@ private fun BottomNavigationItem(
     val grayColor =
         Color(0xFFBDBDBD)
 
-
-    // =========================================================
-    // ITEM
-    // =========================================================
 
     Box(
 
@@ -274,14 +277,7 @@ private fun BottomNavigationItem(
     ) {
 
 
-        // =====================================================
-        // ICON + TEXT
-        //
-        // DONO HAMESHA VISIBLE HONGE
-        // =====================================================
-
         Row(
-
             verticalAlignment =
                 Alignment.CenterVertically
         ) {
@@ -332,7 +328,7 @@ private fun BottomNavigationItem(
 
 
             // =================================================
-            // SPACE BETWEEN ICON AND TEXT
+            // SPACE
             // =================================================
 
             Spacer(
@@ -341,7 +337,9 @@ private fun BottomNavigationItem(
             )
 
 
-
+            // =================================================
+            // TEXT
+            // =================================================
 
             Text(
 
@@ -364,3 +362,4 @@ private fun BottomNavigationItem(
         }
     }
 }
+

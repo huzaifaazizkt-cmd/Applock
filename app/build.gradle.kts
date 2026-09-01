@@ -6,22 +6,18 @@ plugins {
 android {
     namespace = "com.example.applock"
 
-    compileSdk = 34
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.example.applock"
         minSdk = 26
-        targetSdk = 34
+        targetSdk = 37
         versionCode = 1
         versionName = "1.0"
     }
 
     buildFeatures {
         compose = true
-    }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.14"
     }
 
     compileOptions {
@@ -33,35 +29,79 @@ android {
 dependencies {
 
     // Compose BOM
-    implementation(platform("androidx.compose:compose-bom:2024.02.01"))
+    implementation(
+        platform(
+            "androidx.compose:compose-bom:2026.02.01"
+        )
+    )
 
-    // Core Compose
-    implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.ui:ui-tooling-preview")
+    // Compose UI
+    implementation(
+        "androidx.compose.ui:ui"
+    )
 
-    // Material3 (Compose UI ke liye)
-    implementation("androidx.compose.material3:material3")
+    implementation(
+        "androidx.compose.ui:ui-tooling-preview"
+    )
+
+    implementation(
+        "androidx.compose.ui:ui-graphics"
+    )
+
+    // Foundation
+    implementation(
+        "androidx.compose.foundation:foundation"
+    )
+
+    // Material 3
+    implementation(
+        "androidx.compose.material3:material3"
+    )
+
+    // Material Icons
+    implementation(
+        "androidx.compose.material:material-icons-extended"
+    )
 
     // Activity
-    implementation("androidx.activity:activity-compose:1.9.0")
+    implementation(
+        "androidx.activity:activity-compose:1.13.0"
+    )
 
     // Navigation
-    implementation("androidx.navigation:navigation-compose:2.7.7")
-
-    // Icons
-    implementation("androidx.compose.material:material-icons-extended")
+    implementation(
+        "androidx.navigation:navigation-compose:2.9.8"
+    )
 
     // DataStore
-    implementation("androidx.datastore:datastore-preferences:1.0.0")
+    implementation(
+        "androidx.datastore:datastore-preferences:1.1.7"
+    )
 
     // Lifecycle
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
+    implementation(
+        "androidx.lifecycle:lifecycle-runtime-ktx:2.11.0"
+    )
 
-    // Material Components (XML theme ke liye REQUIRED)
-    implementation("com.google.android.material:material:1.11.0")
-    implementation("androidx.biometric:biometric:1.1.0")
-    implementation(libs.androidx.compose.foundation)
-    // Debug
-    debugImplementation("androidx.compose.ui:ui-tooling")
-    implementation("io.coil-kt:coil-compose:2.7.0")
+    // Material Components
+    implementation(
+        "com.google.android.material:material:1.13.0"
+    )
+
+    // Biometric
+    implementation(
+        "androidx.biometric:biometric:1.1.0"
+    )
+
+    // Coil
+    implementation(
+        "io.coil-kt:coil-compose:2.7.0"
+    )
+    implementation("androidx.camera:camera-camera2:1.5.0")
+    implementation("androidx.camera:camera-lifecycle:1.5.0")
+    implementation("androidx.camera:camera-core:1.5.0")
+    // Debug tooling
+    debugImplementation(
+        "androidx.compose.ui:ui-tooling"
+    )
 }
