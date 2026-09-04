@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Common -->
+    <string name="back">Atrás</string>
+    <string name="close_selection">Cerrar selección</string>
+    <string name="selected_count">Seleccionados (%1$d)</string>
+    <string name="all">Todo</string>
+    <string name="all_selected">Todo seleccionado</string>
+    <string name="settings">Ajustes</string>
+    <string name="delete">Eliminar</string>
+    <string name="loading">Cargando...</string>
+
+    <!-- Bottom Navigation -->
+    <string name="apps_lock">Bloqueo de aplicaciones</string>
+    <string name="vault">Bóveda</string>
+
+    <!-- Intruder -->
+    <string name="intruder">Intruso</string>
+    <string name="intruder_settings">Ajustes de intruso</string>
+    <string name="intruder_camera">Cámara de intrusos</string>
+    <string name="capture_wrong_password">Capturar fotos de cualquier persona que introduzca\n la contraseña incorrecta</string>
+    <string name="no_intruder_found">No se encontraron intrusos</string>
+    <string name="today">Hoy</string>
+    <string name="intruder_photo">Foto del intruso</string>
+    <string name="intruder_photo_preview">Vista previa de la foto del intruso</string>
+
+    <!-- Observation Time -->
+    <string name="set_observation_time">Establecer tiempo de observación</string>
+    <string name="failed_to_unblock">Número de intentos fallidos de desbloqueo</string>
+    <string name="immediately">Inmediatamente</string>
+    <string name="never">Nunca</string>
+    <string name="five_seconds">5 segundos</string>
+    <string name="fifteen_seconds">15 segundos</string>
+    <string name="thirty_seconds">30 segundos</string>
+    <string name="cancel">Cancelar</string>
+    <string name="confirm">Confirmar</string>
+
+    <!-- Languages -->
+    <string name="languages">Idiomas</string>
+    <string name="select">Seleccionar</string>
+
+    <!-- Permissions -->
+    <string name="permissions_required">Permisos necesarios</string>
+    <string name="show_over_other_apps">Mostrar sobre otras aplicaciones</string>
+    <string name="allow_lock_screen">Permitir que la pantalla de bloqueo se muestre sobre\notras aplicaciones</string>
+    <string name="detect_launched_app">Detectar aplicación iniciada</string>
+    <string name="detect_launched_description">Permitir detectar qué aplicación se\ninicia otorgando acceso a...</string>
+    <string name="auto_start">Inicio automático</string>
+    <string name="keep_applock_running">Mantener AppLock Pro siempre en ejecución</string>
+    <string name="allow">Permitir</string>
+    <string name="permissions_work_properly">Los permisos son necesarios para que la aplicación funcione\ncorrectamente y de manera eficiente</string>
+
+    <!-- Vault -->
+    <string name="photos">Fotos</string>
+    <string name="videos">Vídeos</string>
+    <string name="add">Añadir</string>
+    <string name="add_image">Añadir imagen</string>
+    <string name="add_video">Añadir vídeo</string>
+    <string name="click_to_add_image">Haz clic en "+" para añadir una imagen</string>
+    <string name="click_to_add_video">Haz clic en "+" para añadir un vídeo</string>
+    <string name="hidden">Oculto</string>
+    <string name="albums">Álbumes</string>
+    <string name="select_all">Seleccionar todo</string>
+    <string name="hide">Ocultar</string>
+    <string name="unhide">Mostrar</string>
+
+    <!-- Hide / Unhide -->
+    <string name="hide_video">Ocultar vídeo</string>
+    <string name="hide_image">Ocultar imagen</string>
+    <string name="hide_videos_question">¿Estás seguro de que quieres ocultar estos vídeos?</string>
+    <string name="hide_images_question">¿Estás seguro de que quieres ocultar estas imágenes?</string>
+    <string name="unhide_video">Mostrar vídeo</string>
+    <string name="unhide_image">Mostrar imagen</string>
+    <string name="unhide_video_question">¿Quieres mostrar este vídeo?</string>
+    <string name="unhide_image_question">¿Quieres mostrar esta imagen?</string>
+
+    <!-- Pin Create Screen -->
+    <string name="four_digit_pin">PIN de 4 dígitos</string>
+    <string name="six_digit_pin">PIN de 6 dígitos</string>
+    <string name="pattern">Patrón</string>
+    <string name="create_pin">Crear PIN de %1$d dígitos</string>
+    <string name="reset">Restablecer</string>
+    <string name="continue_text">Continuar</string>
+    <string name="create_pattern">Crear patrón</string>
+    <string name="connect_four_dots">Conecta al menos 4 puntos</string>
+
+    <!-- Pin Confirm -->
+    <string name="confirm_pattern">Confirmar patrón</string>
+    <string name="confirm_passcode">Confirmar código de acceso</string>
+    <string name="draw_pattern_again">Dibuja el patrón de nuevo</string>
+    <string name="confirm_pin">Confirmar PIN de %1$d dígitos</string>
+    <string name="password_not_match">La contraseña no coincide. Inténtalo de nuevo</string>
+    <string name="enter_correct_password">Introduce tu contraseña correcta</string>
+
+    <!-- Permission -->
+    <string name="allowed">Permitido</string>
+
+    <!-- Security Questions -->
+    <string name="security_questions">Preguntas de seguridad</string>
+    <string name="security_question_description">Establece una palabra clave para recuperar tu código\nde acceso cuando lo olvides.</string>
+    <string name="select_security_questions">Seleccionar preguntas de seguridad</string>
+    <string name="select_security_question">Seleccionar pregunta de seguridad</string>
+    <string name="enter_security_answer">Introducir respuesta de seguridad</string>
+    <string name="enter_your_answer">Introduce tu respuesta</string>
+    <string name="skip">Omitir</string>
+    <string name="save">Guardar</string>
+
+    <string name="security_question_name">¿Cuál es tu nombre?</string>
+    <string name="security_question_father">¿Cuál es el nombre de tu padre?</string>
+    <string name="security_question_pet">¿Cuál es el nombre de tu mascota?</string>
+    <string name="security_question_job">¿Cuál es el trabajo de tus sueños?</string>
+
+    <!-- App List -->
+    <string name="app_lock">Bloqueo de aplicaciones</string>
+    <string name="unlocked">Desbloqueado</string>
+    <string name="locked">Bloqueado</string>
+    <string name="search">Buscar</string>
+    <string name="general">General</string>
+    <string name="unlock_app">Desbloquear %1$s</string>
+    <string name="lock_app">Bloquear %1$s</string>
+
+    <!-- Settings Screen -->
+    <string name="language_description">Seleccionar idioma</string>
+    <string name="lock_setting">Configuración de bloqueo</string>
+    <string name="lock_settings_description">Configuración de bloqueo</string>
+    <string name="hide_settings">Configuración de ocultación</string>
+    <string name="hide_settings_description">Configuración de ocultación</string>
+    <string name="rate_us">Califícanos</string>
+    <string name="rate_us_description">Califícanos</string>
+    <string name="share">Compartir</string>
+    <string name="about">Acerca de</string>
+    <string name="about_applock">Acerca de AppLock</string>
+    <string name="privacy_policy">Política de privacidad</string>
+    <string name="collapse">Contraer</string>
+    <string name="expand">Expandir</string>
+    <string name="open_item">Abrir %1$s</string>
+    <string name="hide_from_recent_screen">Ocultar de la pantalla de recientes</string>
+    <string name="apps_hide_from_recent_screen">Ocultar aplicaciones de la pantalla de recientes</string>
+    <string name="password">Contraseña</string>
+    <string name="reset_password">Restablecer contraseña</string>
+    <string name="security_settings">Configuración de seguridad</string>
+    <string name="set_security_email">Establecer correo electrónico de seguridad</string>
+    <string name="fingerprint_lock">Bloqueo con huella digital</string>
+    <string name="use_fingerprint_to_unlock">Usar huella digital para desbloquear aplicaciones</string>
+    <string name="unlock">Desbloquear</string>
+    <string name="vibration">Vibración</string>
+    <string name="hide_track">Ocultar trazo</string>
+    <string name="hide_track_description">Ocultar el trazo al dibujar la contraseña de patrón</string>
+    <string name="relock_option">Opción de volver a bloquear</string>
+    <string name="relock_after_quitting">Volver a bloquear después de salir</string>
+    <string name="delay_to_relock">Retraso para volver a bloquear</string>
+    <string name="relock">Volver a bloquear</string>
+    <string name="relock_after_quitting_option">Volver a bloquear después de salir</string>
+    <string name="relock_after_screen_off">Volver a bloquear al apagar la pantalla</string>
+    <string name="one_minute">1 minuto</string>
+    <string name="two_minutes">2 minutos</string>
+    <string name="five_minutes">5 minutos</string>
+
+    <!-- Unlock Screen -->
+    <string name="draw_pattern">Dibuja el patrón</string>
+    <string name="enter_passcode">Introduce el código de acceso</string>
+    <string name="enter_digit_pin">Introduce el PIN de %1$d dígitos</string>
+    <string name="pattern_not_match">El patrón no coincide</string>
+
+</resources>

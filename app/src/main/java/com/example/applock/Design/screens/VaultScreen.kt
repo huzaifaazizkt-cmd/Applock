@@ -1,4 +1,3 @@
-
 package com.example.applock.Design.screens
 
 import android.Manifest
@@ -37,6 +36,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
@@ -58,6 +58,12 @@ data class VaultMediaItem(
     val isVaultFile: Boolean = false,
     val vaultFilePath: String? = null
 )
+
+// =============================================================
+// ALL ALBUMS INTERNAL KEY
+// =============================================================
+
+private const val ALL_ALBUMS_KEY = "ALL"
 
 // =============================================================
 // VAULT SCREEN
@@ -122,13 +128,6 @@ fun VaultScreen() {
 
     // =========================================================
     // MEDIA PERMISSION
-    //
-    // Android 13+:
-    // Photos -> READ_MEDIA_IMAGES
-    // Videos -> READ_MEDIA_VIDEO
-    //
-    // Android 12 and below:
-    // READ_EXTERNAL_STORAGE
     // =========================================================
 
     val mediaPermissionLauncher =
@@ -141,11 +140,8 @@ fun VaultScreen() {
 
                     val requiredPermission =
                         if (selectedTab == 0) {
-
                             Manifest.permission.READ_MEDIA_IMAGES
-
                         } else {
-
                             Manifest.permission.READ_MEDIA_VIDEO
                         }
 
@@ -157,7 +153,9 @@ fun VaultScreen() {
 
                 } else {
 
-                    permissions[Manifest.permission.READ_EXTERNAL_STORAGE] == true ||
+                    permissions[
+                        Manifest.permission.READ_EXTERNAL_STORAGE
+                    ] == true ||
                             ContextCompat.checkSelfPermission(
                                 context,
                                 Manifest.permission.READ_EXTERNAL_STORAGE
@@ -165,7 +163,6 @@ fun VaultScreen() {
                 }
 
             if (granted) {
-
                 galleryOpen = true
             }
         }
@@ -183,11 +180,8 @@ fun VaultScreen() {
 
             val permission =
                 if (selectedTab == 0) {
-
                     Manifest.permission.READ_MEDIA_IMAGES
-
                 } else {
-
                     Manifest.permission.READ_MEDIA_VIDEO
                 }
 
@@ -213,12 +207,10 @@ fun VaultScreen() {
 
         if (hasMediaPermission()) {
 
-            // Permission already granted
             galleryOpen = true
 
         } else {
 
-            // Request correct permission
             if (
                 Build.VERSION.SDK_INT >=
                 Build.VERSION_CODES.TIRAMISU
@@ -226,11 +218,8 @@ fun VaultScreen() {
 
                 val permission =
                     if (selectedTab == 0) {
-
                         Manifest.permission.READ_MEDIA_IMAGES
-
                     } else {
-
                         Manifest.permission.READ_MEDIA_VIDEO
                     }
 
@@ -267,13 +256,11 @@ fun VaultScreen() {
 
                     val alreadyExists =
                         newHidden.any {
-
                             it.vaultFilePath ==
                                     copied.vaultFilePath
                         }
 
                     if (!alreadyExists) {
-
                         newHidden.add(copied)
                     }
                 }
@@ -292,12 +279,10 @@ fun VaultScreen() {
                     try {
 
                         copied.vaultFilePath?.let { path ->
-
                             File(path).delete()
                         }
 
                     } catch (e: Exception) {
-
                         e.printStackTrace()
                     }
                 }
@@ -328,12 +313,10 @@ fun VaultScreen() {
                 selectedMedia,
 
             onSelectionChange = { newSelection ->
-
                 selectedMedia = newSelection
             },
 
             onBack = {
-
                 galleryOpen = false
                 selectedMedia = emptySet()
             },
@@ -394,12 +377,10 @@ fun VaultScreen() {
                             try {
 
                                 copied.vaultFilePath?.let { path ->
-
                                     File(path).delete()
                                 }
 
                             } catch (e: Exception) {
-
                                 e.printStackTrace()
                             }
                         }
@@ -505,7 +486,6 @@ fun VaultScreen() {
                                     try {
 
                                         copied.vaultFilePath?.let { path ->
-
                                             File(path).delete()
                                         }
 
@@ -587,7 +567,6 @@ fun VaultScreen() {
                                 try {
 
                                     copied.vaultFilePath?.let { path ->
-
                                         File(path).delete()
                                     }
 
@@ -629,7 +608,7 @@ fun VaultScreen() {
             // =================================================
 
             Text(
-                text = "Vault",
+                text = stringResource(R.string.vault),
                 color = Color.Black,
                 fontSize = 20.sp,
                 modifier =
@@ -662,7 +641,7 @@ fun VaultScreen() {
                         R.drawable.imageicon,
 
                     text =
-                        "Photos",
+                        stringResource(R.string.photos),
 
                     onClick = {
 
@@ -682,7 +661,7 @@ fun VaultScreen() {
                         R.drawable.vedioicon,
 
                     text =
-                        "Videos",
+                        stringResource(R.string.videos),
 
                     onClick = {
 
@@ -771,7 +750,7 @@ fun VaultScreen() {
                     ),
 
                 contentDescription =
-                    "Add",
+                    stringResource(R.string.add),
 
                 modifier =
                     Modifier.size(50.dp)
@@ -797,11 +776,15 @@ fun VaultScreen() {
                         text =
                             if (media.isVideo) {
 
-                                "Unhide Video"
+                                stringResource(
+                                    R.string.unhide_video
+                                )
 
                             } else {
 
-                                "Unhide Image"
+                                stringResource(
+                                    R.string.unhide_image
+                                )
                             }
                     )
                 },
@@ -812,11 +795,15 @@ fun VaultScreen() {
                         text =
                             if (media.isVideo) {
 
-                                "Do you want to unhide this video?"
+                                stringResource(
+                                    R.string.unhide_video_question
+                                )
 
                             } else {
 
-                                "Do you want to unhide this image?"
+                                stringResource(
+                                    R.string.unhide_image_question
+                                )
                             }
                     )
                 },
@@ -863,7 +850,10 @@ fun VaultScreen() {
                     ) {
 
                         Text(
-                            text = "Unhide",
+                            text =
+                                stringResource(
+                                    R.string.unhide
+                                ),
                             color =
                                 Color(0xFF0396FF)
                         )
@@ -881,7 +871,10 @@ fun VaultScreen() {
                     ) {
 
                         Text(
-                            text = "Cancel",
+                            text =
+                                stringResource(
+                                    R.string.cancel
+                                ),
                             color =
                                 Color(0xFF818181)
                         )
@@ -1019,7 +1012,9 @@ private fun PhotosVaultContent() {
                     ),
 
                 contentDescription =
-                    "Add Image",
+                    stringResource(
+                        R.string.add_image
+                    ),
 
                 modifier =
                     Modifier.size(80.dp)
@@ -1032,7 +1027,9 @@ private fun PhotosVaultContent() {
 
             Text(
                 text =
-                    """Click "+" To add image""",
+                    stringResource(
+                        R.string.click_to_add_image
+                    ),
 
                 color =
                     Color(0xFF9E9E9E),
@@ -1071,7 +1068,9 @@ private fun VideosVaultContent() {
                     ),
 
                 contentDescription =
-                    "Add Video",
+                    stringResource(
+                        R.string.add_video
+                    ),
 
                 modifier =
                     Modifier.size(80.dp)
@@ -1084,7 +1083,9 @@ private fun VideosVaultContent() {
 
             Text(
                 text =
-                    """Click "+" To add video""",
+                    stringResource(
+                        R.string.click_to_add_video
+                    ),
 
                 color =
                     Color(0xFF9E9E9E),
@@ -1244,7 +1245,9 @@ private fun VaultHiddenMediaItem(
                 ),
 
             contentDescription =
-                "Hidden",
+                stringResource(
+                    R.string.hidden
+                ),
 
             colorFilter =
                 ColorFilter.tint(
@@ -1285,7 +1288,7 @@ private fun VaultGalleryScreen(
     }
 
     var selectedAlbum by remember {
-        mutableStateOf("All")
+        mutableStateOf(ALL_ALBUMS_KEY)
     }
 
     var albumDropdownOpen by remember {
@@ -1328,7 +1331,7 @@ private fun VaultGalleryScreen(
     val albums =
         remember(mediaList) {
 
-            listOf("All") +
+            listOf(ALL_ALBUMS_KEY) +
                     mediaList
                         .map {
                             it.bucketName
@@ -1350,7 +1353,7 @@ private fun VaultGalleryScreen(
             selectedAlbum
         ) {
 
-            if (selectedAlbum == "All") {
+            if (selectedAlbum == ALL_ALBUMS_KEY) {
 
                 mediaList
 
@@ -1421,7 +1424,9 @@ private fun VaultGalleryScreen(
                         ),
 
                     contentDescription =
-                        "Back",
+                        stringResource(
+                            R.string.back
+                        ),
 
                     modifier =
                         Modifier
@@ -1452,7 +1457,19 @@ private fun VaultGalleryScreen(
                     Text(
 
                         text =
-                            selectedAlbum,
+                            if (
+                                selectedAlbum ==
+                                ALL_ALBUMS_KEY
+                            ) {
+
+                                stringResource(
+                                    R.string.all
+                                )
+
+                            } else {
+
+                                selectedAlbum
+                            },
 
                         color =
                             Color(0xFF333333),
@@ -1474,7 +1491,9 @@ private fun VaultGalleryScreen(
                             ),
 
                         contentDescription =
-                            "Albums",
+                            stringResource(
+                                R.string.albums
+                            ),
 
                         modifier =
                             Modifier.size(14.dp)
@@ -1542,7 +1561,19 @@ private fun VaultGalleryScreen(
                             Text(
 
                                 text =
-                                    album,
+                                    if (
+                                        album ==
+                                        ALL_ALBUMS_KEY
+                                    ) {
+
+                                        stringResource(
+                                            R.string.all
+                                        )
+
+                                    } else {
+
+                                        album
+                                    },
 
                                 color =
                                     if (
@@ -1681,7 +1712,9 @@ private fun VaultGalleryScreen(
                         ),
 
                     contentDescription =
-                        "Select All",
+                        stringResource(
+                            R.string.select_all
+                        ),
 
                     colorFilter =
                         ColorFilter.tint(
@@ -1742,7 +1775,9 @@ private fun VaultGalleryScreen(
                         ),
 
                     contentDescription =
-                        "Hide",
+                        stringResource(
+                            R.string.hide
+                        ),
 
                     colorFilter =
                         ColorFilter.tint(
@@ -1795,9 +1830,16 @@ private fun VaultGalleryScreen(
                     Text(
                         text =
                             if (isVideo) {
-                                "Hide Video"
+
+                                stringResource(
+                                    R.string.hide_video
+                                )
+
                             } else {
-                                "Hide Image"
+
+                                stringResource(
+                                    R.string.hide_image
+                                )
                             }
                     )
                 },
@@ -1808,11 +1850,15 @@ private fun VaultGalleryScreen(
                         text =
                             if (isVideo) {
 
-                                "Are you sure you want to hide these videos?"
+                                stringResource(
+                                    R.string.hide_videos_question
+                                )
 
                             } else {
 
-                                "Are you sure you want to hide these images?"
+                                stringResource(
+                                    R.string.hide_images_question
+                                )
                             }
                     )
                 },
@@ -1829,7 +1875,10 @@ private fun VaultGalleryScreen(
                     ) {
 
                         Text(
-                            text = "Hide",
+                            text =
+                                stringResource(
+                                    R.string.hide
+                                ),
                             color =
                                 Color(0xFF0396FF)
                         )
@@ -1847,7 +1896,10 @@ private fun VaultGalleryScreen(
                     ) {
 
                         Text(
-                            text = "Cancel",
+                            text =
+                                stringResource(
+                                    R.string.cancel
+                                ),
                             color =
                                 Color(0xFF818181)
                         )
@@ -2748,4 +2800,3 @@ private suspend fun loadVaultThumbnail(
         }
     }
 }
-

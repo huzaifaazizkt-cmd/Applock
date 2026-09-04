@@ -11,6 +11,8 @@ import android.util.Log
 import android.view.WindowManager
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
+import androidx.biometric.BiometricManager
+import androidx.biometric.BiometricPrompt
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -55,22 +57,30 @@ class LockScreenActivity :
             ImageCapture? =
         null
 
-
     private var pendingIntruderCapture =
         false
-
 
     private var cameraProvider:
             ProcessCameraProvider? =
         null
 
-
     private val CAMERA_PERMISSION =
         Manifest.permission.CAMERA
 
-
     private val CAMERA_REQUEST_CODE =
         501
+
+
+    // =========================================================
+    // BIOMETRIC
+    // =========================================================
+
+    private var biometricPrompt:
+            BiometricPrompt? =
+        null
+
+    private var biometricStarted =
+        false
 
 
     // =========================================================
@@ -86,10 +96,6 @@ class LockScreenActivity :
             savedInstanceState
         )
 
-
-        // =====================================================
-        // DATASTORE
-        // =====================================================
 
         dataStore =
             DataStoreManager(
@@ -217,72 +223,15 @@ class LockScreenActivity :
 
                 onUnlockSuccess = {
 
-                    val packageName =
-                        targetPackage
-
-
-                    Log.d(
-                        TAG,
-                        "================================"
-                    )
-
-                    Log.d(
-                        TAG,
-                        "UNLOCK SUCCESS"
-                    )
-
-                    Log.d(
-                        TAG,
-                        "PACKAGE = $packageName"
-                    )
-
-                    Log.d(
-                        TAG,
-                        "================================"
-                    )
-
-
-                    if (
-                        packageName.isNullOrEmpty()
-                    ) {
-
-                        goHome()
-
-                        return@UnlockScreen
-                    }
-
-
-                    // =================================================
-                    // SAVE UNLOCKED APP
-                    // =================================================
-
-                    AppLockServiceHolder.currentUnlockedApp =
-                        packageName
-
-
-                    AppLockServiceHolder.lastUnlockTime =
-                        System.currentTimeMillis()
-
-
-                    // =================================================
-                    // CLOSE LOCK SCREEN STATE
-                    // =================================================
-
-                    AppLockServiceHolder.isLockScreenOpen =
-                        false
-
-
-                    // =================================================
-                    // OPEN TARGET APP
-                    // =================================================
-
-                    openApp()
+                    unlockAndOpenApp()
                 },
 
 
-                // =================================================
-                // INTRUDER CAMERA
-                // =================================================
+                onFingerprintRequest = {
+
+                    showBiometricPrompt()
+                },
+
 
                 onIntruderCapture = {
 
@@ -295,6 +244,226 @@ class LockScreenActivity :
                 }
             )
         }
+    }
+
+
+    // =========================================================
+    // UNLOCK + OPEN APP
+    // =========================================================
+
+    private fun unlockAndOpenApp() {
+
+        val packageName =
+            targetPackage
+
+
+        Log.d(
+            TAG,
+            "================================"
+        )
+
+        Log.d(
+            TAG,
+            "UNLOCK SUCCESS"
+        )
+
+        Log.d(
+            TAG,
+            "PACKAGE = $packageName"
+        )
+
+        Log.d(
+            TAG,
+            "================================"
+        )
+
+
+        if (
+            packageName.isNullOrEmpty()
+        ) {
+
+            goHome()
+
+            return
+        }
+
+
+        AppLockServiceHolder.currentUnlockedApp =
+            packageName
+
+
+        AppLockServiceHolder.lastUnlockTime =
+            System.currentTimeMillis()
+
+
+        AppLockServiceHolder.isLockScreenOpen =
+            false
+
+
+        openApp()
+    }
+
+
+    // =========================================================
+    // BIOMETRIC PROMPT
+    // =========================================================
+
+    private fun showBiometricPrompt() {
+
+        if (
+            biometricStarted
+        ) {
+
+            return
+        }
+
+
+        // =====================================================
+        // CHECK BIOMETRIC
+        // =====================================================
+
+        val biometricManager =
+            BiometricManager.from(
+                this
+            )
+
+
+        val authenticators =
+            androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG or
+                    androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK
+
+
+        val canAuthenticate =
+            biometricManager.canAuthenticate(
+                authenticators
+            )
+
+
+        if (
+            canAuthenticate !=
+            BiometricManager.BIOMETRIC_SUCCESS
+        ) {
+
+            Log.e(
+                TAG,
+                "BIOMETRIC NOT AVAILABLE = $canAuthenticate"
+            )
+
+            return
+        }
+
+
+        // =====================================================
+        // PROMPT INFO
+        // =====================================================
+
+        val promptInfo =
+            BiometricPrompt.PromptInfo.Builder()
+                .setTitle(
+                    "Fingerprint Lock"
+                )
+                .setSubtitle(
+                    "Use your fingerprint to unlock"
+                )
+                .setNegativeButtonText(
+                    "Use PIN / Pattern"
+                )
+                .build()
+
+
+        // =====================================================
+        // AUTH CALLBACK
+        // =====================================================
+
+        val executor =
+            ContextCompat.getMainExecutor(
+                this
+            )
+
+
+        biometricPrompt =
+            BiometricPrompt(
+
+                this,
+
+                executor,
+
+                object :
+                    BiometricPrompt.AuthenticationCallback() {
+
+                    override fun
+                            onAuthenticationSucceeded(
+                        result:
+                        BiometricPrompt.AuthenticationResult
+                    ) {
+
+                        super.onAuthenticationSucceeded(
+                            result
+                        )
+
+
+                        biometricStarted =
+                            false
+
+
+                        Log.d(
+                            TAG,
+                            "FINGERPRINT SUCCESS"
+                        )
+
+
+                        unlockAndOpenApp()
+                    }
+
+
+                    override fun
+                            onAuthenticationError(
+                        errorCode:
+                        Int,
+
+                        errString:
+                        CharSequence
+                    ) {
+
+                        super.onAuthenticationError(
+                            errorCode,
+                            errString
+                        )
+
+
+                        biometricStarted =
+                            false
+
+
+                        Log.d(
+                            TAG,
+                            "BIOMETRIC ERROR = $errString"
+                        )
+                    }
+
+
+                    override fun
+                            onAuthenticationFailed() {
+
+                        super.onAuthenticationFailed()
+
+
+                        Log.d(
+                            TAG,
+                            "FINGERPRINT FAILED"
+                        )
+                    }
+                }
+            )
+
+
+        biometricStarted =
+            true
+
+
+        biometricPrompt?.authenticate(
+            promptInfo
+        )
     }
 
 
@@ -435,10 +604,6 @@ class LockScreenActivity :
                 provider.unbindAll()
 
 
-                // =================================================
-                // FRONT CAMERA
-                // =================================================
-
                 val cameraSelector =
                     CameraSelector.Builder()
                         .requireLensFacing(
@@ -447,10 +612,6 @@ class LockScreenActivity :
                         )
                         .build()
 
-
-                // =================================================
-                // IMAGE CAPTURE
-                // =================================================
 
                 val capture =
                     ImageCapture.Builder()
@@ -470,10 +631,6 @@ class LockScreenActivity :
                     capture
 
 
-                // =================================================
-                // BIND CAMERA
-                // =================================================
-
                 provider.bindToLifecycle(
 
                     this,
@@ -489,10 +646,6 @@ class LockScreenActivity :
                     "FRONT CAMERA READY"
                 )
 
-
-                // =================================================
-                // CAPTURE
-                // =================================================
 
                 takeIntruderPhoto(
                     capture
@@ -602,36 +755,13 @@ class LockScreenActivity :
 
                     Log.d(
                         TAG,
-                        "================================"
-                    )
-
-                    Log.d(
-                        TAG,
                         "INTRUDER PHOTO SAVED"
                     )
 
-                    Log.d(
-                        TAG,
-                        "FILE = ${outputFileResults.savedUri}"
-                    )
-
-                    Log.d(
-                        TAG,
-                        "================================"
-                    )
-
-
-                    // =================================================
-                    // GET SAVED URI
-                    // =================================================
 
                     val savedUri =
                         outputFileResults.savedUri
 
-
-                    // =================================================
-                    // COMPLETE MEDIASTORE ITEM
-                    // =================================================
 
                     if (
                         Build.VERSION.SDK_INT >=
@@ -664,10 +794,6 @@ class LockScreenActivity :
                     }
 
 
-                    // =================================================
-                    // SAVE PHOTO URI IN DATASTORE
-                    // =================================================
-
                     if (
                         savedUri != null
                     ) {
@@ -683,12 +809,6 @@ class LockScreenActivity :
                                         savedUri.toString()
                                     )
 
-
-                                Log.d(
-                                    TAG,
-                                    "INTRUDER URI SAVED IN DATASTORE = $savedUri"
-                                )
-
                             } catch (
                                 e: Exception
                             ) {
@@ -702,10 +822,6 @@ class LockScreenActivity :
                         }
                     }
 
-
-                    // =================================================
-                    // RELEASE CAMERA
-                    // =================================================
 
                     releaseCamera()
                 }
@@ -991,10 +1107,6 @@ class LockScreenActivity :
 
         releaseCamera()
 
-
-        /*
-         * Do not clear currentUnlockedApp here.
-         */
 
         AppLockServiceHolder.isLockScreenOpen =
             false

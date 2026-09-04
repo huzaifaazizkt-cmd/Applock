@@ -1,6 +1,4 @@
 
-
-
 package com.example.applock.Design.screens
 
 import android.content.Context
@@ -17,6 +15,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.applock.R
@@ -30,35 +29,81 @@ import com.example.applock.Design.screens.VaultScreen
 
 @Composable
 fun MainScreen(
+
     context: Context,
+
     onIntruderClick: () -> Unit,
+
+    onLanguageClick: () -> Unit,
+
     openSettings: Boolean = false
+
 ) {
 
+    // =========================================================
+    // SELECTED TAB
+    // =========================================================
+
     var selectedTab by remember {
+
         mutableStateOf(
-            if (openSettings) 2 else 0
+
+            if (openSettings) {
+
+                2
+
+            } else {
+
+                0
+            }
         )
     }
 
 
+    // =========================================================
+    // WHEN OPEN SETTINGS CHANGES
+    // =========================================================
+
+    LaunchedEffect(openSettings) {
+
+        if (openSettings) {
+
+            selectedTab = 2
+        }
+    }
+
+
+    // =========================================================
+    // ROOT
+    // =========================================================
+
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
+
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(
+                    Color.White
+                )
     ) {
+
 
         // =====================================================
         // MAIN CONTENT
         // =====================================================
 
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = 74.dp)
+
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(
+                        bottom = 74.dp
+                    )
         ) {
 
             when (selectedTab) {
+
 
                 // =================================================
                 // 0 = APPS LOCK
@@ -67,7 +112,9 @@ fun MainScreen(
                 0 -> {
 
                     AppListScreen(
-                        context = context
+
+                        context =
+                            context
                     )
                 }
 
@@ -89,7 +136,21 @@ fun MainScreen(
                 2 -> {
 
                     SettingsScreen(
-                        onIntruderClick = onIntruderClick
+
+                        // ---------------------------------------------
+                        // INTRUDER
+                        // ---------------------------------------------
+
+                        onIntruderClick =
+                            onIntruderClick,
+
+
+                        // ---------------------------------------------
+                        // LANGUAGES
+                        // ---------------------------------------------
+
+                        onLanguageClick =
+                            onLanguageClick
                     )
                 }
             }
@@ -101,15 +162,21 @@ fun MainScreen(
         // =====================================================
 
         AppLockBottomNavigation(
-            selectedTab = selectedTab,
+
+            selectedTab =
+                selectedTab,
 
             onTabSelected = { tab ->
 
-                selectedTab = tab
+                selectedTab =
+                    tab
             },
 
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
+            modifier =
+                Modifier
+                    .align(
+                        Alignment.BottomCenter
+                    )
         )
     }
 }
@@ -121,21 +188,28 @@ fun MainScreen(
 
 @Composable
 private fun AppLockBottomNavigation(
+
     selectedTab: Int,
+
     onTabSelected: (Int) -> Unit,
+
     modifier: Modifier = Modifier
+
 ) {
 
     Row(
 
-        modifier = modifier
-            .fillMaxWidth()
-            .height(74.dp)
-            .background(Color.White)
-            .padding(
-                horizontal = 28.dp,
-                vertical = 10.dp
-            ),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .height(74.dp)
+                .background(
+                    Color.White
+                )
+                .padding(
+                    horizontal = 28.dp,
+                    vertical = 10.dp
+                ),
 
         horizontalArrangement =
             Arrangement.SpaceBetween,
@@ -158,11 +232,15 @@ private fun AppLockBottomNavigation(
                 R.drawable.group6,
 
             text =
-                "Apps Lock",
+                stringResource(
+                    R.string.apps_lock
+                ),
 
             onClick = {
 
-                onTabSelected(0)
+                onTabSelected(
+                    0
+                )
             }
         )
 
@@ -180,11 +258,15 @@ private fun AppLockBottomNavigation(
                 R.drawable.group8,
 
             text =
-                "Vault",
+                stringResource(
+                    R.string.vault
+                ),
 
             onClick = {
 
-                onTabSelected(1)
+                onTabSelected(
+                    1
+                )
             }
         )
 
@@ -202,11 +284,15 @@ private fun AppLockBottomNavigation(
                 R.drawable.group7,
 
             text =
-                "Settings",
+                stringResource(
+                    R.string.settings
+                ),
 
             onClick = {
 
-                onTabSelected(2)
+                onTabSelected(
+                    2
+                )
             }
         )
     }
@@ -219,10 +305,15 @@ private fun AppLockBottomNavigation(
 
 @Composable
 private fun BottomNavigationItem(
+
     selected: Boolean,
+
     icon: Int,
+
     text: String,
+
     onClick: () -> Unit
+
 ) {
 
     val blueColor =
@@ -234,43 +325,47 @@ private fun BottomNavigationItem(
 
     Box(
 
-        modifier = Modifier
-            .height(38.dp)
+        modifier =
+            Modifier
+                .height(
+                    38.dp
+                )
 
-            .clickable {
-                onClick()
-            }
+                .clickable {
 
-            .background(
+                    onClick()
+                }
 
-                color =
-                    if (selected) {
+                .background(
 
-                        blueColor
+                    color =
+                        if (selected) {
 
-                    } else {
+                            blueColor
 
-                        Color.Transparent
-                    },
+                        } else {
 
-                shape =
-                    RoundedCornerShape(
-                        22.dp
-                    )
-            )
+                            Color.Transparent
+                        },
 
-            .padding(
+                    shape =
+                        RoundedCornerShape(
+                            22.dp
+                        )
+                )
 
-                horizontal =
-                    if (selected) {
+                .padding(
 
-                        12.dp
+                    horizontal =
+                        if (selected) {
 
-                    } else {
+                            12.dp
 
-                        5.dp
-                    }
-            ),
+                        } else {
+
+                            5.dp
+                        }
+                ),
 
         contentAlignment =
             Alignment.Center
@@ -278,6 +373,7 @@ private fun BottomNavigationItem(
 
 
         Row(
+
             verticalAlignment =
                 Alignment.CenterVertically
         ) {
@@ -291,7 +387,8 @@ private fun BottomNavigationItem(
 
                 painter =
                     painterResource(
-                        id = icon
+                        id =
+                            icon
                     ),
 
                 contentDescription =
@@ -312,7 +409,9 @@ private fun BottomNavigationItem(
 
                 modifier =
                     Modifier
-                        .size(22.dp)
+                        .size(
+                            22.dp
+                        )
                         .alpha(
 
                             if (selected) {
@@ -332,8 +431,11 @@ private fun BottomNavigationItem(
             // =================================================
 
             Spacer(
+
                 modifier =
-                    Modifier.width(5.dp)
+                    Modifier.width(
+                        5.dp
+                    )
             )
 
 

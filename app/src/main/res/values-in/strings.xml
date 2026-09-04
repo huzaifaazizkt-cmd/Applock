@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Common -->
+    <string name="back">Kembali</string>
+    <string name="close_selection">Tutup pilihan</string>
+    <string name="selected_count">Dipilih (%1$d)</string>
+    <string name="all">Semua</string>
+    <string name="all_selected">Semua dipilih</string>
+    <string name="settings">Pengaturan</string>
+    <string name="delete">Hapus</string>
+    <string name="loading">Memuat...</string>
+
+    <!-- Bottom Navigation -->
+    <string name="apps_lock">Kunci Aplikasi</string>
+    <string name="vault">Brankas</string>
+
+    <!-- Intruder -->
+    <string name="intruder">Penyusup</string>
+    <string name="intruder_settings">Pengaturan penyusup</string>
+    <string name="intruder_camera">Kamera Penyusup</string>
+    <string name="capture_wrong_password">Ambil foto siapa pun yang memasukkan\nkata sandi yang salah</string>
+    <string name="no_intruder_found">Tidak Ada Penyusup</string>
+    <string name="today">Hari ini</string>
+    <string name="intruder_photo">Foto penyusup</string>
+    <string name="intruder_photo_preview">Pratinjau foto penyusup</string>
+
+    <!-- Observation Time -->
+    <string name="set_observation_time">Atur Waktu Pemantauan</string>
+    <string name="failed_to_unblock">Jumlah kegagalan membuka kunci</string>
+    <string name="immediately">Segera</string>
+    <string name="never">Tidak pernah</string>
+    <string name="five_seconds">5 Detik</string>
+    <string name="fifteen_seconds">15 Detik</string>
+    <string name="thirty_seconds">30 Detik</string>
+    <string name="cancel">Batal</string>
+    <string name="confirm">Konfirmasi</string>
+
+    <!-- Languages -->
+    <string name="languages">Bahasa</string>
+    <string name="select">Pilih</string>
+
+    <!-- Permissions -->
+    <string name="permissions_required">Izin Diperlukan</string>
+    <string name="show_over_other_apps">Tampilkan di Atas Aplikasi Lain</string>
+    <string name="allow_lock_screen">Izinkan layar kunci ditampilkan di atas\naplikasi lain</string>
+    <string name="detect_launched_app">Deteksi Aplikasi yang Dibuka</string>
+    <string name="detect_launched_description">Izinkan untuk mendeteksi aplikasi yang\nsedang dibuka dengan memberikan akses...</string>
+    <string name="auto_start">Mulai Otomatis</string>
+    <string name="keep_applock_running">Selalu Jalankan AppLock Pro</string>
+    <string name="allow">Izinkan</string>
+    <string name="permissions_work_properly">Izin diperlukan agar aplikasi dapat bekerja\ndengan baik dan efisien</string>
+
+    <!-- Vault -->
+    <string name="photos">Foto</string>
+    <string name="videos">Video</string>
+    <string name="add">Tambah</string>
+    <string name="add_image">Tambah Gambar</string>
+    <string name="add_video">Tambah Video</string>
+    <string name="click_to_add_image">Klik "+" untuk menambahkan gambar</string>
+    <string name="click_to_add_video">Klik "+" untuk menambahkan video</string>
+    <string name="hidden">Tersembunyi</string>
+    <string name="albums">Album</string>
+    <string name="select_all">Pilih Semua</string>
+    <string name="hide">Sembunyikan</string>
+    <string name="unhide">Tampilkan</string>
+
+    <!-- Hide / Unhide -->
+    <string name="hide_video">Sembunyikan Video</string>
+    <string name="hide_image">Sembunyikan Gambar</string>
+    <string name="hide_videos_question">Apakah Anda yakin ingin menyembunyikan video-video ini?</string>
+    <string name="hide_images_question">Apakah Anda yakin ingin menyembunyikan gambar-gambar ini?</string>
+    <string name="unhide_video">Tampilkan Video</string>
+    <string name="unhide_image">Tampilkan Gambar</string>
+    <string name="unhide_video_question">Apakah Anda ingin menampilkan video ini?</string>
+    <string name="unhide_image_question">Apakah Anda ingin menampilkan gambar ini?</string>
+
+    <!-- Pin Create Screen -->
+    <string name="four_digit_pin">PIN 4 Digit</string>
+    <string name="six_digit_pin">PIN 6 Digit</string>
+    <string name="pattern">Pola</string>
+    <string name="create_pin">Buat PIN %1$d Digit</string>
+    <string name="reset">Atur Ulang</string>
+    <string name="continue_text">Lanjutkan</string>
+    <string name="create_pattern">Buat Pola</string>
+    <string name="connect_four_dots">Hubungkan setidaknya 4 titik</string>
+
+    <!-- Pin Confirm -->
+    <string name="confirm_pattern">Konfirmasi pola</string>
+    <string name="confirm_passcode">Konfirmasi kode sandi</string>
+    <string name="draw_pattern_again">Gambar pola lagi</string>
+    <string name="confirm_pin">Konfirmasi PIN %1$d Digit</string>
+    <string name="password_not_match">Kata sandi tidak cocok. Silakan coba lagi</string>
+    <string name="enter_correct_password">Masukkan kata sandi yang benar</string>
+
+    <!-- Permission -->
+    <string name="allowed">Diizinkan</string>
+
+    <!-- Security Questions -->
+    <string name="security_questions">Pertanyaan Keamanan</string>
+    <string name="security_question_description">Atur kata kunci untuk memulihkan kode sandi\nketika Anda lupa.</string>
+    <string name="select_security_questions">Pilih Pertanyaan Keamanan</string>
+    <string name="select_security_question">Pilih Pertanyaan Keamanan</string>
+    <string name="enter_security_answer">Masukkan Jawaban Keamanan</string>
+    <string name="enter_your_answer">Masukkan jawaban Anda</string>
+    <string name="skip">Lewati</string>
+    <string name="save">Simpan</string>
+
+    <string name="security_question_name">Siapa nama Anda?</string>
+    <string name="security_question_father">Siapa nama ayah Anda?</string>
+    <string name="security_question_pet">Siapa nama hewan peliharaan Anda?</string>
+    <string name="security_question_job">Apa pekerjaan impian Anda?</string>
+
+    <!-- App List -->
+    <string name="app_lock">Kunci Aplikasi</string>
+    <string name="unlocked">Tidak Terkunci</string>
+    <string name="locked">Terkunci</string>
+    <string name="search">Cari</string>
+    <string name="general">Umum</string>
+    <string name="unlock_app">Buka kunci %1$s</string>
+    <string name="lock_app">Kunci %1$s</string>
+
+    <!-- Settings Screen -->
+    <string name="language_description">Pilih bahasa</string>
+    <string name="lock_setting">Pengaturan Kunci</string>
+    <string name="lock_settings_description">Pengaturan kunci</string>
+    <string name="hide_settings">Pengaturan Sembunyikan</string>
+    <string name="hide_settings_description">Pengaturan sembunyikan</string>
+    <string name="rate_us">Beri Kami Nilai</string>
+    <string name="rate_us_description">Beri kami nilai</string>
+    <string name="share">Bagikan</string>
+    <string name="about">Tentang</string>
+    <string name="about_applock">Tentang AppLock</string>
+    <string name="privacy_policy">Kebijakan Privasi</string>
+    <string name="collapse">Ciutkan</string>
+    <string name="expand">Perluas</string>
+    <string name="open_item">Buka %1$s</string>
+    <string name="hide_from_recent_screen">Sembunyikan dari layar terbaru</string>
+    <string name="apps_hide_from_recent_screen">Sembunyikan aplikasi dari layar terbaru</string>
+    <string name="password">Kata Sandi</string>
+    <string name="reset_password">Atur Ulang Kata Sandi</string>
+    <string name="security_settings">Pengaturan keamanan</string>
+    <string name="set_security_email">Atur email keamanan</string>
+    <string name="fingerprint_lock">Kunci sidik jari</string>
+    <string name="use_fingerprint_to_unlock">gunakan sidik jari untuk membuka kunci aplikasi</string>
+    <string name="unlock">Buka Kunci</string>
+    <string name="vibration">Getaran</string>
+    <string name="hide_track">Sembunyikan Jejak</string>
+    <string name="hide_track_description">Sembunyikan jejak saat menggambar pola kata sandi</string>
+    <string name="relock_option">Opsi Kunci Ulang</string>
+    <string name="relock_after_quitting">Kunci ulang setelah keluar</string>
+    <string name="delay_to_relock">Waktu tunda untuk kunci ulang</string>
+    <string name="relock">Kunci Ulang</string>
+    <string name="relock_after_quitting_option">Kunci Ulang Setelah Keluar</string>
+    <string name="relock_after_screen_off">Kunci ulang setelah layar mati</string>
+    <string name="one_minute">1 Menit</string>
+    <string name="two_minutes">2 Menit</string>
+    <string name="five_minutes">5 Menit</string>
+
+    <!-- Unlock Screen -->
+    <string name="draw_pattern">Gambar pola</string>
+    <string name="enter_passcode">Masukkan kode sandi</string>
+    <string name="enter_digit_pin">Masukkan PIN %1$d Digit</string>
+    <string name="pattern_not_match">Pola tidak cocok</string>
+
+</resources>

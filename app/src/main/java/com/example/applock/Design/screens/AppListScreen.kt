@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -57,20 +58,12 @@ data class AppItem(
 // =============================================================
 // APP CACHE
 // =============================================================
-//
-// Apps + icons dono yahan preload honge.
-//
-// IMPORTANT:
-// AppListScreen dobara icons load nahi karegi.
-// =============================================================
 
 object AppListCache {
 
     @Volatile
     private var apps: List<AppItem>? = null
 
-    // Multiple screens agar ek waqt mein preload call karen
-    // to duplicate loading nahi hogi.
     private val preloadMutex = Mutex()
 
 
@@ -91,13 +84,11 @@ object AppListCache {
         context: Context
     ) {
 
-        // Agar already complete cache available hai
         if (apps != null) {
             return
         }
 
         preloadMutex.withLock {
-
 
             if (apps != null) {
                 return@withLock
@@ -176,7 +167,6 @@ object AppListCache {
                                             .toString()
 
 
-
                                     val iconBitmap =
                                         try {
 
@@ -228,8 +218,6 @@ object AppListCache {
 
                 // =================================================
                 // COMPLETE CACHE SAVE
-                //
-                // Apps aur icons dono ready hain.
                 // =================================================
 
                 apps = result
@@ -245,10 +233,6 @@ object AppListCache {
 
     // =========================================================
     // UPDATE ICON
-    // =========================================================
-    //
-    // Ab normal flow mein iski zaroorat nahi hai,
-    // lekin existing code compatibility ke liye rakha hai.
     // =========================================================
 
     fun updateIcon(
@@ -357,21 +341,16 @@ fun AppListScreen(
 
         if (cachedApps != null) {
 
-            // DIRECT SHOW
             apps =
                 cachedApps
 
         } else {
 
-            // Agar preload already chal raha hai to
-            // ye call wait karegi.
             AppListCache.preload(
                 appContext
             )
 
 
-            // Preload complete hone ke baad
-            // complete apps + icons mil jayenge.
             AppListCache.getApps()
                 ?.let { loadedApps ->
 
@@ -486,7 +465,10 @@ fun AppListScreen(
 
         Text(
 
-            text = "App Lock",
+            text =
+                stringResource(
+                    R.string.app_lock
+                ),
 
             color =
                 Color.Black,
@@ -500,7 +482,6 @@ fun AppListScreen(
                     top = 10.dp
                 )
         )
-
 
 
         // =====================================================
@@ -588,7 +569,9 @@ fun AppListScreen(
                             ),
 
                         contentDescription =
-                            "Unlocked",
+                            stringResource(
+                                R.string.unlocked
+                            ),
 
                         colorFilter =
                             ColorFilter.tint(
@@ -627,7 +610,9 @@ fun AppListScreen(
                     Text(
 
                         text =
-                            "Unlocked",
+                            stringResource(
+                                R.string.unlocked
+                            ),
 
                         color =
                             if (
@@ -690,7 +675,9 @@ fun AppListScreen(
                             ),
 
                         contentDescription =
-                            "Locked",
+                            stringResource(
+                                R.string.locked
+                            ),
 
                         colorFilter =
                             ColorFilter.tint(
@@ -729,7 +716,9 @@ fun AppListScreen(
                     Text(
 
                         text =
-                            "Locked",
+                            stringResource(
+                                R.string.locked
+                            ),
 
                         color =
                             if (
@@ -803,7 +792,9 @@ fun AppListScreen(
                         Icons.Default.Search,
 
                     contentDescription =
-                        "Search",
+                        stringResource(
+                            R.string.search
+                        ),
 
                     tint =
                         Color(0xFFBDBDBD),
@@ -876,7 +867,9 @@ fun AppListScreen(
                                 Text(
 
                                     text =
-                                        "Search",
+                                        stringResource(
+                                            R.string.search
+                                        ),
 
                                     color =
                                         Color(
@@ -903,7 +896,9 @@ fun AppListScreen(
         Text(
 
             text =
-                "General",
+                stringResource(
+                    R.string.general
+                ),
 
             color =
                 Color(0xFF878585),
@@ -1037,9 +1032,6 @@ fun AppListScreen(
 
                     } else {
 
-                        // Sirf exceptional case mein empty space.
-                        // Normal flow mein icon already preload hoga.
-
                         Spacer(
                             modifier =
                                 Modifier.size(
@@ -1141,11 +1133,17 @@ fun AppListScreen(
                                     isLocked
                                 ) {
 
-                                    "Unlock $appName"
+                                    stringResource(
+                                        R.string.unlock_app,
+                                        appName
+                                    )
 
                                 } else {
 
-                                    "Lock $appName"
+                                    stringResource(
+                                        R.string.lock_app,
+                                        appName
+                                    )
                                 },
 
                             modifier =

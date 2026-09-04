@@ -3,61 +3,31 @@
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.applock">
-
-    <!-- ================================================= -->
-    <!-- PERMISSIONS -->
-    <!-- ================================================= -->
-
-    <!-- Show AppLock over other apps / Appear on top -->
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
-    <uses-permission
-        android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-
-    <!-- Get installed apps -->
-    <uses-permission
-        android:name="android.permission.QUERY_ALL_PACKAGES" />
-
-    <uses-permission
-        android:name="android.permission.CAMERA" />
-
-
-    <!-- Biometric -->
-    <uses-permission
-        android:name="android.permission.USE_BIOMETRIC" />
-
-
-    <!-- ================================================= -->
-    <!-- GALLERY / MEDIA PERMISSIONS -->
-    <!-- ================================================= -->
-
-    <!-- Android 13+ : Read Images -->
-    <uses-permission
-        android:name="android.permission.READ_MEDIA_IMAGES" />
-
-    <!-- Android 13+ : Read Videos -->
-    <uses-permission
-        android:name="android.permission.READ_MEDIA_VIDEO" />
-
-    <!-- Android 12 and below -->
-    <uses-permission
-        android:name="android.permission.READ_EXTERNAL_STORAGE"
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
 
-    <!-- ================================================= -->
-    <!-- APPLICATION -->
-    <!-- ================================================= -->
-
     <application
+
         android:allowBackup="true"
-        android:label="AppLock"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:enableOnBackInvokedCallback="false"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:requestLegacyExternalStorage="true"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
         android:theme="@style/Theme.AppLock">
-
-        <!-- ================================================= -->
-        <!-- MAIN ACTIVITY -->
-        <!-- ================================================= -->
-
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -73,11 +43,6 @@
             </intent-filter>
 
         </activity>
-
-        <!-- ================================================= -->
-        <!-- LOCK SCREEN -->
-        <!-- ================================================= -->
-
         <activity
             android:name=".Design.screens.LockScreenActivity"
             android:exported="false"
@@ -87,12 +52,8 @@
             android:showWhenLocked="true"
             android:turnScreenOn="true" />
 
-        <!-- ================================================= -->
-        <!-- ACCESSIBILITY SERVICE -->
-        <!-- ================================================= -->
-
         <service
-            android:name=".service.com.example.applock.service.AppLockService"
+            android:name=".service.AppLockService"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
             android:exported="false">
 

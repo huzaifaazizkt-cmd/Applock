@@ -11,19 +11,13 @@ object AppLockServiceHolder {
     @Volatile
     var lastUnlockTime: Long = 0L
 
-    // =========================================================
-    // CLEAR
-    // =========================================================
 
     fun clear() {
 
-        isLockScreenOpen =
-            false
+        isLockScreenOpen = false
 
-        currentUnlockedApp =
-            null
+        currentUnlockedApp = null
 
-        lastUnlockTime =
-            0L
+        lastUnlockTime = 0L
     }
 }

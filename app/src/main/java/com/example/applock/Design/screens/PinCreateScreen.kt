@@ -19,9 +19,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.applock.Design.components.NumberPad
+import com.example.applock.R
 import kotlin.math.sqrt
 
 @Composable
@@ -29,12 +31,18 @@ fun PinCreateScreen(
     onNext: (String, String) -> Unit
 ) {
 
-    var pin by remember { mutableStateOf("") }
+    var pin by remember {
+        mutableStateOf("")
+    }
 
-    var pinLength by remember { mutableStateOf(6) }
+    var pinLength by remember {
+        mutableStateOf(6)
+    }
 
+    // Stable values use kar rahe hain.
+    // Display ke liye neeche stringResource use hoga.
     var authType by remember {
-        mutableStateOf("6 - Digit pin")
+        mutableStateOf("6")
     }
 
     var expanded by remember {
@@ -45,7 +53,7 @@ fun PinCreateScreen(
         mutableStateOf<List<Int>>(emptyList())
     }
 
-    val isPattern = authType == "Pattern"
+    val isPattern = authType == "pattern"
 
     val backgroundColor = Color(0xFF189FFF)
 
@@ -66,22 +74,18 @@ fun PinCreateScreen(
                     top = 24.dp,
                     bottom = 20.dp
                 ),
-
-            horizontalAlignment =
-                Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            // =====================================================
-            // TOP BAR
-            // =====================================================
+            // ------------------------------------------------
+            // TOP DROPDOWN
+            // ------------------------------------------------
 
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(35.dp),
-
-                verticalAlignment =
-                    Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically
             ) {
 
                 Box {
@@ -92,13 +96,28 @@ fun PinCreateScreen(
                             .clickable {
                                 expanded = true
                             },
-
-                        verticalAlignment =
-                            Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
 
                         Text(
-                            text = authType,
+                            text = when (authType) {
+
+                                "4" -> stringResource(
+                                    R.string.four_digit_pin
+                                )
+
+                                "6" -> stringResource(
+                                    R.string.six_digit_pin
+                                )
+
+                                "pattern" -> stringResource(
+                                    R.string.pattern
+                                )
+
+                                else -> stringResource(
+                                    R.string.six_digit_pin
+                                )
+                            },
                             color = Color.White,
                             fontSize = 14.sp
                         )
@@ -106,70 +125,80 @@ fun PinCreateScreen(
                         Icon(
                             imageVector =
                                 Icons.Default.KeyboardArrowDown,
-
                             contentDescription = null,
-
                             tint = Color.White,
-
-                            modifier =
-                                Modifier.size(18.dp)
+                            modifier = Modifier.size(18.dp)
                         )
                     }
 
                     DropdownMenu(
                         expanded = expanded,
-
                         onDismissRequest = {
                             expanded = false
                         }
                     ) {
 
+                        // 4 DIGIT PIN
                         DropdownMenuItem(
                             text = {
-                                Text("4 - Digit pin")
+                                Text(
+                                    text = stringResource(
+                                        R.string.four_digit_pin
+                                    )
+                                )
                             },
-
                             onClick = {
 
-                                authType =
-                                    "4 - Digit pin"
+                                authType = "4"
 
                                 pinLength = 4
+
                                 pin = ""
+
                                 selectedDots = emptyList()
 
                                 expanded = false
                             }
                         )
 
+                        // 6 DIGIT PIN
                         DropdownMenuItem(
                             text = {
-                                Text("6 - Digit pin")
+                                Text(
+                                    text = stringResource(
+                                        R.string.six_digit_pin
+                                    )
+                                )
                             },
-
                             onClick = {
 
-                                authType =
-                                    "6 - Digit pin"
+                                authType = "6"
 
                                 pinLength = 6
+
                                 pin = ""
+
                                 selectedDots = emptyList()
 
                                 expanded = false
                             }
                         )
 
+                        // PATTERN
                         DropdownMenuItem(
                             text = {
-                                Text("Pattern")
+                                Text(
+                                    text = stringResource(
+                                        R.string.pattern
+                                    )
+                                )
                             },
-
                             onClick = {
 
-                                authType = "Pattern"
+                                authType = "pattern"
 
                                 pin = ""
+
                                 selectedDots = emptyList()
 
                                 expanded = false
@@ -179,17 +208,16 @@ fun PinCreateScreen(
                 }
             }
 
-            // =====================================================
-            // STEP INDICATOR
-            // =====================================================
-
             Spacer(
                 modifier = Modifier.height(38.dp)
             )
 
+            // ------------------------------------------------
+            // STEP INDICATOR
+            // ------------------------------------------------
+
             Row(
-                verticalAlignment =
-                    Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically
             ) {
 
                 Box(
@@ -204,9 +232,7 @@ fun PinCreateScreen(
                             Color.White.copy(alpha = 0.35f),
                             CircleShape
                         ),
-
-                    contentAlignment =
-                        Alignment.Center
+                    contentAlignment = Alignment.Center
                 ) {
 
                     Box(
@@ -216,9 +242,7 @@ fun PinCreateScreen(
                                 Color.White,
                                 CircleShape
                             ),
-
-                        contentAlignment =
-                            Alignment.Center
+                        contentAlignment = Alignment.Center
                     ) {
 
                         Text(
@@ -244,9 +268,7 @@ fun PinCreateScreen(
                             Color.White,
                             CircleShape
                         ),
-
-                    contentAlignment =
-                        Alignment.Center
+                    contentAlignment = Alignment.Center
                 ) {
 
                     Text(
@@ -261,16 +283,17 @@ fun PinCreateScreen(
                 modifier = Modifier.height(65.dp)
             )
 
-            // =====================================================
-            // PIN
-            // =====================================================
+            // =================================================
+            // PIN SCREEN
+            // =================================================
 
             if (!isPattern) {
 
                 Text(
-                    text =
-                        "Create $pinLength - Digit pin",
-
+                    text = stringResource(
+                        R.string.create_pin,
+                        pinLength
+                    ),
                     color = Color.White,
                     fontSize = 18.sp
                 )
@@ -279,6 +302,7 @@ fun PinCreateScreen(
                     modifier = Modifier.height(18.dp)
                 )
 
+                // PIN DOTS
                 Row(
                     horizontalArrangement =
                         Arrangement.spacedBy(14.dp)
@@ -309,15 +333,14 @@ fun PinCreateScreen(
                     modifier = Modifier.height(82.dp)
                 )
 
+                // NUMBER PAD
                 NumberPad(
-
                     onNumberClick = { number ->
 
                         if (pin.length < pinLength) {
                             pin += number
                         }
                     },
-
                     onDelete = {
 
                         if (pin.isNotEmpty()) {
@@ -330,11 +353,11 @@ fun PinCreateScreen(
                     modifier = Modifier.height(55.dp)
                 )
 
+                // RESET + CONTINUE
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(end = 30.dp),
-
                     horizontalArrangement =
                         Arrangement.spacedBy(
                             30.dp,
@@ -342,17 +365,17 @@ fun PinCreateScreen(
                         )
                 ) {
 
+                    // RESET
                     Text(
-                        text = "Reset",
-
+                        text = stringResource(
+                            R.string.reset
+                        ),
                         color =
                             if (pin.isEmpty())
                                 Color.White.copy(alpha = 0.35f)
                             else
                                 Color.White,
-
                         fontSize = 20.sp,
-
                         modifier =
                             Modifier
                                 .clickable(
@@ -364,17 +387,17 @@ fun PinCreateScreen(
                                 .padding(10.dp)
                     )
 
+                    // CONTINUE
                     Text(
-                        text = "Continue",
-
+                        text = stringResource(
+                            R.string.continue_text
+                        ),
                         color =
                             if (pin.length == pinLength)
                                 Color.White
                             else
                                 Color.White.copy(alpha = 0.35f),
-
                         fontSize = 20.sp,
-
                         modifier =
                             Modifier
                                 .clickable(
@@ -394,12 +417,13 @@ fun PinCreateScreen(
             } else {
 
                 // =================================================
-                // PATTERN
+                // PATTERN SCREEN
                 // =================================================
 
                 Text(
-                    text = "Create Pattern",
-
+                    text = stringResource(
+                        R.string.create_pattern
+                    ),
                     color = Color.White,
                     fontSize = 18.sp
                 )
@@ -409,11 +433,12 @@ fun PinCreateScreen(
                 )
 
                 Text(
-                    text = "Connect at least 4 dots",
-
-                    color =
-                        Color.White.copy(alpha = 0.85f),
-
+                    text = stringResource(
+                        R.string.connect_four_dots
+                    ),
+                    color = Color.White.copy(
+                        alpha = 0.85f
+                    ),
                     fontSize = 14.sp
                 )
 
@@ -421,15 +446,13 @@ fun PinCreateScreen(
                     modifier = Modifier.height(20.dp)
                 )
 
+                // PATTERN GRID
                 PatternGrid(
                     selectedDots = selectedDots,
-
                     onPatternChanged = { dots ->
                         selectedDots = dots
                     },
-
                     dotColor = patternDotColor,
-
                     backgroundColor = backgroundColor
                 )
 
@@ -437,11 +460,11 @@ fun PinCreateScreen(
                     modifier = Modifier.height(40.dp)
                 )
 
+                // RESET + CONTINUE
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(end = 30.dp),
-
                     horizontalArrangement =
                         Arrangement.spacedBy(
                             30.dp,
@@ -449,39 +472,40 @@ fun PinCreateScreen(
                         )
                 ) {
 
+                    // RESET
                     Text(
-                        text = "Reset",
-
+                        text = stringResource(
+                            R.string.reset
+                        ),
                         color =
                             if (selectedDots.isEmpty())
                                 Color.White.copy(alpha = 0.35f)
                             else
                                 Color.White,
-
                         fontSize = 20.sp,
-
                         modifier =
                             Modifier
                                 .clickable(
                                     enabled =
                                         selectedDots.isNotEmpty()
                                 ) {
-                                    selectedDots = emptyList()
+                                    selectedDots =
+                                        emptyList()
                                 }
                                 .padding(10.dp)
                     )
 
+                    // CONTINUE
                     Text(
-                        text = "Continue",
-
+                        text = stringResource(
+                            R.string.continue_text
+                        ),
                         color =
                             if (selectedDots.size >= 4)
                                 Color.White
                             else
                                 Color.White.copy(alpha = 0.35f),
-
                         fontSize = 20.sp,
-
                         modifier =
                             Modifier
                                 .clickable(
@@ -502,7 +526,6 @@ fun PinCreateScreen(
     }
 }
 
-
 // =============================================================
 // PATTERN GRID
 // =============================================================
@@ -516,7 +539,9 @@ fun PatternGrid(
 ) {
 
     val latestOnPatternChanged by
-    rememberUpdatedState(onPatternChanged)
+    rememberUpdatedState(
+        onPatternChanged
+    )
 
     Box(
         modifier = Modifier
@@ -527,6 +552,10 @@ fun PatternGrid(
                     mutableListOf<Int>()
 
                 detectDragGestures(
+
+                    // ------------------------------------------------
+                    // DRAG START
+                    // ------------------------------------------------
 
                     onDragStart = { offset ->
 
@@ -549,6 +578,10 @@ fun PatternGrid(
                             )
                         }
                     },
+
+                    // ------------------------------------------------
+                    // DRAG
+                    // ------------------------------------------------
 
                     onDrag = { change, _ ->
 
@@ -591,6 +624,10 @@ fun PatternGrid(
                     size.height
                 )
 
+            // ------------------------------------------------
+            // DRAW CONNECTION LINES
+            // ------------------------------------------------
+
             if (selectedDots.size >= 2) {
 
                 for (
@@ -599,44 +636,52 @@ fun PatternGrid(
 
                     drawLine(
                         color = Color.White,
-
                         start =
-                            positions[selectedDots[i]],
-
+                            positions[
+                                selectedDots[i]
+                            ],
                         end =
-                            positions[selectedDots[i + 1]],
-
+                            positions[
+                                selectedDots[i + 1]
+                            ],
                         strokeWidth = 8f
                     )
                 }
             }
 
-            positions.forEachIndexed { index, position ->
+            // ------------------------------------------------
+            // DRAW DOTS
+            // ------------------------------------------------
+
+            positions.forEachIndexed {
+                    index,
+                    position ->
 
                 val selected =
                     selectedDots.contains(index)
 
+                // Outer circle
                 drawCircle(
                     color = dotColor,
                     radius = 17.5.dp.toPx(),
                     center = position
                 )
 
+                // Inner background
                 drawCircle(
                     color = backgroundColor,
                     radius = 13.5.dp.toPx(),
                     center = position
                 )
 
+                // Center dot
                 drawCircle(
                     color =
                         if (selected)
                             Color.White
                         else
                             dotColor,
-
                     radius = 9.dp.toPx(),
-
                     center = position
                 )
             }
@@ -644,6 +689,9 @@ fun PatternGrid(
     }
 }
 
+// =============================================================
+// GRID POSITIONS
+// =============================================================
 
 private fun getGridPositions(
     width: Float,
@@ -659,6 +707,7 @@ private fun getGridPositions(
     val y3 = height * 0.8333f
 
     return listOf(
+
         Offset(x1, y1),
         Offset(x2, y1),
         Offset(x3, y1),
@@ -673,6 +722,9 @@ private fun getGridPositions(
     )
 }
 
+// =============================================================
+// FIND DOT
+// =============================================================
 
 private fun findDot(
     touch: Offset,
@@ -681,15 +733,26 @@ private fun findDot(
 ): Int? {
 
     val positions =
-        getGridPositions(width, height)
+        getGridPositions(
+            width,
+            height
+        )
 
-    positions.forEachIndexed { index, dot ->
+    positions.forEachIndexed {
+            index,
+            dot ->
 
-        val dx = touch.x - dot.x
-        val dy = touch.y - dot.y
+        val dx =
+            touch.x - dot.x
+
+        val dy =
+            touch.y - dot.y
 
         val distance =
-            sqrt(dx * dx + dy * dy)
+            sqrt(
+                dx * dx +
+                        dy * dy
+            )
 
         if (distance <= 55f) {
             return index

@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -43,24 +44,34 @@ import kotlinx.coroutines.launch
 
 
 // =============================================================
+// SETTINGS ITEM DATA
+// =============================================================
+
+private data class SettingsItemData(
+    val key: String,
+    val titleRes: Int,
+    val iconRes: Int,
+    val descriptionRes: Int?
+)
+
+
+// =============================================================
 // SETTINGS SCREEN
 // =============================================================
 
 @Composable
 fun SettingsScreen(
-    onIntruderClick: () -> Unit
+    onIntruderClick: () -> Unit,
+    onLanguageClick: () -> Unit
 ) {
 
-    val context =
-        LocalContext.current
+    val context = LocalContext.current
 
-    val dataStore =
-        remember {
-            DataStoreManager(context)
-        }
+    val dataStore = remember {
+        DataStoreManager(context)
+    }
 
-    val scope =
-        rememberCoroutineScope()
+    val scope = rememberCoroutineScope()
 
 
     // =========================================================
@@ -69,53 +80,61 @@ fun SettingsScreen(
 
     val settingsItems = listOf(
 
-        Triple(
-            "Languages",
-            R.drawable.language,
-            "Select language"
+        SettingsItemData(
+            key = "languages",
+            titleRes = R.string.languages,
+            iconRes = R.drawable.language,
+            descriptionRes = R.string.language_description
         ),
 
-        Triple(
-            "Lock Setting",
-            R.drawable.settingicon,
-            "Lock settings"
+        SettingsItemData(
+            key = "lock_setting",
+            titleRes = R.string.lock_setting,
+            iconRes = R.drawable.settingicon,
+            descriptionRes = R.string.lock_settings_description
         ),
 
-        Triple(
-            "Intruder",
-            R.drawable.intruder,
-            "Intruder settings"
+        SettingsItemData(
+            key = "intruder",
+            titleRes = R.string.intruder,
+            iconRes = R.drawable.intruder,
+            descriptionRes = R.string.intruder_settings
         ),
 
-        Triple(
-            "Hide Settings",
-            R.drawable.hideicon,
-            "Hide settings"
+        SettingsItemData(
+            key = "hide_settings",
+            titleRes = R.string.hide_settings,
+            iconRes = R.drawable.hideicon,
+            descriptionRes = R.string.hide_settings_description
         ),
 
-        Triple(
-            "Rate Us",
-            R.drawable.rateus,
-            "Rate us"
+        SettingsItemData(
+            key = "rate_us",
+            titleRes = R.string.rate_us,
+            iconRes = R.drawable.rateus,
+            descriptionRes = R.string.rate_us_description
         ),
 
-        Triple(
-            "Share",
-            R.drawable.share,
-            ""
+        SettingsItemData(
+            key = "share",
+            titleRes = R.string.share,
+            iconRes = R.drawable.share,
+            descriptionRes = null
         ),
 
-        Triple(
-            "About",
-            R.drawable.feedback,
-            "About AppLock"
+        SettingsItemData(
+            key = "about",
+            titleRes = R.string.about,
+            iconRes = R.drawable.feedback,
+            descriptionRes = R.string.about_applock
         ),
 
-        Triple(
-            "Privacy Policy",
-            R.drawable.privacy,
-            "About AppLock"
-        ),
+        SettingsItemData(
+            key = "privacy_policy",
+            titleRes = R.string.privacy_policy,
+            iconRes = R.drawable.privacy,
+            descriptionRes = R.string.about_applock
+        )
     )
 
 
@@ -146,14 +165,17 @@ fun SettingsScreen(
     }
 
 
-    // =========================================================
-    // SELECTED RE-LOCK OPTION
-    // =========================================================
+    // SAVED RELOCK OPTION
 
     var relockOption by remember {
-        mutableStateOf(
-            "Re-Lock After Quitting"
-        )
+        mutableStateOf("relock_after_quitting")
+    }
+
+
+    // TEMPORARY RELOCK OPTION
+
+    var tempRelockOption by remember {
+        mutableStateOf("relock_after_quitting")
     }
 
 
@@ -166,25 +188,61 @@ fun SettingsScreen(
     }
 
 
-    // =========================================================
-    // SELECTED DELAY OPTION
-    // =========================================================
+    // SAVED DELAY OPTION
 
     var delayOption by remember {
-        mutableStateOf("Never")
+        mutableStateOf("never")
+    }
+
+
+    // TEMPORARY DELAY OPTION
+    // Cancel par ye save nahi hogi
+
+    var tempDelayOption by remember {
+        mutableStateOf("never")
     }
 
 
     // =========================================================
-    // LOAD HIDE FROM RECENTS
+    // LOAD SAVED SETTINGS
     // =========================================================
 
     LaunchedEffect(Unit) {
+
+        // -----------------------------------------------------
+        // HIDE FROM RECENTS
+        // -----------------------------------------------------
 
         hideFromRecents =
             dataStore
                 .getHideFromRecents()
                 .first()
+
+
+        // -----------------------------------------------------
+        // RELOCK OPTION
+        // -----------------------------------------------------
+
+        relockOption =
+            dataStore
+                .getRelockOption()
+                .first()
+
+        tempRelockOption =
+            relockOption
+
+
+        // -----------------------------------------------------
+        // DELAY OPTION
+        // -----------------------------------------------------
+
+        delayOption =
+            dataStore
+                .getRelockDelay()
+                .first()
+
+        tempDelayOption =
+            delayOption
     }
 
 
@@ -192,8 +250,7 @@ fun SettingsScreen(
     // SCROLL
     // =========================================================
 
-    val scrollState =
-        rememberScrollState()
+    val scrollState = rememberScrollState()
 
 
     // =========================================================
@@ -201,49 +258,40 @@ fun SettingsScreen(
     // =========================================================
 
     Box(
-
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .background(
-                    Color(0xFFF7F7F7)
-                )
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                Color(0xFFF7F7F7)
+            )
     ) {
 
         Column(
-
-            modifier =
-                Modifier
-                    .fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
         ) {
-
 
             // =================================================
             // TITLE
             // =================================================
 
             Text(
+                text = stringResource(
+                    R.string.settings
+                ),
 
-                text =
-                    "Settings",
+                modifier = Modifier.padding(
+                    start = 54.dp,
+                    top = 22.dp
+                ),
 
-                modifier =
-                    Modifier.padding(
-                        start = 54.dp,
-                        top = 22.dp
-                    ),
+                color = Color(0xFF333333),
 
-                color =
-                    Color(0xFF333333),
-
-                fontSize =
-                    22.sp
+                fontSize = 22.sp
             )
 
 
             Spacer(
-                modifier =
-                    Modifier.height(22.dp)
+                modifier = Modifier.height(22.dp)
             )
 
 
@@ -252,54 +300,51 @@ fun SettingsScreen(
             // =================================================
 
             Column(
-
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                        .verticalScroll(
-                            scrollState
-                        )
-                        .padding(
-                            start = 14.dp,
-                            end = 14.dp,
-                            bottom = 25.dp
-                        )
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .verticalScroll(
+                        scrollState
+                    )
+                    .padding(
+                        start = 14.dp,
+                        end = 14.dp,
+                        bottom = 25.dp
+                    )
             ) {
 
                 settingsItems.forEach { item ->
 
                     val title =
-                        item.first
-
-                    val icon =
-                        item.second
+                        stringResource(
+                            item.titleRes
+                        )
 
                     val description =
-                        item.third
+                        item.descriptionRes?.let {
+                            stringResource(it)
+                        } ?: ""
 
 
                     SettingsItem(
 
-                        title =
-                            title,
+                        itemKey = item.key,
 
-                        iconRes =
-                            icon,
+                        title = title,
 
-                        description =
-                            description,
+                        iconRes = item.iconRes,
+
+                        description = description,
 
                         expanded =
-                            expandedItem == title,
+                            expandedItem == item.key,
 
                         hideFromRecents =
                             hideFromRecents,
 
                         onHideFromRecentsChange = {
 
-                            hideFromRecents =
-                                it
+                            hideFromRecents = it
 
                             scope.launch {
 
@@ -312,11 +357,21 @@ fun SettingsScreen(
 
                         onRelockClick = {
 
+                            // Saved option ko temporary mein copy karein
+
+                            tempRelockOption =
+                                relockOption
+
                             showRelockDialog =
                                 true
                         },
 
                         onDelayClick = {
+
+                            // Saved delay ko temporary mein copy karein
+
+                            tempDelayOption =
+                                delayOption
 
                             showDelayDialog =
                                 true
@@ -325,31 +380,61 @@ fun SettingsScreen(
                         delayOption =
                             delayOption,
 
+                        relockOption =
+                            relockOption,
+
                         onArrowClick = {
 
-                            // =================================================
-                            // INTRUDER
-                            // =================================================
+                            when (item.key) {
 
-                            if (
-                                title == "Intruder"
-                            ) {
+                                "languages" -> {
 
-                                onIntruderClick()
+                                    onLanguageClick()
+                                }
 
-                            } else {
 
-                                expandedItem =
-                                    if (
-                                        expandedItem == title
-                                    ) {
+                                "intruder" -> {
 
-                                        null
+                                    onIntruderClick()
+                                }
 
-                                    } else {
 
-                                        title
-                                    }
+                                "lock_setting",
+                                "hide_settings" -> {
+
+                                    expandedItem =
+                                        if (
+                                            expandedItem ==
+                                            item.key
+                                        ) {
+
+                                            null
+
+                                        } else {
+
+                                            item.key
+                                        }
+                                }
+
+
+                                "rate_us" -> {
+                                    // Later Rate Us logic
+                                }
+
+
+                                "share" -> {
+                                    // Later Share logic
+                                }
+
+
+                                "about" -> {
+                                    // Later About screen
+                                }
+
+
+                                "privacy_policy" -> {
+                                    // Later Privacy Policy
+                                }
                             }
                         }
                     )
@@ -373,15 +458,20 @@ fun SettingsScreen(
             RelockOptionDialog(
 
                 selectedOption =
-                    relockOption,
+                    tempRelockOption,
 
                 onOptionSelected = {
 
-                    relockOption =
+                    tempRelockOption =
                         it
                 },
 
                 onCancel = {
+
+                    // Cancel par saved value same rahegi
+
+                    tempRelockOption =
+                        relockOption
 
                     showRelockDialog =
                         false
@@ -389,8 +479,24 @@ fun SettingsScreen(
 
                 onConfirm = {
 
+                    // Temporary option ko saved option banayein
+
+                    relockOption =
+                        tempRelockOption
+
                     showRelockDialog =
                         false
+
+
+                    // DataStore mein save
+
+                    scope.launch {
+
+                        dataStore
+                            .saveRelockOption(
+                                tempRelockOption
+                            )
+                    }
                 }
             )
         }
@@ -405,15 +511,20 @@ fun SettingsScreen(
             DelayToRelockDialog(
 
                 selectedOption =
-                    delayOption,
+                    tempDelayOption,
 
                 onOptionSelected = {
 
-                    delayOption =
+                    tempDelayOption =
                         it
                 },
 
                 onCancel = {
+
+                    // Cancel par saved value restore
+
+                    tempDelayOption =
+                        delayOption
 
                     showDelayDialog =
                         false
@@ -421,8 +532,24 @@ fun SettingsScreen(
 
                 onConfirm = {
 
+                    // Temporary delay ko saved delay banayein
+
+                    delayOption =
+                        tempDelayOption
+
                     showDelayDialog =
                         false
+
+
+                    // DataStore mein save
+
+                    scope.launch {
+
+                        dataStore
+                            .saveRelockDelay(
+                                tempDelayOption
+                            )
+                    }
                 }
             )
         }
@@ -437,6 +564,8 @@ fun SettingsScreen(
 @Composable
 private fun SettingsItem(
 
+    itemKey: String,
+
     title: String,
 
     iconRes: Int,
@@ -447,7 +576,8 @@ private fun SettingsItem(
 
     hideFromRecents: Boolean,
 
-    onHideFromRecentsChange: (Boolean) -> Unit,
+    onHideFromRecentsChange:
+        (Boolean) -> Unit,
 
     onRelockClick: () -> Unit,
 
@@ -455,48 +585,44 @@ private fun SettingsItem(
 
     delayOption: String,
 
+    relockOption: String,
+
     onArrowClick: () -> Unit
 
 ) {
 
     Card(
 
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .shadow(
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(
+                elevation = 5.dp,
 
-                    elevation =
-                        5.dp,
-
-                    shape =
-                        RoundedCornerShape(
-                            12.dp
-                        ),
-
-                    clip =
-                        false,
-
-                    ambientColor =
-                        Color.Black.copy(
-                            alpha = 0.10f
-                        ),
-
-                    spotColor =
-                        Color.Black.copy(
-                            alpha = 0.10f
-                        )
-                )
-                .clip(
-                    RoundedCornerShape(
-                        12.dp
-                    )
+                shape = RoundedCornerShape(
+                    12.dp
                 ),
 
-        shape =
-            RoundedCornerShape(
-                12.dp
+                clip = false,
+
+                ambientColor =
+                    Color.Black.copy(
+                        alpha = 0.10f
+                    ),
+
+                spotColor =
+                    Color.Black.copy(
+                        alpha = 0.10f
+                    )
+            )
+            .clip(
+                RoundedCornerShape(
+                    12.dp
+                )
             ),
+
+        shape = RoundedCornerShape(
+            12.dp
+        ),
 
         colors =
             CardDefaults.cardColors(
@@ -506,11 +632,8 @@ private fun SettingsItem(
 
         elevation =
             CardDefaults.cardElevation(
-                defaultElevation =
-                    2.dp,
-
-                pressedElevation =
-                    1.dp
+                defaultElevation = 2.dp,
+                pressedElevation = 1.dp
             )
     ) {
 
@@ -519,26 +642,23 @@ private fun SettingsItem(
                 Modifier.fillMaxWidth()
         ) {
 
-
             // =================================================
             // HEADER
             // =================================================
 
             Row(
 
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .height(52.dp)
-                        .padding(
-                            start = 8.dp,
-                            end = 10.dp
-                        ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp)
+                    .padding(
+                        start = 8.dp,
+                        end = 10.dp
+                    ),
 
                 verticalAlignment =
                     Alignment.CenterVertically
             ) {
-
 
                 // =================================================
                 // ICON
@@ -548,8 +668,7 @@ private fun SettingsItem(
 
                     painter =
                         painterResource(
-                            id =
-                                iconRes
+                            id = iconRes
                         ),
 
                     contentDescription =
@@ -567,9 +686,7 @@ private fun SettingsItem(
 
                 Spacer(
                     modifier =
-                        Modifier.width(
-                            18.dp
-                        )
+                        Modifier.width(18.dp)
                 )
 
 
@@ -579,13 +696,10 @@ private fun SettingsItem(
 
                 Text(
 
-                    text =
-                        title,
+                    text = title,
 
                     modifier =
-                        Modifier.weight(
-                            1f
-                        ),
+                        Modifier.weight(1f),
 
                     color =
                         Color(0xFF333333),
@@ -603,11 +717,8 @@ private fun SettingsItem(
 
                     modifier =
                         Modifier
-                            .size(
-                                32.dp
-                            )
+                            .size(32.dp)
                             .clickable {
-
                                 onArrowClick()
                             },
 
@@ -615,24 +726,20 @@ private fun SettingsItem(
                         Alignment.Center
                 ) {
 
+                    val expandable =
+                        itemKey == "lock_setting" ||
+                                itemKey == "hide_settings"
+
+
                     Image(
 
                         painter =
                             painterResource(
 
                                 id =
-                                    if (
-                                        title ==
-                                        "Intruder"
-                                    ) {
+                                    if (expandable) {
 
-                                        R.drawable.sidearrow
-
-                                    } else {
-
-                                        if (
-                                            expanded
-                                        ) {
+                                        if (expanded) {
 
                                             R.drawable.uparrow
 
@@ -640,45 +747,45 @@ private fun SettingsItem(
 
                                             R.drawable.downicon
                                         }
+
+                                    } else {
+
+                                        R.drawable.sidearrow
                                     }
                             ),
 
                         contentDescription =
 
-                            if (
-                                title ==
-                                "Intruder"
-                            ) {
+                            if (expandable) {
 
-                                "Open Intruder"
+                                if (expanded) {
 
-                            } else {
-
-                                if (
-                                    expanded
-                                ) {
-
-                                    "Collapse"
+                                    stringResource(
+                                        R.string.collapse
+                                    )
 
                                 } else {
 
-                                    "Expand"
+                                    stringResource(
+                                        R.string.expand
+                                    )
                                 }
+
+                            } else {
+
+                                stringResource(
+                                    R.string.open_item,
+                                    title
+                                )
                             },
 
                         modifier =
                             Modifier.size(
 
-                                if (
-                                    title ==
-                                    "Intruder"
-                                ) {
-
-                                    14.dp
-
-                                } else {
-
+                                if (expandable) {
                                     12.dp
+                                } else {
+                                    14.dp
                                 }
                             ),
 
@@ -695,7 +802,7 @@ private fun SettingsItem(
 
             if (
                 expanded &&
-                title == "Lock Setting"
+                itemKey == "lock_setting"
             ) {
 
                 LockSettingExpandedContent(
@@ -707,7 +814,10 @@ private fun SettingsItem(
                         onDelayClick,
 
                     delayOption =
-                        delayOption
+                        delayOption,
+
+                    relockOption =
+                        relockOption
                 )
             }
 
@@ -718,7 +828,7 @@ private fun SettingsItem(
 
             if (
                 expanded &&
-                title == "Hide Settings"
+                itemKey == "hide_settings"
             ) {
 
                 HideSettingsExpandedContent(
@@ -738,15 +848,19 @@ private fun SettingsItem(
 
             if (
                 expanded &&
-                title != "Intruder" &&
-                title != "Lock Setting" &&
-                title != "Hide Settings"
+                itemKey != "intruder" &&
+                itemKey != "lock_setting" &&
+                itemKey != "hide_settings" &&
+                itemKey != "languages" &&
+                itemKey != "rate_us" &&
+                itemKey != "share" &&
+                itemKey != "about" &&
+                itemKey != "privacy_policy"
             ) {
 
                 Text(
 
-                    text =
-                        description,
+                    text = description,
 
                     modifier =
                         Modifier
@@ -778,12 +892,12 @@ private fun HideSettingsExpandedContent(
 
     hideFromRecents: Boolean,
 
-    onHideFromRecentsChange: (Boolean) -> Unit
+    onHideFromRecentsChange:
+        (Boolean) -> Unit
 
 ) {
 
     Column(
-
         modifier =
             Modifier.fillMaxWidth()
     ) {
@@ -808,17 +922,16 @@ private fun HideSettingsExpandedContent(
 
                 painter =
                     painterResource(
-                        id =
-                            R.drawable.eyehide
+                        id = R.drawable.eyehide
                     ),
 
                 contentDescription =
-                    "Hide from recent screen",
+                    stringResource(
+                        R.string.hide_from_recent_screen
+                    ),
 
                 modifier =
-                    Modifier.size(
-                        22.dp
-                    ),
+                    Modifier.size(22.dp),
 
                 contentScale =
                     ContentScale.Fit
@@ -827,16 +940,16 @@ private fun HideSettingsExpandedContent(
 
             Spacer(
                 modifier =
-                    Modifier.width(
-                        13.dp
-                    )
+                    Modifier.width(13.dp)
             )
 
 
             Text(
 
                 text =
-                    "Apps Hide-from recent screen",
+                    stringResource(
+                        R.string.apps_hide_from_recent_screen
+                    ),
 
                 color =
                     Color(0xFF444444),
@@ -845,9 +958,7 @@ private fun HideSettingsExpandedContent(
                     14.sp,
 
                 modifier =
-                    Modifier.weight(
-                        1f
-                    )
+                    Modifier.weight(1f)
             )
 
 
@@ -865,9 +976,7 @@ private fun HideSettingsExpandedContent(
                             width = 42.dp,
                             height = 24.dp
                         )
-                        .scale(
-                            0.56f
-                        ),
+                        .scale(0.56f),
 
                 colors =
                     SwitchDefaults.colors(
@@ -907,20 +1016,58 @@ private fun LockSettingExpandedContent(
 
     onDelayClick: () -> Unit,
 
-    delayOption: String
+    delayOption: String,
+
+    relockOption: String
 
 ) {
 
+    val context = LocalContext.current
+
+    val dataStore = remember {
+        DataStoreManager(context)
+    }
+
+    val scope = rememberCoroutineScope()
+
+
+    // =========================================================
+    // LOCAL STATES
+    // =========================================================
+
     var fingerprintEnabled by remember {
-        mutableStateOf(true)
+        mutableStateOf(false)
     }
 
     var vibrationEnabled by remember {
-        mutableStateOf(true)
+        mutableStateOf(false)
     }
 
     var hideTrackEnabled by remember {
-        mutableStateOf(true)
+        mutableStateOf(false)
+    }
+
+
+    // =========================================================
+    // LOAD SAVED SETTINGS
+    // =========================================================
+
+    LaunchedEffect(Unit) {
+
+        fingerprintEnabled =
+            dataStore
+                .getFingerprintEnabled()
+                .first()
+
+        vibrationEnabled =
+            dataStore
+                .getVibrationEnabled()
+                .first()
+
+        hideTrackEnabled =
+            dataStore
+                .getHideTrackEnabled()
+                .first()
     }
 
 
@@ -929,15 +1076,16 @@ private fun LockSettingExpandedContent(
             Modifier.fillMaxWidth()
     ) {
 
-
-        // =================================================
+        // =====================================================
         // PASSWORD
-        // =================================================
+        // =====================================================
 
         Text(
 
             text =
-                "Password",
+                stringResource(
+                    R.string.password
+                ),
 
             color =
                 Color(0xFF888888),
@@ -960,10 +1108,14 @@ private fun LockSettingExpandedContent(
                 R.drawable.redlock,
 
             title =
-                "Reset Password",
+                stringResource(
+                    R.string.reset_password
+                ),
 
             subtitle =
-                "Pattern",
+                stringResource(
+                    R.string.pattern
+                ),
 
             onClick = {}
         )
@@ -978,10 +1130,14 @@ private fun LockSettingExpandedContent(
                 R.drawable.security,
 
             title =
-                "Security settings",
+                stringResource(
+                    R.string.security_settings
+                ),
 
             subtitle =
-                "Set security email",
+                stringResource(
+                    R.string.set_security_email
+                ),
 
             onClick = {}
         )
@@ -990,36 +1146,54 @@ private fun LockSettingExpandedContent(
         SettingDivider()
 
 
+        // =====================================================
+        // FINGERPRINT
+        // =====================================================
+
         LockSettingSwitchRow(
 
             iconRes =
                 R.drawable.fingerprint,
 
             title =
-                "Fingerprint lock",
+                stringResource(
+                    R.string.fingerprint_lock
+                ),
 
             subtitle =
-                "use Fingerprint to unlock apps",
+                stringResource(
+                    R.string.use_fingerprint_to_unlock
+                ),
 
             checked =
                 fingerprintEnabled,
 
-            onCheckedChange = {
+            onCheckedChange = { enabled ->
 
                 fingerprintEnabled =
-                    it
+                    enabled
+
+                scope.launch {
+
+                    dataStore
+                        .saveFingerprintEnabled(
+                            enabled
+                        )
+                }
             }
         )
 
 
-        // =================================================
+        // =====================================================
         // UNLOCK
-        // =================================================
+        // =====================================================
 
         Text(
 
             text =
-                "Unlock",
+                stringResource(
+                    R.string.unlock
+                ),
 
             color =
                 Color(0xFF888888),
@@ -1036,13 +1210,19 @@ private fun LockSettingExpandedContent(
         )
 
 
+        // =====================================================
+        // VIBRATION
+        // =====================================================
+
         LockSettingSwitchRow(
 
             iconRes =
                 R.drawable.vibration,
 
             title =
-                "Vibration",
+                stringResource(
+                    R.string.vibration
+                ),
 
             subtitle =
                 null,
@@ -1050,16 +1230,28 @@ private fun LockSettingExpandedContent(
             checked =
                 vibrationEnabled,
 
-            onCheckedChange = {
+            onCheckedChange = { enabled ->
 
                 vibrationEnabled =
-                    it
+                    enabled
+
+                scope.launch {
+
+                    dataStore
+                        .saveVibrationEnabled(
+                            enabled
+                        )
+                }
             }
         )
 
 
         SettingDivider()
 
+
+        // =====================================================
+        // HIDE TRACK
+        // =====================================================
 
         LockSettingSwitchRow(
 
@@ -1067,18 +1259,30 @@ private fun LockSettingExpandedContent(
                 R.drawable.track,
 
             title =
-                "Hide Track",
+                stringResource(
+                    R.string.hide_track
+                ),
 
             subtitle =
-                "Hide track when you draw pattern password",
+                stringResource(
+                    R.string.hide_track_description
+                ),
 
             checked =
                 hideTrackEnabled,
 
-            onCheckedChange = {
+            onCheckedChange = { enabled ->
 
                 hideTrackEnabled =
-                    it
+                    enabled
+
+                scope.launch {
+
+                    dataStore
+                        .saveHideTrackEnabled(
+                            enabled
+                        )
+                }
             }
         )
 
@@ -1086,9 +1290,9 @@ private fun LockSettingExpandedContent(
         SettingDivider()
 
 
-        // =================================================
-        // RE-LOCK OPTION
-        // =================================================
+        // =====================================================
+        // RE-LOCK
+        // =====================================================
 
         LockSettingRow(
 
@@ -1096,10 +1300,18 @@ private fun LockSettingExpandedContent(
                 R.drawable.relock,
 
             title =
-                "Re-Lock option",
+                stringResource(
+                    R.string.relock_option
+                ),
+
+            // IMPORTANT:
+            // Ab actual saved option show hogi
 
             subtitle =
-                "Re-lock after Quitting",
+                getRelockText(
+                    relockOption =
+                        relockOption
+                ),
 
             onClick =
                 onRelockClick
@@ -1109,9 +1321,9 @@ private fun LockSettingExpandedContent(
         SettingDivider()
 
 
-        // =================================================
+        // =====================================================
         // DELAY TO RE-LOCK
-        // =================================================
+        // =====================================================
 
         LockSettingRow(
 
@@ -1119,10 +1331,14 @@ private fun LockSettingExpandedContent(
                 R.drawable.delay,
 
             title =
-                "Delay to Re-Lock",
+                stringResource(
+                    R.string.delay_to_relock
+                ),
 
             subtitle =
-                delayOption,
+                getDelayText(
+                    delayOption
+                ),
 
             onClick =
                 onDelayClick
@@ -1131,10 +1347,94 @@ private fun LockSettingExpandedContent(
 
         Spacer(
             modifier =
-                Modifier.height(
-                    8.dp
-                )
+                Modifier.height(8.dp)
         )
+    }
+}
+
+
+// =============================================================
+// RE-LOCK TEXT
+// =============================================================
+
+@Composable
+private fun getRelockText(
+    relockOption: String
+): String {
+
+    return when (relockOption) {
+
+        "relock_after_screen_off" ->
+
+            stringResource(
+                R.string.relock_after_screen_off
+            )
+
+        "relock_after_quitting" ->
+
+            stringResource(
+                R.string.relock_after_quitting
+            )
+
+        else ->
+
+            stringResource(
+                R.string.relock_after_quitting
+            )
+    }
+}
+
+
+// =============================================================
+// DELAY TEXT
+// =============================================================
+
+@Composable
+private fun getDelayText(
+    key: String
+): String {
+
+    return when (key) {
+
+        "never" ->
+            stringResource(
+                R.string.never
+            )
+
+        "five_seconds" ->
+            stringResource(
+                R.string.five_seconds
+            )
+
+        "fifteen_seconds" ->
+            stringResource(
+                R.string.fifteen_seconds
+            )
+
+        "thirty_seconds" ->
+            stringResource(
+                R.string.thirty_seconds
+            )
+
+        "one_minute" ->
+            stringResource(
+                R.string.one_minute
+            )
+
+        "two_minutes" ->
+            stringResource(
+                R.string.two_minutes
+            )
+
+        "five_minutes" ->
+            stringResource(
+                R.string.five_minutes
+            )
+
+        else ->
+            stringResource(
+                R.string.never
+            )
     }
 }
 
@@ -1148,7 +1448,8 @@ private fun RelockOptionDialog(
 
     selectedOption: String,
 
-    onOptionSelected: (String) -> Unit,
+    onOptionSelected:
+        (String) -> Unit,
 
     onCancel: () -> Unit,
 
@@ -1163,7 +1464,8 @@ private fun RelockOptionDialog(
 
         properties =
             DialogProperties(
-                usePlatformDefaultWidth = false
+                usePlatformDefaultWidth =
+                    false
             )
     ) {
 
@@ -1175,9 +1477,7 @@ private fun RelockOptionDialog(
                     .height(178.dp)
                     .background(
                         Color.White,
-                        RoundedCornerShape(
-                            12.dp
-                        )
+                        RoundedCornerShape(12.dp)
                     )
         ) {
 
@@ -1194,11 +1494,6 @@ private fun RelockOptionDialog(
                         )
             ) {
 
-
-                // =================================================
-                // HEADING
-                // =================================================
-
                 Box(
 
                     modifier =
@@ -1213,7 +1508,9 @@ private fun RelockOptionDialog(
                     Text(
 
                         text =
-                            "Re-Lock",
+                            stringResource(
+                                R.string.relock
+                            ),
 
                         color =
                             Color(0xFF333333),
@@ -1230,45 +1527,41 @@ private fun RelockOptionDialog(
                 )
 
 
-                // =================================================
-                // OPTION 1
-                // =================================================
-
                 RelockOptionRow(
 
                     text =
-                        "Re-Lock After Quitting",
+                        stringResource(
+                            R.string.relock_after_quitting_option
+                        ),
 
                     selected =
                         selectedOption ==
-                                "Re-Lock After Quitting",
+                                "relock_after_quitting",
 
                     onClick = {
 
                         onOptionSelected(
-                            "Re-Lock After Quitting"
+                            "relock_after_quitting"
                         )
                     }
                 )
 
 
-                // =================================================
-                // OPTION 2
-                // =================================================
-
                 RelockOptionRow(
 
                     text =
-                        "Re-Lock after screen off",
+                        stringResource(
+                            R.string.relock_after_screen_off
+                        ),
 
                     selected =
                         selectedOption ==
-                                "Re-Lock after screen off",
+                                "relock_after_screen_off",
 
                     onClick = {
 
                         onOptionSelected(
-                            "Re-Lock after screen off"
+                            "relock_after_screen_off"
                         )
                     }
                 )
@@ -1276,15 +1569,9 @@ private fun RelockOptionDialog(
 
                 Spacer(
                     modifier =
-                        Modifier.weight(
-                            1f
-                        )
+                        Modifier.weight(1f)
                 )
 
-
-                // =================================================
-                // BUTTONS
-                // =================================================
 
                 DialogButtons(
 
@@ -1338,9 +1625,7 @@ private fun RelockOptionRow(
                 onClick,
 
             modifier =
-                Modifier.size(
-                    28.dp
-                ),
+                Modifier.size(28.dp),
 
             colors =
                 RadioButtonDefaults.colors(
@@ -1356,9 +1641,7 @@ private fun RelockOptionRow(
 
         Spacer(
             modifier =
-                Modifier.width(
-                    5.dp
-                )
+                Modifier.width(5.dp)
         )
 
 
@@ -1386,7 +1669,8 @@ private fun DelayToRelockDialog(
 
     selectedOption: String,
 
-    onOptionSelected: (String) -> Unit,
+    onOptionSelected:
+        (String) -> Unit,
 
     onCancel: () -> Unit,
 
@@ -1396,19 +1680,13 @@ private fun DelayToRelockDialog(
 
     val delayOptions = listOf(
 
-        "Never",
-
-        "5 Seconds",
-
-        "15 Seconds",
-
-        "30 Seconds",
-
-        "1 Minute",
-
-        "2 Minutes",
-
-        "5 Minutes"
+        "never",
+        "five_seconds",
+        "fifteen_seconds",
+        "thirty_seconds",
+        "one_minute",
+        "two_minutes",
+        "five_minutes"
     )
 
 
@@ -1419,7 +1697,8 @@ private fun DelayToRelockDialog(
 
         properties =
             DialogProperties(
-                usePlatformDefaultWidth = false
+                usePlatformDefaultWidth =
+                    false
             )
     ) {
 
@@ -1431,9 +1710,7 @@ private fun DelayToRelockDialog(
                     .height(360.dp)
                     .background(
                         Color.White,
-                        RoundedCornerShape(
-                            12.dp
-                        )
+                        RoundedCornerShape(12.dp)
                     )
         ) {
 
@@ -1450,11 +1727,6 @@ private fun DelayToRelockDialog(
                         )
             ) {
 
-
-                // =================================================
-                // HEADING
-                // =================================================
-
                 Box(
 
                     modifier =
@@ -1469,7 +1741,9 @@ private fun DelayToRelockDialog(
                     Text(
 
                         text =
-                            "Delay to Re-Lock",
+                            stringResource(
+                                R.string.delay_to_relock
+                            ),
 
                         color =
                             Color(0xFF333333),
@@ -1486,16 +1760,14 @@ private fun DelayToRelockDialog(
                 )
 
 
-                // =================================================
-                // OPTIONS
-                // =================================================
-
                 delayOptions.forEach { option ->
 
                     DelayOptionRow(
 
                         text =
-                            option,
+                            getDelayText(
+                                option
+                            ),
 
                         selected =
                             selectedOption ==
@@ -1513,15 +1785,9 @@ private fun DelayToRelockDialog(
 
                 Spacer(
                     modifier =
-                        Modifier.weight(
-                            1f
-                        )
+                        Modifier.weight(1f)
                 )
 
-
-                // =================================================
-                // BUTTONS
-                // =================================================
 
                 DialogButtons(
 
@@ -1575,9 +1841,7 @@ private fun DelayOptionRow(
                 onClick,
 
             modifier =
-                Modifier.size(
-                    28.dp
-                ),
+                Modifier.size(28.dp),
 
             colors =
                 RadioButtonDefaults.colors(
@@ -1593,9 +1857,7 @@ private fun DelayOptionRow(
 
         Spacer(
             modifier =
-                Modifier.width(
-                    5.dp
-                )
+                Modifier.width(5.dp)
         )
 
 
@@ -1642,7 +1904,9 @@ private fun DialogButtons(
         Text(
 
             text =
-                "Cancel",
+                stringResource(
+                    R.string.cancel
+                ),
 
             color =
                 Color(0xFF818181),
@@ -1664,16 +1928,16 @@ private fun DialogButtons(
 
         Spacer(
             modifier =
-                Modifier.width(
-                    4.dp
-                )
+                Modifier.width(4.dp)
         )
 
 
         Text(
 
             text =
-                "Confirm",
+                stringResource(
+                    R.string.confirm
+                ),
 
             color =
                 Color(0xFF0396FF),
@@ -1718,7 +1982,6 @@ private fun LockSettingRow(
             Modifier
                 .fillMaxWidth()
                 .clickable {
-
                     onClick()
                 }
                 .padding(
@@ -1732,13 +1995,10 @@ private fun LockSettingRow(
             Alignment.CenterVertically
     ) {
 
-
         Box(
 
             modifier =
-                Modifier.width(
-                    28.dp
-                ),
+                Modifier.width(28.dp),
 
             contentAlignment =
                 Alignment.Center
@@ -1748,17 +2008,14 @@ private fun LockSettingRow(
 
                 painter =
                     painterResource(
-                        id =
-                            iconRes
+                        id = iconRes
                     ),
 
                 contentDescription =
                     title,
 
                 modifier =
-                    Modifier.size(
-                        19.dp
-                    ),
+                    Modifier.size(19.dp),
 
                 contentScale =
                     ContentScale.Fit
@@ -1768,18 +2025,14 @@ private fun LockSettingRow(
 
         Spacer(
             modifier =
-                Modifier.width(
-                    8.dp
-                )
+                Modifier.width(8.dp)
         )
 
 
         Column(
 
             modifier =
-                Modifier.weight(
-                    1f
-                )
+                Modifier.weight(1f)
         ) {
 
             Text(
@@ -1801,9 +2054,7 @@ private fun LockSettingRow(
 
                 Spacer(
                     modifier =
-                        Modifier.height(
-                            2.dp
-                        )
+                        Modifier.height(2.dp)
                 )
 
 
@@ -1839,7 +2090,8 @@ private fun LockSettingSwitchRow(
 
     checked: Boolean,
 
-    onCheckedChange: (Boolean) -> Unit
+    onCheckedChange:
+        (Boolean) -> Unit
 
 ) {
 
@@ -1859,13 +2111,10 @@ private fun LockSettingSwitchRow(
             Alignment.CenterVertically
     ) {
 
-
         Box(
 
             modifier =
-                Modifier.width(
-                    28.dp
-                ),
+                Modifier.width(28.dp),
 
             contentAlignment =
                 Alignment.Center
@@ -1875,17 +2124,14 @@ private fun LockSettingSwitchRow(
 
                 painter =
                     painterResource(
-                        id =
-                            iconRes
+                        id = iconRes
                     ),
 
                 contentDescription =
                     title,
 
                 modifier =
-                    Modifier.size(
-                        19.dp
-                    ),
+                    Modifier.size(19.dp),
 
                 contentScale =
                     ContentScale.Fit
@@ -1895,18 +2141,14 @@ private fun LockSettingSwitchRow(
 
         Spacer(
             modifier =
-                Modifier.width(
-                    8.dp
-                )
+                Modifier.width(8.dp)
         )
 
 
         Column(
 
             modifier =
-                Modifier.weight(
-                    1f
-                )
+                Modifier.weight(1f)
         ) {
 
             Text(
@@ -1928,9 +2170,7 @@ private fun LockSettingSwitchRow(
 
                 Spacer(
                     modifier =
-                        Modifier.height(
-                            2.dp
-                        )
+                        Modifier.height(2.dp)
                 )
 
 
@@ -1956,9 +2196,7 @@ private fun LockSettingSwitchRow(
 
             onCheckedChange = {
 
-                onCheckedChange(
-                    it
-                )
+                onCheckedChange(it)
             },
 
             modifier =
@@ -1967,9 +2205,7 @@ private fun LockSettingSwitchRow(
                         width = 42.dp,
                         height = 24.dp
                     )
-                    .scale(
-                        0.56f
-                    ),
+                    .scale(0.56f),
 
             colors =
                 SwitchDefaults.colors(

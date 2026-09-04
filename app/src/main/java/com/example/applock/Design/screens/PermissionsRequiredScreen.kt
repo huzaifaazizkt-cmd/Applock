@@ -6,10 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Fingerprint
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
-import androidx.compose.material.icons.outlined.Layers
-import androidx.compose.material.icons.outlined.PowerSettingsNew
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,12 +15,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.applock.R
 
+
+// =============================================================
+// PERMISSIONS REQUIRED SCREEN
+// =============================================================
 
 @Composable
 fun PermissionsRequiredScreen(
@@ -49,6 +51,7 @@ fun PermissionsRequiredScreen(
         // =====================================================
 
         Box(
+
             modifier =
                 Modifier
                     .fillMaxSize()
@@ -70,6 +73,7 @@ fun PermissionsRequiredScreen(
             // =================================================
 
             Column(
+
                 modifier =
                     Modifier
                         .fillMaxWidth()
@@ -92,6 +96,7 @@ fun PermissionsRequiredScreen(
                 // =================================================
 
                 Box(
+
                     modifier =
                         Modifier
                             .fillMaxWidth()
@@ -104,8 +109,11 @@ fun PermissionsRequiredScreen(
                 ) {
 
                     Text(
+
                         text =
-                            "Permissions Required",
+                            stringResource(
+                                R.string.permissions_required
+                            ),
 
                         color =
                             Color(0xFF333333),
@@ -124,24 +132,41 @@ fun PermissionsRequiredScreen(
 
                     icon = {
 
-                        Image(painter = painterResource(
-                            id = R.drawable.group1
-                        ),
-                            contentDescription = "group1",
-                            modifier = Modifier.size(23.dp),
-                            contentScale = ContentScale.Fit
-                        )
+                        Image(
 
+                            painter =
+                                painterResource(
+                                    id = R.drawable.group1
+                                ),
+
+                            contentDescription =
+                                stringResource(
+                                    R.string.show_over_other_apps
+                                ),
+
+                            modifier =
+                                Modifier.size(
+                                    23.dp
+                                ),
+
+                            contentScale =
+                                ContentScale.Fit
+                        )
                     },
 
                     title =
-                        "Show Over Other Apps",
+                        stringResource(
+                            R.string.show_over_other_apps
+                        ),
 
                     description =
-                        "Allow Lock Screen to show over\nother apps",
+                        stringResource(
+                            R.string.allow_lock_screen
+                        ),
 
                     onAllowClick = {
 
+                        // Permission action yahan add kar sakte hain
 
                     }
                 )
@@ -158,23 +183,41 @@ fun PermissionsRequiredScreen(
 
                     icon = {
 
-                        Image(painter = painterResource(
-                            id = R.drawable.group2
-                        ),
-                            contentDescription = "group2",
-                            modifier = Modifier.size(23.dp),
-                            contentScale = ContentScale.Fit
+                        Image(
+
+                            painter =
+                                painterResource(
+                                    id = R.drawable.group2
+                                ),
+
+                            contentDescription =
+                                stringResource(
+                                    R.string.detect_launched_app
+                                ),
+
+                            modifier =
+                                Modifier.size(
+                                    23.dp
+                                ),
+
+                            contentScale =
+                                ContentScale.Fit
                         )
                     },
 
                     title =
-                        "Detect Launched App",
+                        stringResource(
+                            R.string.detect_launched_app
+                        ),
 
                     description =
-                        "Permit to detect which app is\nlaunched by granting access to...",
+                        stringResource(
+                            R.string.detect_launched_description
+                        ),
 
                     onAllowClick = {
 
+                        // Accessibility permission action yahan add kar sakte hain
 
                     }
                 )
@@ -191,23 +234,41 @@ fun PermissionsRequiredScreen(
 
                     icon = {
 
-                        Image(painter = painterResource(
-                            id = R.drawable.group3
-                        ),
-                            contentDescription = "group3",
-                            modifier = Modifier.size(23.dp),
-                            contentScale = ContentScale.Fit
+                        Image(
+
+                            painter =
+                                painterResource(
+                                    id = R.drawable.group3
+                                ),
+
+                            contentDescription =
+                                stringResource(
+                                    R.string.auto_start
+                                ),
+
+                            modifier =
+                                Modifier.size(
+                                    23.dp
+                                ),
+
+                            contentScale =
+                                ContentScale.Fit
                         )
                     },
 
                     title =
-                        "Auto Start",
+                        stringResource(
+                            R.string.auto_start
+                        ),
 
                     description =
-                        "Always Keep AppLock Pro Running",
+                        stringResource(
+                            R.string.keep_applock_running
+                        ),
 
                     onAllowClick = {
 
+                        // Auto Start permission action yahan add kar sakte hain
 
                     }
                 )
@@ -221,9 +282,11 @@ fun PermissionsRequiredScreen(
                 // =================================================
 
                 Text(
+
                     text =
-                        "Permissions are required for the application to work\n" +
-                                "properly and efficiently",
+                        stringResource(
+                            R.string.permissions_work_properly
+                        ),
 
                     color =
                         Color(0xFFBDBDBD),
@@ -263,14 +326,17 @@ private fun PermissionItem(
 
     onAllowClick:
         () -> Unit
+
 ) {
 
     Column(
+
         modifier =
             Modifier.fillMaxWidth()
     ) {
 
         Row(
+
             modifier =
                 Modifier.fillMaxWidth(),
 
@@ -284,6 +350,7 @@ private fun PermissionItem(
             // =================================================
 
             Box(
+
                 modifier =
                     Modifier
                         .width(30.dp)
@@ -304,6 +371,7 @@ private fun PermissionItem(
             // =================================================
 
             Column(
+
                 modifier =
                     Modifier.weight(1f)
             ) {
@@ -314,6 +382,7 @@ private fun PermissionItem(
                 // =================================================
 
                 Row(
+
                     modifier =
                         Modifier.fillMaxWidth(),
 
@@ -322,6 +391,7 @@ private fun PermissionItem(
                 ) {
 
                     Text(
+
                         text =
                             title,
 
@@ -332,11 +402,14 @@ private fun PermissionItem(
                             15.sp,
 
                         modifier =
-                            Modifier.weight(1f)
+                            Modifier.weight(
+                                1f
+                            )
                     )
 
 
                     Icon(
+
                         imageVector =
                             Icons.Outlined.KeyboardArrowDown,
 
@@ -347,14 +420,18 @@ private fun PermissionItem(
                             Color(0xFFB5B5B5),
 
                         modifier =
-                            Modifier.size(18.dp)
+                            Modifier.size(
+                                18.dp
+                            )
                     )
                 }
 
 
                 Spacer(
                     modifier =
-                        Modifier.height(7.dp)
+                        Modifier.height(
+                            7.dp
+                        )
                 )
 
 
@@ -363,6 +440,7 @@ private fun PermissionItem(
                 // =================================================
 
                 Row(
+
                     modifier =
                         Modifier.fillMaxWidth(),
 
@@ -371,6 +449,7 @@ private fun PermissionItem(
                 ) {
 
                     Text(
+
                         text =
                             description,
 
@@ -384,7 +463,9 @@ private fun PermissionItem(
                             18.sp,
 
                         modifier =
-                            Modifier.weight(1f)
+                            Modifier.weight(
+                                1f
+                            )
                     )
 
 
@@ -393,15 +474,19 @@ private fun PermissionItem(
                     // =================================================
 
                     Box(
+
                         modifier =
                             Modifier
                                 .width(72.dp)
                                 .height(40.dp)
                                 .background(
                                     Color(0xFF2196F3),
-                                    RoundedCornerShape(4.dp)
+                                    RoundedCornerShape(
+                                        4.dp
+                                    )
                                 )
                                 .clickable {
+
                                     onAllowClick()
                                 },
 
@@ -410,8 +495,11 @@ private fun PermissionItem(
                     ) {
 
                         Text(
+
                             text =
-                                "Allow",
+                                stringResource(
+                                    R.string.allow
+                                ),
 
                             color =
                                 Color.White,
@@ -427,18 +515,23 @@ private fun PermissionItem(
 }
 
 
-
+// =============================================================
+// PERMISSION DIVIDER
+// =============================================================
 
 @Composable
 private fun PermissionDivider() {
 
     Spacer(
         modifier =
-            Modifier.height(17.dp)
+            Modifier.height(
+                17.dp
+            )
     )
 
 
     Box(
+
         modifier =
             Modifier
                 .fillMaxWidth()
@@ -451,6 +544,8 @@ private fun PermissionDivider() {
 
     Spacer(
         modifier =
-            Modifier.height(22.dp)
+            Modifier.height(
+                22.dp
+            )
     )
 }

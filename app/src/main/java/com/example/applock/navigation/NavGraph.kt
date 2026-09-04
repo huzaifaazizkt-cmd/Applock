@@ -1,38 +1,65 @@
-
 package com.example.applock.navigation
 
 import android.content.Context
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+
 import com.example.applock.Design.screens.HomeScreen
 import com.example.applock.Design.screens.IntruderScreen
+import com.example.applock.Design.screens.LanguagesScreen
 import com.example.applock.Design.screens.MainScreen
+import com.example.applock.Design.screens.OnboardingScreen
 import com.example.applock.Design.screens.PinConfirmScreen
 import com.example.applock.Design.screens.PinCreateScreen
+import com.example.applock.Design.screens.StartScreen
+import com.example.applock.Design.screens.WelcomeScreen
+
 
 @Composable
 fun NavGraph(
     context: Context
 ) {
 
-    val navController =
-        rememberNavController()
-
+    val navController = rememberNavController()
 
     NavHost(
         navController = navController,
-        startDestination = "create"
+        startDestination = "startScreen"
     ) {
 
 
-        // =====================================================
-        // CREATE
-        // =====================================================
+
+        composable("startScreen") {
+
+            StartScreen(
+                navController = navController
+            )
+        }
+
+
+
+        composable("welcomeScreen") {
+
+            WelcomeScreen(
+                navController = navController
+            )
+        }
+
+
+
+        composable("onboardingScreen") {
+
+            OnboardingScreen(
+                navController = navController
+            )
+        }
+
+
+
 
         composable("create") {
 
@@ -61,9 +88,7 @@ fun NavGraph(
         }
 
 
-        // =====================================================
-        // CONFIRM
-        // =====================================================
+
 
         composable(
             route = "confirm/{type}/{value}",
@@ -71,15 +96,11 @@ fun NavGraph(
             arguments = listOf(
 
                 navArgument("type") {
-
-                    type =
-                        NavType.StringType
+                    type = NavType.StringType
                 },
 
                 navArgument("value") {
-
-                    type =
-                        NavType.StringType
+                    type = NavType.StringType
                 }
             )
 
@@ -91,34 +112,25 @@ fun NavGraph(
                     ?.getString("type")
                     ?: "pin"
 
-
             val value =
                 backStackEntry
                     .arguments
                     ?.getString("value")
                     ?: ""
 
-
             PinConfirmScreen(
 
-                navController =
-                    navController,
+                navController = navController,
 
-                context =
-                    context,
+                context = context,
 
-                type =
-                    type,
+                type = type,
 
-                value =
-                    value
+                value = value
             )
         }
 
 
-        // =====================================================
-        // HOME
-        // =====================================================
 
         composable("home") {
 
@@ -128,9 +140,6 @@ fun NavGraph(
         }
 
 
-        // =====================================================
-        // APP LIST / MAIN SCREEN
-        // =====================================================
 
         composable("appList") {
 
@@ -141,15 +150,10 @@ fun NavGraph(
                     ?.get<Boolean>("openSettings")
                     ?: false
 
-
             MainScreen(
 
-                context =
-                    context,
+                context = context,
 
-                // =================================================
-                // SETTINGS -> INTRUDER
-                // =================================================
 
                 onIntruderClick = {
 
@@ -158,12 +162,37 @@ fun NavGraph(
                     )
                 },
 
-                // =================================================
-                // DEFAULT
-                // =================================================
 
-                openSettings =
-                    openSettings
+                onLanguageClick = {
+
+                    navController.navigate(
+                        "languages"
+                    )
+                },
+
+
+                openSettings = openSettings
+            )
+        }
+
+
+
+        composable("languages") {
+
+            LanguagesScreen(
+
+                onBackClick = {
+
+                    navController
+                        .previousBackStackEntry
+                        ?.savedStateHandle
+                        ?.set(
+                            "openSettings",
+                            true
+                        )
+
+                    navController.popBackStack()
+                }
             )
         }
 
@@ -178,11 +207,6 @@ fun NavGraph(
 
                 onBackClick = {
 
-                    // =================================================
-                    // MAIN SCREEN KO BATAYEIN:
-                    // SETTINGS TAB OPEN KARNA HAI
-                    // =================================================
-
                     navController
                         .previousBackStackEntry
                         ?.savedStateHandle
@@ -191,14 +215,9 @@ fun NavGraph(
                             true
                         )
 
-                    // =================================================
-                    // INTRUDER SE MAIN SCREEN PAR WAPAS
-                    // =================================================
-
                     navController.popBackStack()
                 }
             )
         }
     }
 }
-

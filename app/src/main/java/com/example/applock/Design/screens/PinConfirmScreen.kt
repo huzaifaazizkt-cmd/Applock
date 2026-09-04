@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
+
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -15,10 +16,12 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,6 +31,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -36,16 +40,20 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
+
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavController
+
 import com.example.applock.Design.components.NumberPad
 import com.example.applock.R
 import com.example.applock.data.DataStoreManager
+
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+
 import kotlin.math.sqrt
 
 
@@ -64,12 +72,10 @@ fun PinConfirmScreen(
     val scope =
         rememberCoroutineScope()
 
-
     val appContext =
         remember {
             context.applicationContext
         }
-
 
     val dataStore =
         remember {
@@ -78,15 +84,12 @@ fun PinConfirmScreen(
             )
         }
 
-
     val lifecycleOwner =
         LocalLifecycleOwner.current
 
 
     // =========================================================
     // START APP LIST PRELOAD IMMEDIATELY
-    //
-    // APPS + ICONS dono yahin preload honge.
     // =========================================================
 
     LaunchedEffect(Unit) {
@@ -166,7 +169,6 @@ fun PinConfirmScreen(
         )
     }
 
-
     var accessibilityAllowed by remember {
 
         mutableStateOf(
@@ -175,7 +177,6 @@ fun PinConfirmScreen(
             )
         )
     }
-
 
     var autoStartAllowed by remember {
 
@@ -230,6 +231,26 @@ fun PinConfirmScreen(
 
     val pinLength =
         value.length
+
+
+    // =========================================================
+    // STRING RESOURCES
+    //
+    // IMPORTANT:
+    // stringResource() yahan composable body mein hai.
+    // Isko normal functions/click callbacks mein directly
+    // use nahi kiya gaya.
+    // =========================================================
+
+    val passwordNotMatchText =
+        stringResource(
+            R.string.password_not_match
+        )
+
+    val enterCorrectPasswordText =
+        stringResource(
+            R.string.enter_correct_password
+        )
 
 
     // =========================================================
@@ -327,13 +348,11 @@ fun PinConfirmScreen(
                                 context
                             )
 
-
                         overlayAllowed =
                             newOverlayAllowed
 
                         accessibilityAllowed =
                             newAccessibilityAllowed
-
 
                         if (
                             newOverlayAllowed &&
@@ -460,8 +479,11 @@ fun PinConfirmScreen(
         patternConfirmed =
             false
 
+        // IMPORTANT:
+        // stringResource() ko normal function ke andar
+        // call nahi kar rahe.
         error =
-            "Password does not match. Please try again"
+            passwordNotMatchText
 
         clearErrorJob =
             scope.launch {
@@ -494,7 +516,9 @@ fun PinConfirmScreen(
         showPermissionDialog =
             true
 
-        scope.launch(Dispatchers.IO) {
+        scope.launch(
+            Dispatchers.IO
+        ) {
 
             try {
 
@@ -525,7 +549,9 @@ fun PinConfirmScreen(
         showPermissionDialog =
             true
 
-        scope.launch(Dispatchers.IO) {
+        scope.launch(
+            Dispatchers.IO
+        ) {
 
             try {
 
@@ -617,11 +643,6 @@ fun PinConfirmScreen(
 
     // =========================================================
     // GO TO APP LIST
-    //
-    // IMPORTANT:
-    // No delay.
-    // No DataStore wait.
-    // Direct navigation.
     // =========================================================
 
     fun goToAppList() {
@@ -632,17 +653,14 @@ fun PinConfirmScreen(
             return
         }
 
-
         isNavigatingToAppList =
             true
-
 
         showSecurityDialog =
             false
 
         showPermissionDialog =
             false
-
 
         navController.navigate(
             "appList"
@@ -660,7 +678,7 @@ fun PinConfirmScreen(
     }
 
 
-    // =============================================================
+    // =========================================================
     // MAIN UI
     // =============================================================
 
@@ -700,11 +718,15 @@ fun PinConfirmScreen(
                 text =
                     if (isPattern) {
 
-                        "Confirm pattern"
+                        stringResource(
+                            R.string.confirm_pattern
+                        )
 
                     } else {
 
-                        "Confirm passcode"
+                        stringResource(
+                            R.string.confirm_passcode
+                        )
                     },
 
                 color =
@@ -833,7 +855,9 @@ fun PinConfirmScreen(
                 Text(
 
                     text =
-                        "Draw pattern again",
+                        stringResource(
+                            R.string.draw_pattern_again
+                        ),
 
                     color =
                         Color.White,
@@ -997,7 +1021,9 @@ fun PinConfirmScreen(
                     Text(
 
                         text =
-                            "Continue",
+                            stringResource(
+                                R.string.continue_text
+                            ),
 
                         color =
                             if (
@@ -1043,7 +1069,10 @@ fun PinConfirmScreen(
                 Text(
 
                     text =
-                        "Confirm $pinLength - Digit pin",
+                        stringResource(
+                            R.string.confirm_pin,
+                            pinLength
+                        ),
 
                     color =
                         Color.White,
@@ -1210,7 +1239,9 @@ fun PinConfirmScreen(
                     Text(
 
                         text =
-                            "Continue",
+                            stringResource(
+                                R.string.continue_text
+                            ),
 
                         color =
                             if (
@@ -1245,8 +1276,11 @@ fun PinConfirmScreen(
                                         value
                                     ) {
 
+                                        // IMPORTANT:
+                                        // Composable ke bahar
+                                        // stringResource() nahi.
                                         error =
-                                            "Enter your correct password"
+                                            enterCorrectPasswordText
 
                                         confirmPin =
                                             ""
@@ -1351,7 +1385,6 @@ fun PinConfirmScreen(
 
                 onSkip = {
 
-                    // FORAN APP LIST
                     goToAppList()
                 },
 
@@ -1364,11 +1397,11 @@ fun PinConfirmScreen(
                         securityAnswer.trim()
 
 
-                    // FORAN APP LIST
+                    // Navigation immediately
                     goToAppList()
 
 
-                    // Background save
+                    // Save in background
                     scope.launch(
                         Dispatchers.IO
                     ) {
@@ -1473,7 +1506,9 @@ private fun PermissionRequiredDialog(
                 Text(
 
                     text =
-                        "Permissions Required",
+                        stringResource(
+                            R.string.permissions_required
+                        ),
 
                     color =
                         Color(0xFF333333),
@@ -1493,6 +1528,10 @@ private fun PermissionRequiredDialog(
                 )
 
 
+                // =================================================
+                // OVERLAY
+                // =================================================
+
                 PermissionRow(
 
                     icon = {
@@ -1506,7 +1545,9 @@ private fun PermissionRequiredDialog(
                                 ),
 
                             contentDescription =
-                                "Show Over Other Apps",
+                                stringResource(
+                                    R.string.show_over_other_apps
+                                ),
 
                             modifier =
                                 Modifier.size(
@@ -1519,10 +1560,14 @@ private fun PermissionRequiredDialog(
                     },
 
                     title =
-                        "Show Over Other Apps",
+                        stringResource(
+                            R.string.show_over_other_apps
+                        ),
 
                     description =
-                        "Allow Lock Screen to show over\nother apps",
+                        stringResource(
+                            R.string.allow_lock_screen
+                        ),
 
                     allowed =
                         overlayAllowed,
@@ -1534,6 +1579,10 @@ private fun PermissionRequiredDialog(
 
                 PermissionDivider()
 
+
+                // =================================================
+                // ACCESSIBILITY
+                // =================================================
 
                 PermissionRow(
 
@@ -1548,7 +1597,9 @@ private fun PermissionRequiredDialog(
                                 ),
 
                             contentDescription =
-                                "Detect Launched App",
+                                stringResource(
+                                    R.string.detect_launched_app
+                                ),
 
                             modifier =
                                 Modifier.size(
@@ -1561,10 +1612,14 @@ private fun PermissionRequiredDialog(
                     },
 
                     title =
-                        "Detect Launched App",
+                        stringResource(
+                            R.string.detect_launched_app
+                        ),
 
                     description =
-                        "Permit to detect which app is\nlaunched by granting access to...",
+                        stringResource(
+                            R.string.detect_launched_description
+                        ),
 
                     allowed =
                         accessibilityAllowed,
@@ -1576,6 +1631,10 @@ private fun PermissionRequiredDialog(
 
                 PermissionDivider()
 
+
+                // =================================================
+                // AUTO START
+                // =================================================
 
                 PermissionRow(
 
@@ -1590,7 +1649,9 @@ private fun PermissionRequiredDialog(
                                 ),
 
                             contentDescription =
-                                "Auto Start",
+                                stringResource(
+                                    R.string.auto_start
+                                ),
 
                             modifier =
                                 Modifier.size(
@@ -1603,10 +1664,14 @@ private fun PermissionRequiredDialog(
                     },
 
                     title =
-                        "Auto Start",
+                        stringResource(
+                            R.string.auto_start
+                        ),
 
                     description =
-                        "Always Keep AppLock Pro Running",
+                        stringResource(
+                            R.string.keep_applock_running
+                        ),
 
                     allowed =
                         autoStartAllowed,
@@ -1622,7 +1687,9 @@ private fun PermissionRequiredDialog(
                 Text(
 
                     text =
-                        "Permissions are required for the application to work\nproperly and efficiently",
+                        stringResource(
+                            R.string.permissions_work_properly
+                        ),
 
                     color =
                         Color(0xFFBDBDBD),
@@ -1683,7 +1750,9 @@ private fun PermissionRow(
             modifier =
                 Modifier
                     .width(32.dp)
-                    .padding(top = 4.dp),
+                    .padding(
+                        top = 4.dp
+                    ),
 
             contentAlignment =
                 Alignment.Center
@@ -1698,7 +1767,9 @@ private fun PermissionRow(
             modifier =
                 Modifier
                     .weight(1f)
-                    .padding(start = 8.dp)
+                    .padding(
+                        start = 8.dp
+                    )
         ) {
 
             Row(
@@ -1776,7 +1847,9 @@ private fun PermissionRow(
 
             modifier =
                 Modifier
-                    .padding(top = 8.dp)
+                    .padding(
+                        top = 8.dp
+                    )
                     .width(72.dp)
                     .height(40.dp)
                     .background(
@@ -1815,11 +1888,15 @@ private fun PermissionRow(
                 text =
                     if (allowed) {
 
-                        "Allowed"
+                        stringResource(
+                            R.string.allowed
+                        )
 
                     } else {
 
-                        "Allow"
+                        stringResource(
+                            R.string.allow
+                        )
                     },
 
                 color =
@@ -1899,16 +1976,26 @@ private fun SecurityQuestionDialog(
 
 ) {
 
+    // IMPORTANT:
+    // stringResource() remember ke andar nahi hai.
     val questions =
         listOf(
 
-            "What is your Name ?",
+            stringResource(
+                R.string.security_question_name
+            ),
 
-            "What is your father name ?",
+            stringResource(
+                R.string.security_question_father
+            ),
 
-            "What is your Pet Name?",
+            stringResource(
+                R.string.security_question_pet
+            ),
 
-            "What is your dream job?"
+            stringResource(
+                R.string.security_question_job
+            )
         )
 
 
@@ -1965,7 +2052,9 @@ private fun SecurityQuestionDialog(
                 Text(
 
                     text =
-                        "Security Questions",
+                        stringResource(
+                            R.string.security_questions
+                        ),
 
                     color =
                         Color(0xFF333333),
@@ -1992,7 +2081,9 @@ private fun SecurityQuestionDialog(
                 Text(
 
                     text =
-                        "Set a keyword to Recover your passcode when you\nforget it.",
+                        stringResource(
+                            R.string.security_question_description
+                        ),
 
                     color =
                         Color(0xFFBDBDBD),
@@ -2022,7 +2113,9 @@ private fun SecurityQuestionDialog(
                 Text(
 
                     text =
-                        "Select Security Questions",
+                        stringResource(
+                            R.string.select_security_questions
+                        ),
 
                     color =
                         Color(0xFF333333),
@@ -2079,7 +2172,9 @@ private fun SecurityQuestionDialog(
                                     selectedQuestion.isEmpty()
                                 ) {
 
-                                    "Select Security Question"
+                                    stringResource(
+                                        R.string.select_security_question
+                                    )
 
                                 } else {
 
@@ -2117,7 +2212,9 @@ private fun SecurityQuestionDialog(
                                 Icons.Outlined.KeyboardArrowDown,
 
                             contentDescription =
-                                "Select Security Question",
+                                stringResource(
+                                    R.string.select_security_question
+                                ),
 
                             tint =
                                 Color(0xFF8F8F8F),
@@ -2129,6 +2226,10 @@ private fun SecurityQuestionDialog(
                         )
                     }
 
+
+                    // =================================================
+                    // DROPDOWN
+                    // =================================================
 
                     if (
                         dropdownExpanded
@@ -2245,7 +2346,9 @@ private fun SecurityQuestionDialog(
                 Text(
 
                     text =
-                        "Enter Security Answer",
+                        stringResource(
+                            R.string.enter_security_answer
+                        ),
 
                     color =
                         Color(0xFF333333),
@@ -2320,7 +2423,9 @@ private fun SecurityQuestionDialog(
                                 Text(
 
                                     text =
-                                        "Enter your answer",
+                                        stringResource(
+                                            R.string.enter_your_answer
+                                        ),
 
                                     color =
                                         Color(
@@ -2365,7 +2470,9 @@ private fun SecurityQuestionDialog(
                     Text(
 
                         text =
-                            "Skip",
+                            stringResource(
+                                R.string.skip
+                            ),
 
                         color =
                             Color(0xFF2196F3),
@@ -2401,7 +2508,9 @@ private fun SecurityQuestionDialog(
                     Text(
 
                         text =
-                            "Save",
+                            stringResource(
+                                R.string.save
+                            ),
 
                         color =
                             if (saveEnabled) {
@@ -2702,6 +2811,10 @@ private fun ConfirmPatternGrid(
                 )
 
 
+            // =================================================
+            // CONNECTION LINES
+            // =================================================
+
             if (
                 selectedDots.size >= 2
             ) {
@@ -2740,6 +2853,10 @@ private fun ConfirmPatternGrid(
             }
 
 
+            // =================================================
+            // DOTS
+            // =================================================
+
             positions.forEachIndexed {
                     index,
                     position ->
@@ -2750,6 +2867,7 @@ private fun ConfirmPatternGrid(
                     )
 
 
+                // Outer circle
                 drawCircle(
 
                     color =
@@ -2763,6 +2881,7 @@ private fun ConfirmPatternGrid(
                 )
 
 
+                // Inner background
                 drawCircle(
 
                     color =
@@ -2776,6 +2895,7 @@ private fun ConfirmPatternGrid(
                 )
 
 
+                // Center dot
                 drawCircle(
 
                     color =

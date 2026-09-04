@@ -2,6 +2,10 @@ package com.example.applock.Design.screens
 
 import android.content.ContentUris
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Matrix
+import android.media.ExifInterface
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
@@ -49,8 +53,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import android.graphics.BitmapFactory
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 
 
 // =============================================================
@@ -104,16 +106,19 @@ fun IntruderScreen(
         mutableStateOf(false)
     }
 
+
     var observationTime by remember {
-        mutableStateOf("Immediately")
+        mutableStateOf(10)
     }
+
 
     var showTimeDialog by remember {
         mutableStateOf(false)
     }
 
+
     var selectedObservationTime by remember {
-        mutableStateOf("Immediately")
+        mutableStateOf("5 Seconds")
     }
 
 
@@ -135,6 +140,7 @@ fun IntruderScreen(
     var selectionMode by remember {
         mutableStateOf(false)
     }
+
 
     var selectedImages by remember {
         mutableStateOf<Set<Uri>>(
@@ -158,15 +164,31 @@ fun IntruderScreen(
 
     LaunchedEffect(Unit) {
 
+        /*
+         * IMPORTANT:
+         *
+         * Intruder switch is controlled only by the value
+         * saved when the user manually changes the switch.
+         *
+         * DataStore default is false.
+         */
+
         intruderEnabled =
             dataStore
                 .getIntruderEnabled()
                 .first()
 
+
         observationTime =
             dataStore
                 .getIntruderObservationTime()
                 .first()
+
+
+        selectedObservationTime =
+            observationTimeToText(
+                observationTime
+            )
 
 
         intruderImages =
@@ -279,8 +301,10 @@ fun IntruderScreen(
             selectedImages =
                 emptySet()
 
+
             selectionMode =
                 false
+
 
             intruderImages =
                 loadIntruderImages(
@@ -328,6 +352,7 @@ fun IntruderScreen(
     // =========================================================
 
     Box(
+
         modifier =
             Modifier
                 .fillMaxSize()
@@ -337,9 +362,9 @@ fun IntruderScreen(
     ) {
 
         Column(
+
             modifier =
-                Modifier
-                    .fillMaxSize()
+                Modifier.fillMaxSize()
         ) {
 
 
@@ -525,6 +550,7 @@ fun IntruderScreen(
                                 Modifier
                                     .size(10.dp)
                                     .background(
+
                                         if (
                                             allSelected
                                         ) {
@@ -572,7 +598,9 @@ fun IntruderScreen(
                         onClick = {
 
                             selectedObservationTime =
-                                observationTime
+                                observationTimeToText(
+                                    observationTime
+                                )
 
                             showTimeDialog =
                                 true
@@ -727,16 +755,23 @@ fun IntruderScreen(
                         checked =
                             intruderEnabled,
 
-                        onCheckedChange = {
+                        onCheckedChange = { enabled ->
+
+                            /*
+                             * IMPORTANT:
+                             *
+                             * Only the user's switch action changes
+                             * the Intruder Camera state.
+                             */
 
                             intruderEnabled =
-                                it
+                                enabled
 
                             scope.launch {
 
                                 dataStore
                                     .saveIntruderEnabled(
-                                        it
+                                        enabled
                                     )
                             }
                         },
@@ -783,10 +818,6 @@ fun IntruderScreen(
                 intruderImages.isEmpty()
             ) {
 
-                // =================================================
-                // EMPTY INTRUDER AREA
-                // =================================================
-
                 Box(
 
                     modifier =
@@ -806,11 +837,6 @@ fun IntruderScreen(
                         verticalArrangement =
                             Arrangement.Center
                     ) {
-
-
-                        // =========================================
-                        // NO FOUND ICON
-                        // =========================================
 
                         Icon(
 
@@ -837,10 +863,6 @@ fun IntruderScreen(
                         )
 
 
-                        // =========================================
-                        // NO INTRUDER FOUND
-                        // =========================================
-
                         Text(
 
                             text =
@@ -857,11 +879,8 @@ fun IntruderScreen(
 
             } else {
 
-                // =================================================
-                // IMAGE AREA
-                // =================================================
-
                 Column(
+
                     modifier =
                         Modifier
                             .fillMaxWidth()
@@ -919,18 +938,16 @@ fun IntruderScreen(
                     ) {
 
                         items(
+
                             items =
                                 intruderImages,
 
                             key = {
                                 it.uri.toString()
                             }
+
                         ) { image ->
 
-
-                            // =====================================
-                            // IMAGE ITEM
-                            // =====================================
 
                             IntruderImageItem(
 
@@ -999,7 +1016,7 @@ fun IntruderScreen(
 
 
         // =========================================================
-        // DELETE BUTTON - SELECTION MODE
+        // DELETE BUTTON
         // =========================================================
 
         if (
@@ -1096,12 +1113,6 @@ fun IntruderScreen(
                     )
 
 
-                    Spacer(
-                        modifier =
-                            Modifier.height(0.dp)
-                    )
-
-
                     Text(
 
                         text =
@@ -1124,19 +1135,13 @@ fun IntruderScreen(
                 ) {
 
                     ObservationTimeOption(
-
-                        text =
-                            "Never",
-
+                        text = "Never",
                         selected =
                             selectedObservationTime ==
                                     "Never",
-
                         blueColor =
                             blueColor,
-
                         onClick = {
-
                             selectedObservationTime =
                                 "Never"
                         }
@@ -1144,19 +1149,13 @@ fun IntruderScreen(
 
 
                     ObservationTimeOption(
-
-                        text =
-                            "5 Seconds",
-
+                        text = "5 Seconds",
                         selected =
                             selectedObservationTime ==
                                     "5 Seconds",
-
                         blueColor =
                             blueColor,
-
                         onClick = {
-
                             selectedObservationTime =
                                 "5 Seconds"
                         }
@@ -1164,19 +1163,13 @@ fun IntruderScreen(
 
 
                     ObservationTimeOption(
-
-                        text =
-                            "15 Seconds",
-
+                        text = "15 Seconds",
                         selected =
                             selectedObservationTime ==
                                     "15 Seconds",
-
                         blueColor =
                             blueColor,
-
                         onClick = {
-
                             selectedObservationTime =
                                 "15 Seconds"
                         }
@@ -1184,19 +1177,13 @@ fun IntruderScreen(
 
 
                     ObservationTimeOption(
-
-                        text =
-                            "30 Seconds",
-
+                        text = "30 Seconds",
                         selected =
                             selectedObservationTime ==
                                     "30 Seconds",
-
                         blueColor =
                             blueColor,
-
                         onClick = {
-
                             selectedObservationTime =
                                 "30 Seconds"
                         }
@@ -1252,17 +1239,25 @@ fun IntruderScreen(
 
                     onClick = {
 
+                        val timeInSeconds =
+                            observationTimeFromText(
+                                selectedObservationTime
+                            )
+
+
                         observationTime =
-                            selectedObservationTime
+                            timeInSeconds
+
 
                         showTimeDialog =
                             false
+
 
                         scope.launch {
 
                             dataStore
                                 .saveIntruderObservationTime(
-                                    selectedObservationTime
+                                    timeInSeconds
                                 )
                         }
                     },
@@ -1289,6 +1284,62 @@ fun IntruderScreen(
                 }
             }
         )
+    }
+}
+
+
+// =============================================================
+// CONVERT INT -> UI TEXT
+// =============================================================
+
+private fun observationTimeToText(
+    value: Int
+): String {
+
+    return when (value) {
+
+        0 ->
+            "Never"
+
+        5 ->
+            "5 Seconds"
+
+        15 ->
+            "15 Seconds"
+
+        30 ->
+            "30 Seconds"
+
+        else ->
+            "5 Seconds"
+    }
+}
+
+
+// =============================================================
+// CONVERT UI TEXT -> INT
+// =============================================================
+
+private fun observationTimeFromText(
+    value: String
+): Int {
+
+    return when (value) {
+
+        "Never" ->
+            0
+
+        "5 Seconds" ->
+            5
+
+        "15 Seconds" ->
+            15
+
+        "30 Seconds" ->
+            30
+
+        else ->
+            5
     }
 }
 
@@ -1323,9 +1374,11 @@ private fun IntruderImageItem(
                 )
                 .combinedClickable(
 
-                    onClick = onClick,
+                    onClick =
+                        onClick,
 
-                    onLongClick = onLongClick
+                    onLongClick =
+                        onLongClick
                 )
     ) {
 
@@ -1334,10 +1387,6 @@ private fun IntruderImageItem(
                 image.uri
         )
 
-
-        // =========================================================
-        // SELECTED CHECK
-        // =========================================================
 
         if (
             selectionMode
@@ -1402,6 +1451,183 @@ private fun IntruderImageItem(
 
 
 // =============================================================
+// LOAD BITMAP + FIX EXIF ROTATION
+// =============================================================
+
+private suspend fun loadCorrectlyRotatedBitmap(
+    context: Context,
+    uri: Uri
+): Bitmap? {
+
+    return withContext(
+        Dispatchers.IO
+    ) {
+
+        try {
+
+            // =================================================
+            // FIRST: DECODE BITMAP
+            // =================================================
+
+            val bitmap =
+                context.contentResolver
+                    .openInputStream(uri)
+                    ?.use { input ->
+
+                        BitmapFactory
+                            .decodeStream(input)
+                    }
+                    ?: return@withContext null
+
+
+            // =================================================
+            // SECOND: READ EXIF ORIENTATION
+            // =================================================
+
+            val orientation =
+                context.contentResolver
+                    .openInputStream(uri)
+                    ?.use { input ->
+
+                        ExifInterface(input)
+                            .getAttributeInt(
+                                ExifInterface.TAG_ORIENTATION,
+                                ExifInterface.ORIENTATION_NORMAL
+                            )
+                    }
+                    ?: ExifInterface.ORIENTATION_NORMAL
+
+
+            // =================================================
+            // CREATE ROTATION MATRIX
+            // =================================================
+
+            val matrix =
+                Matrix()
+
+
+            when (orientation) {
+
+                ExifInterface.ORIENTATION_FLIP_HORIZONTAL -> {
+
+                    matrix.setScale(
+                        -1f,
+                        1f
+                    )
+                }
+
+
+                ExifInterface.ORIENTATION_ROTATE_180 -> {
+
+                    matrix.setRotate(
+                        180f
+                    )
+                }
+
+
+                ExifInterface.ORIENTATION_FLIP_VERTICAL -> {
+
+                    matrix.setScale(
+                        1f,
+                        -1f
+                    )
+                }
+
+
+                ExifInterface.ORIENTATION_TRANSPOSE -> {
+
+                    matrix.setRotate(
+                        90f
+                    )
+
+                    matrix.postScale(
+                        -1f,
+                        1f
+                    )
+                }
+
+
+                ExifInterface.ORIENTATION_ROTATE_90 -> {
+
+                    matrix.setRotate(
+                        90f
+                    )
+                }
+
+
+                ExifInterface.ORIENTATION_TRANSVERSE -> {
+
+                    matrix.setRotate(
+                        -90f
+                    )
+
+                    matrix.postScale(
+                        -1f,
+                        1f
+                    )
+                }
+
+
+                ExifInterface.ORIENTATION_ROTATE_270 -> {
+
+                    matrix.setRotate(
+                        270f
+                    )
+                }
+
+
+                ExifInterface.ORIENTATION_NORMAL -> {
+                    // No rotation required
+                }
+            }
+
+
+            // =================================================
+            // IF NO ROTATION
+            // =================================================
+
+            if (
+                matrix.isIdentity
+            ) {
+
+                return@withContext bitmap
+            }
+
+
+            // =================================================
+            // APPLY ROTATION
+            // =================================================
+
+            Bitmap.createBitmap(
+
+                bitmap,
+
+                0,
+
+                0,
+
+                bitmap.width,
+
+                bitmap.height,
+
+                matrix,
+
+                true
+            )
+
+        } catch (
+            e: Exception
+        ) {
+
+            e.printStackTrace()
+
+            null
+        }
+    }
+}
+
+
+// =============================================================
 // THUMBNAIL
 // =============================================================
 
@@ -1415,7 +1641,8 @@ private fun IntruderThumbnail(
 
 
     var bitmap by remember(uri) {
-        mutableStateOf<android.graphics.Bitmap?>(
+
+        mutableStateOf<Bitmap?>(
             null
         )
     }
@@ -1424,29 +1651,10 @@ private fun IntruderThumbnail(
     LaunchedEffect(uri) {
 
         bitmap =
-            withContext(
-                Dispatchers.IO
-            ) {
-
-                try {
-
-                    context.contentResolver
-                        .openInputStream(uri)
-                        ?.use { input ->
-
-                            BitmapFactory
-                                .decodeStream(
-                                    input
-                                )
-                        }
-
-                } catch (
-                    e: Exception
-                ) {
-
-                    null
-                }
-            }
+            loadCorrectlyRotatedBitmap(
+                context,
+                uri
+            )
     }
 
 
@@ -1486,6 +1694,7 @@ private fun IntruderThumbnail(
         ) {
 
             Text(
+
                 text =
                     "Loading...",
 
@@ -1520,7 +1729,8 @@ private fun IntruderImagePreviewScreen(
 
 
     var bitmap by remember(image.uri) {
-        mutableStateOf<android.graphics.Bitmap?>(
+
+        mutableStateOf<Bitmap?>(
             null
         )
     }
@@ -1531,31 +1741,10 @@ private fun IntruderImagePreviewScreen(
     ) {
 
         bitmap =
-            withContext(
-                Dispatchers.IO
-            ) {
-
-                try {
-
-                    context.contentResolver
-                        .openInputStream(
-                            image.uri
-                        )
-                        ?.use { input ->
-
-                            BitmapFactory
-                                .decodeStream(
-                                    input
-                                )
-                        }
-
-                } catch (
-                    e: Exception
-                ) {
-
-                    null
-                }
-            }
+            loadCorrectlyRotatedBitmap(
+                context,
+                image.uri
+            )
     }
 
 
@@ -1595,11 +1784,6 @@ private fun IntruderImagePreviewScreen(
                     Alignment.CenterVertically
             ) {
 
-
-                // =================================================
-                // BACK
-                // =================================================
-
                 IconButton(
 
                     onClick =
@@ -1623,10 +1807,6 @@ private fun IntruderImagePreviewScreen(
                 }
 
 
-                // =================================================
-                // FILE NAME
-                // =================================================
-
                 Text(
 
                     text =
@@ -1645,10 +1825,6 @@ private fun IntruderImagePreviewScreen(
                         1
                 )
 
-
-                // =================================================
-                // SETTINGS ICON
-                // =================================================
 
                 Icon(
 
@@ -1860,10 +2036,12 @@ private suspend fun loadIntruderImages(
                         MediaStore.Images.Media._ID
                     )
 
+
                 val nameColumn =
                     cursor.getColumnIndexOrThrow(
                         MediaStore.Images.Media.DISPLAY_NAME
                     )
+
 
                 val dateColumn =
                     cursor.getColumnIndexOrThrow(
@@ -1879,6 +2057,7 @@ private suspend fun loadIntruderImages(
                         cursor.getLong(
                             idColumn
                         )
+
 
                     val name =
                         cursor.getString(
@@ -2005,25 +2184,4 @@ private fun ObservationTimeOption(
                 14.sp
         )
     }
-}
-
-
-// =============================================================
-// DIVIDER
-// =============================================================
-
-@Composable
-private fun IntruderDivider() {
-
-    androidx.compose.material3.HorizontalDivider(
-
-        modifier =
-            Modifier.fillMaxWidth(),
-
-        thickness =
-            0.6.dp,
-
-        color =
-            Color(0xFFE8E8E8)
-    )
 }
