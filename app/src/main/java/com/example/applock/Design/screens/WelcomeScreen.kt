@@ -2,7 +2,6 @@ package com.example.applock.Design.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -42,44 +41,42 @@ fun WelcomeScreen(
             )
     ) {
 
-
-
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(
+                    horizontal = 20.dp
+                ),
 
-                .padding(horizontal = 20.dp),
-
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment =
+                Alignment.CenterHorizontally
         ) {
-
-            // =================================================
-            // APP LOCK ICON
-            // =================================================
 
             Image(
                 painter = painterResource(
                     id = R.drawable.startscreen
                 ),
+
                 contentDescription = "App Lock",
-                modifier = Modifier.size(300.dp)
+
+                modifier =
+                    Modifier.size(300.dp)
             )
 
             Spacer(
-                modifier = Modifier.height(9.dp)
+                modifier = Modifier.height(10.dp)
             )
-
-            // =================================================
-            // APP LOCK TITLE
-            // =================================================
 
             Text(
                 text = buildAnnotatedString {
 
                     withStyle(
                         style = SpanStyle(
-                            color = Color(0xFF333333),
-                            fontWeight = FontWeight.Bold
+                            color =
+                                Color(0xFF333333),
+
+                            fontWeight =
+                                FontWeight.Bold
                         )
                     ) {
                         append("App ")
@@ -87,13 +84,17 @@ fun WelcomeScreen(
 
                     withStyle(
                         style = SpanStyle(
-                            color = Color(0xFF2196F3),
-                            fontWeight = FontWeight.Bold
+                            color =
+                                Color(0xFF2196F3),
+
+                            fontWeight =
+                                FontWeight.Bold
                         )
                     ) {
                         append("Lock")
                     }
                 },
+
                 fontSize = 34.sp
             )
 
@@ -101,30 +102,34 @@ fun WelcomeScreen(
                 modifier = Modifier.height(8.dp)
             )
 
-            // =================================================
-            // DESCRIPTION
-            // =================================================
-
             Text(
-                text = "Secure your apps. Protect your privacy.",
+                text =
+                    "Secure your apps. Protect your privacy.",
+
                 fontSize = 13.sp,
+
                 color = Color.Gray
             )
         }
 
 
-        // =====================================================
-        // GET STARTED BUTTON
-        // =====================================================
-
         Button(
             onClick = {
 
-                navController.navigate("onboardingScreen")
+                navController.navigate(
+                    "languagesSetup"
+                ) {
 
+                    popUpTo("welcomeScreen") {
+                        inclusive = true
+                    }
+                }
             },
+
             modifier = Modifier
-                .align(Alignment.BottomCenter)
+                .align(
+                    Alignment.BottomCenter
+                )
                 .fillMaxWidth()
                 .padding(
                     start = 14.dp,
@@ -132,16 +137,25 @@ fun WelcomeScreen(
                     bottom = 18.dp
                 )
                 .height(51.dp),
-            shape = RoundedCornerShape(14.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF2196F3)
-            )
+
+            shape =
+                RoundedCornerShape(14.dp),
+
+            colors =
+                ButtonDefaults.buttonColors(
+                    containerColor =
+                        Color(0xFF2196F3)
+                )
         ) {
 
             Text(
                 text = "Get Started",
+
                 fontSize = 17.sp,
-                fontWeight = FontWeight.SemiBold,
+
+                fontWeight =
+                    FontWeight.SemiBold,
+
                 color = Color.White
             )
         }

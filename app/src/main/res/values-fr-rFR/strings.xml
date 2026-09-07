@@ -162,4 +162,37 @@
     <string name="enter_digit_pin">Saisissez le PIN à %1$d chiffres</string>
     <string name="pattern_not_match">Le schéma ne correspond pas</string>
 
+
+        <!-- Onboarding Screen -->
+
+        <string name="onboarding_secure_your_apps">Sécurisez vos applications</string>
+
+        <string name="onboarding_quick_secure_access">
+        Accès rapide et sécurisé
+    </string>
+
+        <string name="onboarding_privacy_protected">
+        Votre vie privée protégée
+    </string>
+
+        <string name="onboarding_secure_your_apps_description">
+        Gardez vos applications privées protégées grâce à un code d’accès sécurisé et à une couche supplémentaire de confidentialité
+    </string>
+
+        <string name="onboarding_quick_secure_access_description">
+        Déverrouillez instantanément vos applications protégées avec votre code d’accès ou votre empreinte digitale
+    </string>
+
+        <string name="onboarding_privacy_protected_description">
+        Choisissez les applications que vous souhaitez verrouiller et protégez vos contenus personnels contre les accès indésirables
+    </string>
+
+        <string name="onboarding_next">Suivant</string>
+
+        <string name="onboarding_get_started">Commencer</string>
+
+        <string name="onboarding_image_description">
+        Présentation %1$d
+    </string>
+
 </resources>

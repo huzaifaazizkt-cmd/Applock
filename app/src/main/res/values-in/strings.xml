@@ -162,4 +162,37 @@
     <string name="enter_digit_pin">Masukkan PIN %1$d Digit</string>
     <string name="pattern_not_match">Pola tidak cocok</string>
 
+    <!-- Onboarding Screen -->
+
+    <string name="onboarding_secure_your_apps">Lindungi Aplikasi Anda</string>
+
+    <string name="onboarding_quick_secure_access">
+        Akses Cepat &amp; Aman
+    </string>
+
+    <string name="onboarding_privacy_protected">
+        Privasi Anda Terlindungi
+    </string>
+
+    <string name="onboarding_secure_your_apps_description">
+        Lindungi aplikasi pribadi Anda dengan kode sandi yang aman dan lapisan privasi tambahan
+    </string>
+
+    <string name="onboarding_quick_secure_access_description">
+        Buka kunci aplikasi yang dilindungi secara instan dengan kode sandi atau sidik jari Anda
+    </string>
+
+    <string name="onboarding_privacy_protected_description">
+        Pilih aplikasi yang ingin Anda kunci dan lindungi konten pribadi Anda dari akses yang tidak diinginkan
+    </string>
+
+    <string name="onboarding_next">Berikutnya</string>
+
+    <string name="onboarding_get_started">Mulai</string>
+
+    <string name="onboarding_image_description">
+        Pengenalan %1$d
+    </string>
+
+
 </resources>

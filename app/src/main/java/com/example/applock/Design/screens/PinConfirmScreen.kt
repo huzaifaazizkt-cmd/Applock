@@ -56,11 +56,6 @@ import kotlinx.coroutines.launch
 
 import kotlin.math.sqrt
 
-
-// =============================================================
-// PIN CONFIRM SCREEN
-// =============================================================
-
 @Composable
 fun PinConfirmScreen(
     navController: NavController,
@@ -87,22 +82,12 @@ fun PinConfirmScreen(
     val lifecycleOwner =
         LocalLifecycleOwner.current
 
-
-    // =========================================================
-    // START APP LIST PRELOAD IMMEDIATELY
-    // =========================================================
-
     LaunchedEffect(Unit) {
 
         AppListCache.preload(
             appContext
         )
     }
-
-
-    // =========================================================
-    // CONFIRM STATES
-    // =========================================================
 
     var confirmPin by remember {
         mutableStateOf("")
@@ -128,37 +113,17 @@ fun PinConfirmScreen(
         mutableStateOf<Job?>(null)
     }
 
-
-    // =========================================================
-    // PERMISSION DIALOG
-    // =========================================================
-
     var showPermissionDialog by remember {
         mutableStateOf(false)
     }
-
-
-    // =========================================================
-    // SECURITY QUESTION DIALOG
-    // =========================================================
 
     var showSecurityDialog by remember {
         mutableStateOf(false)
     }
 
-
-    // =========================================================
-    // NAVIGATION GUARD
-    // =========================================================
-
     var isNavigatingToAppList by remember {
         mutableStateOf(false)
     }
-
-
-    // =========================================================
-    // PERMISSION STATES
-    // =========================================================
 
     var overlayAllowed by remember {
 
@@ -183,11 +148,6 @@ fun PinConfirmScreen(
         mutableStateOf(false)
     }
 
-
-    // =========================================================
-    // SECURITY QUESTION STATES
-    // =========================================================
-
     var selectedQuestion by remember {
         mutableStateOf("")
     }
@@ -200,21 +160,11 @@ fun PinConfirmScreen(
         mutableStateOf(false)
     }
 
-
-    // =========================================================
-    // TYPE
-    // =========================================================
-
     val isPattern =
         type.equals(
             "pattern",
             ignoreCase = true
         )
-
-
-    // =========================================================
-    // COLORS
-    // =========================================================
 
     val backgroundColor =
         Color(0xFF29A0F0)
@@ -232,16 +182,6 @@ fun PinConfirmScreen(
     val pinLength =
         value.length
 
-
-    // =========================================================
-    // STRING RESOURCES
-    //
-    // IMPORTANT:
-    // stringResource() yahan composable body mein hai.
-    // Isko normal functions/click callbacks mein directly
-    // use nahi kiya gaya.
-    // =========================================================
-
     val passwordNotMatchText =
         stringResource(
             R.string.password_not_match
@@ -251,11 +191,6 @@ fun PinConfirmScreen(
         stringResource(
             R.string.enter_correct_password
         )
-
-
-    // =========================================================
-    // CHECK PERMISSIONS
-    // =========================================================
 
     fun checkPermissions() {
 
@@ -270,11 +205,6 @@ fun PinConfirmScreen(
             )
     }
 
-
-    // =========================================================
-    // ALL PERMISSIONS
-    // =========================================================
-
     fun allPermissionsAllowed(): Boolean {
 
         return overlayAllowed &&
@@ -282,10 +212,6 @@ fun PinConfirmScreen(
                 autoStartAllowed
     }
 
-
-    // =========================================================
-    // OPEN SECURITY QUESTION
-    // =========================================================
 
     fun openSecurityQuestion() {
 
@@ -305,20 +231,11 @@ fun PinConfirmScreen(
             true
     }
 
-
-    // =========================================================
-    // CURRENT PERMISSION DIALOG STATE
-    // =========================================================
-
     val currentShowPermissionDialog by
     rememberUpdatedState(
         showPermissionDialog
     )
 
-
-    // =========================================================
-    // LIFECYCLE
-    // =========================================================
 
     DisposableEffect(
         lifecycleOwner
@@ -389,9 +306,6 @@ fun PinConfirmScreen(
     }
 
 
-    // =========================================================
-    // PERMISSION DIALOG OPEN CHECK
-    // =========================================================
 
     LaunchedEffect(
         showPermissionDialog
@@ -417,10 +331,6 @@ fun PinConfirmScreen(
     }
 
 
-    // =========================================================
-    // AUTO MOVE TO SECURITY QUESTION
-    // =========================================================
-
     LaunchedEffect(
         overlayAllowed,
         accessibilityAllowed,
@@ -443,10 +353,6 @@ fun PinConfirmScreen(
     }
 
 
-    // =========================================================
-    // CLEAR PATTERN ERROR
-    // =========================================================
-
     fun clearPatternError() {
 
         clearErrorJob?.cancel()
@@ -465,10 +371,6 @@ fun PinConfirmScreen(
     }
 
 
-    // =========================================================
-    // SHOW PATTERN ERROR
-    // =========================================================
-
     fun showPatternError() {
 
         clearErrorJob?.cancel()
@@ -479,9 +381,7 @@ fun PinConfirmScreen(
         patternConfirmed =
             false
 
-        // IMPORTANT:
-        // stringResource() ko normal function ke andar
-        // call nahi kar rahe.
+
         error =
             passwordNotMatchText
 
@@ -503,11 +403,6 @@ fun PinConfirmScreen(
                     null
             }
     }
-
-
-    // =========================================================
-    // SAVE PIN
-    // =========================================================
 
     fun continueWithPin() {
 
@@ -537,11 +432,6 @@ fun PinConfirmScreen(
         }
     }
 
-
-    // =========================================================
-    // SAVE PATTERN
-    // =========================================================
-
     fun continueWithPattern() {
 
         checkPermissions()
@@ -569,11 +459,6 @@ fun PinConfirmScreen(
             }
         }
     }
-
-
-    // =========================================================
-    // OPEN OVERLAY
-    // =========================================================
 
     fun openOverlayPermission() {
 
@@ -619,11 +504,6 @@ fun PinConfirmScreen(
         }
     }
 
-
-    // =========================================================
-    // OPEN ACCESSIBILITY
-    // =========================================================
-
     fun openAccessibilitySettings() {
 
         try {
@@ -639,11 +519,6 @@ fun PinConfirmScreen(
             e.printStackTrace()
         }
     }
-
-
-    // =========================================================
-    // GO TO APP LIST
-    // =========================================================
 
     fun goToAppList() {
 
@@ -678,10 +553,6 @@ fun PinConfirmScreen(
     }
 
 
-    // =========================================================
-    // MAIN UI
-    // =============================================================
-
     Box(
 
         modifier =
@@ -707,11 +578,6 @@ fun PinConfirmScreen(
             verticalArrangement =
                 Arrangement.Center
         ) {
-
-
-            // =================================================
-            // HEADING
-            // =================================================
 
             Text(
 
@@ -744,10 +610,6 @@ fun PinConfirmScreen(
                     )
             )
 
-
-            // =================================================
-            // STEP INDICATOR
-            // =================================================
 
             Row(
 
@@ -844,11 +706,6 @@ fun PinConfirmScreen(
                         40.dp
                     )
             )
-
-
-            // =================================================
-            // PATTERN
-            // =================================================
 
             if (isPattern) {
 
@@ -1059,10 +916,6 @@ fun PinConfirmScreen(
 
             }
 
-
-            // =================================================
-            // PIN
-            // =================================================
 
             else {
 
@@ -1299,11 +1152,6 @@ fun PinConfirmScreen(
             }
         }
 
-
-        // =========================================================
-        // PERMISSION DIALOG
-        // =========================================================
-
         if (
             showPermissionDialog
         ) {
@@ -1339,11 +1187,6 @@ fun PinConfirmScreen(
                 }
             )
         }
-
-
-        // =========================================================
-        // SECURITY QUESTION DIALOG
-        // =========================================================
 
         if (
             showSecurityDialog
@@ -1428,11 +1271,6 @@ fun PinConfirmScreen(
         }
     }
 }
-
-
-// =============================================================
-// PERMISSION REQUIRED DIALOG
-// =============================================================
 
 @Composable
 private fun PermissionRequiredDialog(
@@ -1527,11 +1365,6 @@ private fun PermissionRequiredDialog(
                         TextAlign.Center
                 )
 
-
-                // =================================================
-                // OVERLAY
-                // =================================================
-
                 PermissionRow(
 
                     icon = {
@@ -1578,11 +1411,6 @@ private fun PermissionRequiredDialog(
 
 
                 PermissionDivider()
-
-
-                // =================================================
-                // ACCESSIBILITY
-                // =================================================
 
                 PermissionRow(
 
@@ -1710,11 +1538,6 @@ private fun PermissionRequiredDialog(
         }
     }
 }
-
-
-// =============================================================
-// PERMISSION ROW
-// =============================================================
 
 @Composable
 private fun PermissionRow(
@@ -1948,11 +1771,6 @@ private fun PermissionDivider() {
     )
 }
 
-
-// =============================================================
-// SECURITY QUESTION DIALOG
-// =============================================================
-
 @Composable
 private fun SecurityQuestionDialog(
 
@@ -1976,8 +1794,6 @@ private fun SecurityQuestionDialog(
 
 ) {
 
-    // IMPORTANT:
-    // stringResource() remember ke andar nahi hai.
     val questions =
         listOf(
 
@@ -2225,11 +2041,6 @@ private fun SecurityQuestionDialog(
                                 )
                         )
                     }
-
-
-                    // =================================================
-                    // DROPDOWN
-                    // =================================================
 
                     if (
                         dropdownExpanded
@@ -2545,11 +2356,6 @@ private fun SecurityQuestionDialog(
     }
 }
 
-
-// =============================================================
-// ACCESSIBILITY SERVICE CHECK
-// =============================================================
-
 private fun isAccessibilityServiceEnabled(
     context: Context
 ): Boolean {
@@ -2602,11 +2408,6 @@ private fun isAccessibilityServiceEnabled(
         false
     }
 }
-
-
-// =============================================================
-// CONFIRM PATTERN GRID
-// =============================================================
 
 @Composable
 private fun ConfirmPatternGrid(
@@ -2810,11 +2611,6 @@ private fun ConfirmPatternGrid(
                         size.height
                 )
 
-
-            // =================================================
-            // CONNECTION LINES
-            // =================================================
-
             if (
                 selectedDots.size >= 2
             ) {
@@ -2852,11 +2648,6 @@ private fun ConfirmPatternGrid(
                 }
             }
 
-
-            // =================================================
-            // DOTS
-            // =================================================
-
             positions.forEachIndexed {
                     index,
                     position ->
@@ -2866,8 +2657,6 @@ private fun ConfirmPatternGrid(
                         index
                     )
 
-
-                // Outer circle
                 drawCircle(
 
                     color =
@@ -2880,8 +2669,6 @@ private fun ConfirmPatternGrid(
                         position
                 )
 
-
-                // Inner background
                 drawCircle(
 
                     color =
@@ -2894,8 +2681,6 @@ private fun ConfirmPatternGrid(
                         position
                 )
 
-
-                // Center dot
                 drawCircle(
 
                     color =
@@ -2926,11 +2711,6 @@ private fun ConfirmPatternGrid(
     }
 }
 
-
-// =============================================================
-// PATTERN POSITIONS
-// =============================================================
-
 private fun getConfirmPositions(
     width: Float,
     height: Float
@@ -2945,7 +2725,6 @@ private fun getConfirmPositions(
     val x3 =
         width * 0.8333f
 
-
     val y1 =
         height * 0.1667f
 
@@ -2954,8 +2733,6 @@ private fun getConfirmPositions(
 
     val y3 =
         height * 0.8333f
-
-
     return listOf(
 
         Offset(x1, y1),
@@ -2971,12 +2748,6 @@ private fun getConfirmPositions(
         Offset(x3, y3)
     )
 }
-
-
-// =============================================================
-// FIND PATTERN DOT
-// =============================================================
-
 private fun findConfirmDot(
 
     touch: Offset,
@@ -2996,8 +2767,6 @@ private fun findConfirmDot(
             height =
                 height
         )
-
-
     positions.forEachIndexed {
             index,
             dot ->
@@ -3008,22 +2777,16 @@ private fun findConfirmDot(
         val dy =
             touch.y - dot.y
 
-
         val distance =
             sqrt(
                 dx * dx +
                         dy * dy
             )
-
-
         if (
             distance <= 55f
         ) {
-
             return index
         }
     }
-
-
     return null
 }

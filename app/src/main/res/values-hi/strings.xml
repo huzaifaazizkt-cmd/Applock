@@ -162,4 +162,35 @@
     <string name="enter_digit_pin">%1$d अंकों का पिन दर्ज करें</string>
     <string name="pattern_not_match">पैटर्न मेल नहीं खाता</string>
 
+    <!-- Onboarding Screen -->
+
+    <string name="onboarding_secure_your_apps">अपने ऐप्स को सुरक्षित रखें</string>
+
+    <string name="onboarding_quick_secure_access">
+        तेज़ और सुरक्षित एक्सेस
+    </string>
+
+    <string name="onboarding_privacy_protected">
+        आपकी गोपनीयता सुरक्षित
+    </string>
+
+    <string name="onboarding_secure_your_apps_description">
+        सुरक्षित पासकोड और अतिरिक्त गोपनीयता सुरक्षा के साथ अपने निजी ऐप्स को सुरक्षित रखें
+    </string>
+
+    <string name="onboarding_quick_secure_access_description">
+        अपने पासकोड या फिंगरप्रिंट से सुरक्षित ऐप्स को तुरंत अनलॉक करें
+    </string>
+
+    <string name="onboarding_privacy_protected_description">
+        उन ऐप्स को चुनें जिन्हें आप लॉक करना चाहते हैं और अपनी निजी सामग्री को अनचाहे एक्सेस से सुरक्षित रखें
+    </string>
+
+    <string name="onboarding_next">अगला</string>
+
+    <string name="onboarding_get_started">शुरू करें</string>
+
+    <string name="onboarding_image_description">
+        ऑनबोर्डिंग %1$d
+    </string>
 </resources>

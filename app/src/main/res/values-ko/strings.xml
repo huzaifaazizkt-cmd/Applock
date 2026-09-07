@@ -163,4 +163,36 @@
     <string name="enter_digit_pin">%1$d자리 PIN 입력</string>
     <string name="pattern_not_match">패턴이 일치하지 않습니다</string>
 
+    <!-- Onboarding Screen -->
+
+    <string name="onboarding_secure_your_apps">앱을 안전하게 보호하세요</string>
+
+    <string name="onboarding_quick_secure_access">
+        빠르고 안전한 접근
+    </string>
+
+    <string name="onboarding_privacy_protected">
+        소중한 개인정보를 보호하세요
+    </string>
+
+    <string name="onboarding_secure_your_apps_description">
+        안전한 비밀번호와 추가적인 개인정보 보호 기능으로 개인 앱을 안전하게 보호하세요
+    </string>
+
+    <string name="onboarding_quick_secure_access_description">
+        비밀번호 또는 지문으로 보호된 앱을 즉시 잠금 해제하세요
+    </string>
+
+    <string name="onboarding_privacy_protected_description">
+        잠글 앱을 선택하고 개인 콘텐츠를 원치 않는 접근으로부터 안전하게 보호하세요
+    </string>
+
+    <string name="onboarding_next">다음</string>
+
+    <string name="onboarding_get_started">시작하기</string>
+
+    <string name="onboarding_image_description">
+        온보딩 %1$d
+    </string>
+
 </resources>

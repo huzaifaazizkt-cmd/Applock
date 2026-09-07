@@ -55,13 +55,10 @@
         <service
             android:name=".service.AppLockService"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
-            android:exported="false">
+            android:exported="true">
 
             <intent-filter>
-
-                <action
-                    android:name="android.accessibilityservice.AccessibilityService" />
-
+                <action android:name="android.accessibilityservice.AccessibilityService" />
             </intent-filter>
 
             <meta-data

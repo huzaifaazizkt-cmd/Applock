@@ -162,4 +162,37 @@
     <string name="enter_digit_pin">Skriv inn %1$d-sifret PIN-kode</string>
     <string name="pattern_not_match">Mønsteret stemmer ikke</string>
 
+    <!-- Onboarding Screen -->
+
+    <string name="onboarding_secure_your_apps">Sikre appene dine</string>
+
+    <string name="onboarding_quick_secure_access">
+        Rask og sikker tilgang
+    </string>
+
+    <string name="onboarding_privacy_protected">
+        Personvernet ditt er beskyttet
+    </string>
+
+    <string name="onboarding_secure_your_apps_description">
+        Hold private apper beskyttet med en sikker kode og et ekstra lag med personvern
+    </string>
+
+    <string name="onboarding_quick_secure_access_description">
+        Lås opp beskyttede apper umiddelbart med koden eller fingeravtrykket ditt
+    </string>
+
+    <string name="onboarding_privacy_protected_description">
+        Velg appene du vil låse, og hold det personlige innholdet ditt trygt mot uønsket tilgang
+    </string>
+
+    <string name="onboarding_next">Neste</string>
+
+    <string name="onboarding_get_started">Kom i gang</string>
+
+    <string name="onboarding_image_description">
+        Introduksjon %1$d
+    </string>
+
+
 </resources>

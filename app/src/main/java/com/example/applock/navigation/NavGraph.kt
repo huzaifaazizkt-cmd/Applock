@@ -15,6 +15,7 @@ import com.example.applock.Design.screens.MainScreen
 import com.example.applock.Design.screens.OnboardingScreen
 import com.example.applock.Design.screens.PinConfirmScreen
 import com.example.applock.Design.screens.PinCreateScreen
+import com.example.applock.Design.screens.PremiumScreen
 import com.example.applock.Design.screens.StartScreen
 import com.example.applock.Design.screens.WelcomeScreen
 
@@ -24,48 +25,94 @@ fun NavGraph(
     context: Context
 ) {
 
-    val navController = rememberNavController()
+    val navController =
+        rememberNavController()
+
 
     NavHost(
         navController = navController,
-        startDestination = "startScreen"
+
+        startDestination =
+            "startScreen"
     ) {
 
-
-
-        composable("startScreen") {
+        composable(
+            "startScreen"
+        ) {
 
             StartScreen(
-                navController = navController
+                navController =
+                    navController
             )
         }
 
-
-
-        composable("welcomeScreen") {
+        composable(
+            "welcomeScreen"
+        ) {
 
             WelcomeScreen(
-                navController = navController
+                navController =
+                    navController
             )
         }
 
+        composable(
+            "languagesSetup"
+        ) {
+
+            LanguagesScreen(
+
+                // IMPORTANT:
+                // null = no back icon
+
+                onBackClick = null,
 
 
-        composable("onboardingScreen") {
+                onLanguageSelected = {
+
+                    navController.navigate(
+                        "onboardingScreen"
+                    ) {
+
+                        popUpTo(
+                            "languagesSetup"
+                        ) {
+                            inclusive = true
+                        }
+                    }
+                }
+            )
+        }
+
+        composable(
+            "onboardingScreen"
+        ) {
 
             OnboardingScreen(
-                navController = navController
+                navController =
+                    navController
             )
         }
 
+        composable(
+            "premium"
+        ) {
 
+            PremiumScreen(
+                navController =
+                    navController
+            )
+        }
 
-
-        composable("create") {
+        composable(
+            "create"
+        ) {
 
             PinCreateScreen(
 
-                onNext = { type, value ->
+                onNext = {
+                        type,
+                        value ->
 
                     when (type) {
 
@@ -75,6 +122,7 @@ fun NavGraph(
                                 "confirm/pin/$value"
                             )
                         }
+
 
                         "pattern" -> {
 
@@ -87,72 +135,95 @@ fun NavGraph(
             )
         }
 
-
-
-
         composable(
-            route = "confirm/{type}/{value}",
 
-            arguments = listOf(
+            route =
+                "confirm/{type}/{value}",
 
-                navArgument("type") {
-                    type = NavType.StringType
-                },
+            arguments =
+                listOf(
 
-                navArgument("value") {
-                    type = NavType.StringType
-                }
-            )
+                    navArgument(
+                        "type"
+                    ) {
 
+                        type =
+                            NavType.StringType
+                    },
+
+
+                    navArgument(
+                        "value"
+                    ) {
+
+                        type =
+                            NavType.StringType
+                    }
+                )
         ) { backStackEntry ->
+
 
             val type =
                 backStackEntry
                     .arguments
-                    ?.getString("type")
+                    ?.getString(
+                        "type"
+                    )
                     ?: "pin"
+
 
             val value =
                 backStackEntry
                     .arguments
-                    ?.getString("value")
+                    ?.getString(
+                        "value"
+                    )
                     ?: ""
+
 
             PinConfirmScreen(
 
-                navController = navController,
+                navController =
+                    navController,
 
-                context = context,
+                context =
+                    context,
 
-                type = type,
+                type =
+                    type,
 
-                value = value
+                value =
+                    value
             )
         }
 
-
-
-        composable("home") {
+        composable(
+            "home"
+        ) {
 
             HomeScreen(
                 navController
             )
         }
 
-
-
-        composable("appList") {
+        composable(
+            "appList"
+        ) {
 
             val openSettings =
                 navController
                     .currentBackStackEntry
                     ?.savedStateHandle
-                    ?.get<Boolean>("openSettings")
+                    ?.get<Boolean>(
+                        "openSettings"
+                    )
                     ?: false
+
 
             MainScreen(
 
-                context = context,
+                context =
+                    context,
 
 
                 onIntruderClick = {
@@ -171,13 +242,14 @@ fun NavGraph(
                 },
 
 
-                openSettings = openSettings
+                openSettings =
+                    openSettings
             )
         }
 
-
-
-        composable("languages") {
+        composable(
+            "languages"
+        ) {
 
             LanguagesScreen(
 
@@ -191,17 +263,19 @@ fun NavGraph(
                             true
                         )
 
-                    navController.popBackStack()
-                }
+
+                    navController
+                        .popBackStack()
+                },
+
+                onLanguageSelected = null
             )
         }
 
 
-        // =====================================================
-        // INTRUDER SCREEN
-        // =====================================================
-
-        composable("intruder") {
+        composable(
+            "intruder"
+        ) {
 
             IntruderScreen(
 
@@ -215,7 +289,9 @@ fun NavGraph(
                             true
                         )
 
-                    navController.popBackStack()
+
+                    navController
+                        .popBackStack()
                 }
             )
         }

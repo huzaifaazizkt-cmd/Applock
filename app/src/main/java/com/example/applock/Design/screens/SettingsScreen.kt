@@ -55,9 +55,7 @@ private data class SettingsItemData(
 )
 
 
-// =============================================================
-// SETTINGS SCREEN
-// =============================================================
+
 
 @Composable
 fun SettingsScreen(

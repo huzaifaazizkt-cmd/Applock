@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -26,6 +27,7 @@ import com.example.applock.Design.components.NumberPad
 import com.example.applock.R
 import kotlin.math.sqrt
 
+
 @Composable
 fun PinCreateScreen(
     onNext: (String, String) -> Unit
@@ -39,8 +41,6 @@ fun PinCreateScreen(
         mutableStateOf(6)
     }
 
-    // Stable values use kar rahe hain.
-    // Display ke liye neeche stringResource use hoga.
     var authType by remember {
         mutableStateOf("6")
     }
@@ -58,6 +58,7 @@ fun PinCreateScreen(
     val backgroundColor = Color(0xFF189FFF)
 
     val patternDotColor = Color(0xFF83CCFF)
+
 
     Box(
         modifier = Modifier
@@ -77,9 +78,9 @@ fun PinCreateScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            // ------------------------------------------------
-            // TOP DROPDOWN
-            // ------------------------------------------------
+            // =========================================================
+            // PIN TYPE DROPDOWN
+            // =========================================================
 
             Row(
                 modifier = Modifier
@@ -93,7 +94,12 @@ fun PinCreateScreen(
                     Row(
                         modifier = Modifier
                             .height(35.dp)
-                            .clickable {
+                            .clickable(
+                                indication = null,
+                                interactionSource = remember {
+                                    MutableInteractionSource()
+                                }
+                            ) {
                                 expanded = true
                             },
                         verticalAlignment = Alignment.CenterVertically
@@ -131,6 +137,7 @@ fun PinCreateScreen(
                         )
                     }
 
+
                     DropdownMenu(
                         expanded = expanded,
                         onDismissRequest = {
@@ -138,7 +145,10 @@ fun PinCreateScreen(
                         }
                     ) {
 
+                        // =================================================
                         // 4 DIGIT PIN
+                        // =================================================
+
                         DropdownMenuItem(
                             text = {
                                 Text(
@@ -161,7 +171,11 @@ fun PinCreateScreen(
                             }
                         )
 
+
+                        // =================================================
                         // 6 DIGIT PIN
+                        // =================================================
+
                         DropdownMenuItem(
                             text = {
                                 Text(
@@ -184,7 +198,11 @@ fun PinCreateScreen(
                             }
                         )
 
+
+                        // =================================================
                         // PATTERN
+                        // =================================================
+
                         DropdownMenuItem(
                             text = {
                                 Text(
@@ -208,13 +226,15 @@ fun PinCreateScreen(
                 }
             }
 
+
             Spacer(
                 modifier = Modifier.height(38.dp)
             )
 
-            // ------------------------------------------------
+
+            // =========================================================
             // STEP INDICATOR
-            // ------------------------------------------------
+            // =========================================================
 
             Row(
                 verticalAlignment = Alignment.CenterVertically
@@ -253,12 +273,14 @@ fun PinCreateScreen(
                     }
                 }
 
+
                 Box(
                     modifier = Modifier
                         .width(100.dp)
                         .height(2.dp)
                         .background(Color.White)
                 )
+
 
                 Box(
                     modifier = Modifier
@@ -279,13 +301,15 @@ fun PinCreateScreen(
                 }
             }
 
+
             Spacer(
                 modifier = Modifier.height(65.dp)
             )
 
-            // =================================================
+
+            // =========================================================
             // PIN SCREEN
-            // =================================================
+            // =========================================================
 
             if (!isPattern) {
 
@@ -298,11 +322,16 @@ fun PinCreateScreen(
                     fontSize = 18.sp
                 )
 
+
                 Spacer(
                     modifier = Modifier.height(18.dp)
                 )
 
+
+                // =====================================================
                 // PIN DOTS
+                // =====================================================
+
                 Row(
                     horizontalArrangement =
                         Arrangement.spacedBy(14.dp)
@@ -329,18 +358,25 @@ fun PinCreateScreen(
                     }
                 }
 
+
                 Spacer(
                     modifier = Modifier.height(82.dp)
                 )
 
+
+                // =====================================================
                 // NUMBER PAD
+                // =====================================================
+
                 NumberPad(
+
                     onNumberClick = { number ->
 
                         if (pin.length < pinLength) {
                             pin += number
                         }
                     },
+
                     onDelete = {
 
                         if (pin.isNotEmpty()) {
@@ -349,15 +385,21 @@ fun PinCreateScreen(
                     }
                 )
 
+
                 Spacer(
                     modifier = Modifier.height(55.dp)
                 )
 
+
+                // =====================================================
                 // RESET + CONTINUE
+                // =====================================================
+
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(end = 30.dp),
+
                     horizontalArrangement =
                         Arrangement.spacedBy(
                             30.dp,
@@ -365,44 +407,73 @@ fun PinCreateScreen(
                         )
                 ) {
 
+
+                    // =================================================
                     // RESET
+                    // =================================================
+
                     Text(
                         text = stringResource(
                             R.string.reset
                         ),
+
                         color =
                             if (pin.isEmpty())
                                 Color.White.copy(alpha = 0.35f)
                             else
                                 Color.White,
+
                         fontSize = 20.sp,
+
                         modifier =
                             Modifier
                                 .clickable(
                                     enabled =
-                                        pin.isNotEmpty()
+                                        pin.isNotEmpty(),
+
+                                    indication = null,
+
+                                    interactionSource =
+                                        remember {
+                                            MutableInteractionSource()
+                                        }
                                 ) {
+
                                     pin = ""
                                 }
                                 .padding(10.dp)
                     )
 
+
+                    // =================================================
                     // CONTINUE
+                    // =================================================
+
                     Text(
                         text = stringResource(
                             R.string.continue_text
                         ),
+
                         color =
                             if (pin.length == pinLength)
                                 Color.White
                             else
                                 Color.White.copy(alpha = 0.35f),
+
                         fontSize = 20.sp,
+
                         modifier =
                             Modifier
                                 .clickable(
                                     enabled =
-                                        pin.length == pinLength
+                                        pin.length == pinLength,
+
+                                    indication = null,
+
+                                    interactionSource =
+                                        remember {
+                                            MutableInteractionSource()
+                                        }
                                 ) {
 
                                     onNext(
@@ -416,9 +487,9 @@ fun PinCreateScreen(
 
             } else {
 
-                // =================================================
+                // =========================================================
                 // PATTERN SCREEN
-                // =================================================
+                // =========================================================
 
                 Text(
                     text = stringResource(
@@ -428,9 +499,11 @@ fun PinCreateScreen(
                     fontSize = 18.sp
                 )
 
+
                 Spacer(
                     modifier = Modifier.height(25.dp)
                 )
+
 
                 Text(
                     text = stringResource(
@@ -442,29 +515,43 @@ fun PinCreateScreen(
                     fontSize = 14.sp
                 )
 
+
                 Spacer(
                     modifier = Modifier.height(20.dp)
                 )
 
+
+                // =====================================================
                 // PATTERN GRID
+                // =====================================================
+
                 PatternGrid(
                     selectedDots = selectedDots,
+
                     onPatternChanged = { dots ->
                         selectedDots = dots
                     },
+
                     dotColor = patternDotColor,
+
                     backgroundColor = backgroundColor
                 )
+
 
                 Spacer(
                     modifier = Modifier.height(40.dp)
                 )
 
+
+                // =====================================================
                 // RESET + CONTINUE
+                // =====================================================
+
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(end = 30.dp),
+
                     horizontalArrangement =
                         Arrangement.spacedBy(
                             30.dp,
@@ -472,45 +559,74 @@ fun PinCreateScreen(
                         )
                 ) {
 
+
+                    // =================================================
                     // RESET
+                    // =================================================
+
                     Text(
                         text = stringResource(
                             R.string.reset
                         ),
+
                         color =
                             if (selectedDots.isEmpty())
                                 Color.White.copy(alpha = 0.35f)
                             else
                                 Color.White,
+
                         fontSize = 20.sp,
+
                         modifier =
                             Modifier
                                 .clickable(
                                     enabled =
-                                        selectedDots.isNotEmpty()
+                                        selectedDots.isNotEmpty(),
+
+                                    indication = null,
+
+                                    interactionSource =
+                                        remember {
+                                            MutableInteractionSource()
+                                        }
                                 ) {
+
                                     selectedDots =
                                         emptyList()
                                 }
                                 .padding(10.dp)
                     )
 
+
+                    // =================================================
                     // CONTINUE
+                    // =================================================
+
                     Text(
                         text = stringResource(
                             R.string.continue_text
                         ),
+
                         color =
                             if (selectedDots.size >= 4)
                                 Color.White
                             else
                                 Color.White.copy(alpha = 0.35f),
+
                         fontSize = 20.sp,
+
                         modifier =
                             Modifier
                                 .clickable(
                                     enabled =
-                                        selectedDots.size >= 4
+                                        selectedDots.size >= 4,
+
+                                    indication = null,
+
+                                    interactionSource =
+                                        remember {
+                                            MutableInteractionSource()
+                                        }
                                 ) {
 
                                     onNext(
@@ -526,9 +642,10 @@ fun PinCreateScreen(
     }
 }
 
-// =============================================================
+
+// =====================================================================
 // PATTERN GRID
-// =============================================================
+// =====================================================================
 
 @Composable
 fun PatternGrid(
@@ -543,6 +660,7 @@ fun PatternGrid(
         onPatternChanged
     )
 
+
     Box(
         modifier = Modifier
             .size(300.dp)
@@ -551,11 +669,8 @@ fun PatternGrid(
                 var currentDots =
                     mutableListOf<Int>()
 
-                detectDragGestures(
 
-                    // ------------------------------------------------
-                    // DRAG START
-                    // ------------------------------------------------
+                detectDragGestures(
 
                     onDragStart = { offset ->
 
@@ -579,9 +694,6 @@ fun PatternGrid(
                         }
                     },
 
-                    // ------------------------------------------------
-                    // DRAG
-                    // ------------------------------------------------
 
                     onDrag = { change, _ ->
 
@@ -607,6 +719,7 @@ fun PatternGrid(
                         }
                     },
 
+
                     onDragEnd = {},
 
                     onDragCancel = {}
@@ -624,9 +737,10 @@ fun PatternGrid(
                     size.height
                 )
 
-            // ------------------------------------------------
-            // DRAW CONNECTION LINES
-            // ------------------------------------------------
+
+            // =========================================================
+            // PATTERN LINES
+            // =========================================================
 
             if (selectedDots.size >= 2) {
 
@@ -636,22 +750,26 @@ fun PatternGrid(
 
                     drawLine(
                         color = Color.White,
+
                         start =
                             positions[
                                 selectedDots[i]
                             ],
+
                         end =
                             positions[
                                 selectedDots[i + 1]
                             ],
+
                         strokeWidth = 8f
                     )
                 }
             }
 
-            // ------------------------------------------------
-            // DRAW DOTS
-            // ------------------------------------------------
+
+            // =========================================================
+            // PATTERN DOTS
+            // =========================================================
 
             positions.forEachIndexed {
                     index,
@@ -660,12 +778,14 @@ fun PatternGrid(
                 val selected =
                     selectedDots.contains(index)
 
+
                 // Outer circle
                 drawCircle(
                     color = dotColor,
                     radius = 17.5.dp.toPx(),
                     center = position
                 )
+
 
                 // Inner background
                 drawCircle(
@@ -674,6 +794,7 @@ fun PatternGrid(
                     center = position
                 )
 
+
                 // Center dot
                 drawCircle(
                     color =
@@ -681,7 +802,9 @@ fun PatternGrid(
                             Color.White
                         else
                             dotColor,
+
                     radius = 9.dp.toPx(),
+
                     center = position
                 )
             }
@@ -689,9 +812,10 @@ fun PatternGrid(
     }
 }
 
-// =============================================================
+
+// =====================================================================
 // GRID POSITIONS
-// =============================================================
+// =====================================================================
 
 private fun getGridPositions(
     width: Float,
@@ -699,12 +823,18 @@ private fun getGridPositions(
 ): List<Offset> {
 
     val x1 = width * 0.1667f
+
     val x2 = width * 0.5f
+
     val x3 = width * 0.8333f
 
+
     val y1 = height * 0.1667f
+
     val y2 = height * 0.5f
+
     val y3 = height * 0.8333f
+
 
     return listOf(
 
@@ -722,9 +852,10 @@ private fun getGridPositions(
     )
 }
 
-// =============================================================
+
+// =====================================================================
 // FIND DOT
-// =============================================================
+// =====================================================================
 
 private fun findDot(
     touch: Offset,
@@ -737,6 +868,7 @@ private fun findDot(
             width,
             height
         )
+
 
     positions.forEachIndexed {
             index,
@@ -754,10 +886,12 @@ private fun findDot(
                         dy * dy
             )
 
+
         if (distance <= 55f) {
             return index
         }
     }
+
 
     return null
 }

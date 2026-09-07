@@ -24,8 +24,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -79,18 +82,40 @@ fun StartScreen(
             )
 
             Spacer(
-                modifier = Modifier.height(20.dp)
+                modifier = Modifier.height(10.dp)
             )
 
 
             Text(
-                text = "App Lock",
-                style = TextStyle(
-                    fontSize = 34.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            )
+                text = buildAnnotatedString {
 
+                    withStyle(
+                        style = SpanStyle(
+                            color =
+                                Color(0xFF333333),
+
+                            fontWeight =
+                                FontWeight.Bold
+                        )
+                    ) {
+                        append("App ")
+                    }
+
+                    withStyle(
+                        style = SpanStyle(
+                            color =
+                                Color(0xFF2196F3),
+
+                            fontWeight =
+                                FontWeight.Bold
+                        )
+                    ) {
+                        append("Lock")
+                    }
+                },
+
+                fontSize = 34.sp
+            )
             Spacer(
                 modifier = Modifier.height(9.dp)
             )

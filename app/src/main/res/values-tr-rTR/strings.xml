@@ -163,4 +163,39 @@
     <string name="enter_digit_pin">%1$d haneli PIN\'i girin</string>
     <string name="pattern_not_match">Desen eşleşmiyor</string>
 
+    <!-- Onboarding Screen -->
+
+    <string name="onboarding_secure_your_apps">Uygulamalarınızı Güvende Tutun</string>
+
+    <string name="onboarding_quick_secure_access">
+        Hızlı ve Güvenli Erişim
+    </string>
+
+    <string name="onboarding_privacy_protected">
+        Gizliliğiniz Koruma Altında
+    </string>
+
+    <string name="onboarding_secure_your_apps_description">
+        Özel uygulamalarınızı güvenli bir şifre ve ekstra gizlilik katmanıyla koruyun
+    </string>
+
+    <string name="onboarding_quick_secure_access_description">
+        Korumalı uygulamalarınızın kilidini şifreniz veya parmak izinizle anında açın
+    </string>
+
+    <string name="onboarding_privacy_protected_description">
+        Kilitlemek istediğiniz uygulamaları seçin ve kişisel içeriklerinizi istenmeyen erişimlerden koruyun
+    </string>
+
+    <string name="onboarding_next">İleri</string>
+
+    <string name="onboarding_get_started">Başlayın</string>
+
+    <string name="onboarding_image_description">
+        Tanıtım %1$d
+    </string>
+
+
+
+
 </resources>

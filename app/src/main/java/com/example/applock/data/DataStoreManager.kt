@@ -3,26 +3,18 @@ package com.example.applock.data
 import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
-
-
-// =============================================================
-// DATASTORE
-// =============================================================
+import java.io.IOException
 
 private val Context.dataStore by preferencesDataStore(
     name = "app_lock"
 )
-
-
-// =============================================================
-// DATA STORE MANAGER
-// =============================================================
 
 class DataStoreManager(
     private val context: Context
@@ -31,33 +23,17 @@ class DataStoreManager(
     companion object {
 
         // =====================================================
-        // PIN
+        // PIN / PATTERN / AUTH
         // =====================================================
 
         val PIN_KEY =
-            stringPreferencesKey(
-                "pin_key"
-            )
-
-
-        // =====================================================
-        // PATTERN
-        // =====================================================
+            stringPreferencesKey("pin_key")
 
         val PATTERN_KEY =
-            stringPreferencesKey(
-                "pattern_key"
-            )
-
-
-        // =====================================================
-        // AUTH TYPE
-        // =====================================================
+            stringPreferencesKey("pattern_key")
 
         val AUTH_TYPE_KEY =
-            stringPreferencesKey(
-                "auth_type"
-            )
+            stringPreferencesKey("auth_type_key")
 
 
         // =====================================================
@@ -65,39 +41,21 @@ class DataStoreManager(
         // =====================================================
 
         val LOCKED_APPS =
-            stringSetPreferencesKey(
-                "locked_apps"
-            )
+            stringSetPreferencesKey("locked_apps")
 
 
         // =====================================================
-        // FINGERPRINT
+        // LOCK SETTINGS
         // =====================================================
 
         val FINGERPRINT_ENABLED =
-            booleanPreferencesKey(
-                "fingerprint_enabled"
-            )
-
-
-        // =====================================================
-        // VIBRATION
-        // =====================================================
+            booleanPreferencesKey("fingerprint_enabled")
 
         val VIBRATION_ENABLED =
-            booleanPreferencesKey(
-                "vibration_enabled"
-            )
-
-
-        // =====================================================
-        // HIDE TRACK
-        // =====================================================
+            booleanPreferencesKey("vibration_enabled")
 
         val HIDE_TRACK_ENABLED =
-            booleanPreferencesKey(
-                "hide_track_enabled"
-            )
+            booleanPreferencesKey("hide_track_enabled")
 
 
         // =====================================================
@@ -105,41 +63,19 @@ class DataStoreManager(
         // =====================================================
 
         val INTRUDER_ENABLED =
-            booleanPreferencesKey(
-                "intruder_enabled"
-            )
-
+            booleanPreferencesKey("intruder_enabled")
 
         val INTRUDER_WRONG_ATTEMPTS =
-            intPreferencesKey(
-                "intruder_wrong_attempts"
-            )
-
+            stringPreferencesKey("intruder_wrong_attempts")
 
         val INTRUDER_OBSERVATION_TIME =
-            intPreferencesKey(
-                "intruder_observation_time"
-            )
-
-
-        // =====================================================
-        // INTRUDER PHOTOS ENABLE / DISABLE
-        // =====================================================
+            stringPreferencesKey("intruder_observation_time")
 
         val INTRUDER_PHOTOS =
-            booleanPreferencesKey(
-                "intruder_photos"
-            )
-
-
-        // =====================================================
-        // INTRUDER PHOTO URI LIST
-        // =====================================================
+            stringSetPreferencesKey("intruder_photos")
 
         val INTRUDER_PHOTO_URIS =
-            stringSetPreferencesKey(
-                "intruder_photo_uris"
-            )
+            stringSetPreferencesKey("intruder_photo_uris")
 
 
         // =====================================================
@@ -147,15 +83,10 @@ class DataStoreManager(
         // =====================================================
 
         val SECURITY_QUESTION =
-            stringPreferencesKey(
-                "security_question"
-            )
-
+            stringPreferencesKey("security_question")
 
         val SECURITY_ANSWER =
-            stringPreferencesKey(
-                "security_answer"
-            )
+            stringPreferencesKey("security_answer")
 
 
         // =====================================================
@@ -163,9 +94,7 @@ class DataStoreManager(
         // =====================================================
 
         val HIDE_FROM_RECENTS =
-            booleanPreferencesKey(
-                "hide_from_recents"
-            )
+            booleanPreferencesKey("hide_from_recents")
 
 
         // =====================================================
@@ -173,29 +102,26 @@ class DataStoreManager(
         // =====================================================
 
         val LANGUAGE_KEY =
-            stringPreferencesKey(
-                "language_key"
-            )
+            stringPreferencesKey("language_key")
 
 
         // =====================================================
-        // RELOCK OPTION
+        // RELOCK
         // =====================================================
 
         val RELOCK_OPTION_KEY =
-            stringPreferencesKey(
-                "relock_option"
-            )
-
-
-        // =====================================================
-        // RELOCK DELAY
-        // =====================================================
+            stringPreferencesKey("relock_option_key")
 
         val RELOCK_DELAY_KEY =
-            stringPreferencesKey(
-                "relock_delay"
-            )
+            stringPreferencesKey("relock_delay_key")
+
+
+        // =====================================================
+        // PREMIUM
+        // =====================================================
+
+        val PREMIUM_KEY =
+            booleanPreferencesKey("premium_key")
     }
 
 
@@ -206,21 +132,24 @@ class DataStoreManager(
     suspend fun savePin(
         pin: String
     ) {
-
         context.dataStore.edit {
-
-            it[PIN_KEY] =
-                pin
+            it[PIN_KEY] = pin
         }
     }
 
-
     fun getPin(): Flow<String?> {
+        return context.dataStore.data
+            .catch { exception ->
 
-        return context.dataStore.data.map {
-
-            it[PIN_KEY]
-        }
+                if (exception is IOException) {
+                    emit(emptyPreferences())
+                } else {
+                    throw exception
+                }
+            }
+            .map {
+                it[PIN_KEY]
+            }
     }
 
 
@@ -231,21 +160,24 @@ class DataStoreManager(
     suspend fun savePattern(
         pattern: String
     ) {
-
         context.dataStore.edit {
-
-            it[PATTERN_KEY] =
-                pattern
+            it[PATTERN_KEY] = pattern
         }
     }
 
-
     fun getPattern(): Flow<String?> {
+        return context.dataStore.data
+            .catch { exception ->
 
-        return context.dataStore.data.map {
-
-            it[PATTERN_KEY]
-        }
+                if (exception is IOException) {
+                    emit(emptyPreferences())
+                } else {
+                    throw exception
+                }
+            }
+            .map {
+                it[PATTERN_KEY]
+            }
     }
 
 
@@ -256,22 +188,24 @@ class DataStoreManager(
     suspend fun saveAuthType(
         type: String
     ) {
-
         context.dataStore.edit {
-
-            it[AUTH_TYPE_KEY] =
-                type
+            it[AUTH_TYPE_KEY] = type
         }
     }
 
-
     fun getAuthType(): Flow<String?> {
+        return context.dataStore.data
+            .catch { exception ->
 
-        return context.dataStore.data.map {
-
-            it[AUTH_TYPE_KEY]
-                ?: "pin"
-        }
+                if (exception is IOException) {
+                    emit(emptyPreferences())
+                } else {
+                    throw exception
+                }
+            }
+            .map {
+                it[AUTH_TYPE_KEY] ?: "pin"
+            }
     }
 
 
@@ -282,76 +216,56 @@ class DataStoreManager(
     suspend fun saveLockedApps(
         apps: Set<String>
     ) {
-
         context.dataStore.edit {
-
-            it[LOCKED_APPS] =
-                apps
+            it[LOCKED_APPS] = apps
         }
     }
-
-
-    // =========================================================
-    // ADD ONE LOCKED APP
-    // =========================================================
 
     suspend fun saveLockedApp(
         packageName: String
     ) {
-
-        context.dataStore.edit {
+        context.dataStore.edit { preferences ->
 
             val currentApps =
-                it[LOCKED_APPS]
+                preferences[LOCKED_APPS]
                     ?: emptySet()
 
-            it[LOCKED_APPS] =
+            preferences[LOCKED_APPS] =
                 currentApps + packageName
         }
     }
 
-
-    // =========================================================
-    // REMOVE ONE LOCKED APP
-    // =========================================================
-
     suspend fun removeLockedApp(
         packageName: String
     ) {
-
-        context.dataStore.edit {
+        context.dataStore.edit { preferences ->
 
             val currentApps =
-                it[LOCKED_APPS]
+                preferences[LOCKED_APPS]
                     ?: emptySet()
 
-            it[LOCKED_APPS] =
+            preferences[LOCKED_APPS] =
                 currentApps - packageName
         }
     }
 
-
-    // =========================================================
-    // GET LOCKED APPS
-    // =========================================================
-
     fun getLockedApps(): Flow<Set<String>> {
+        return context.dataStore.data
+            .catch { exception ->
 
-        return context.dataStore.data.map {
-
-            it[LOCKED_APPS]
-                ?: emptySet()
-        }
+                if (exception is IOException) {
+                    emit(emptyPreferences())
+                } else {
+                    throw exception
+                }
+            }
+            .map {
+                it[LOCKED_APPS] ?: emptySet()
+            }
     }
 
-
-    // =========================================================
-    // LOCKED APPS FLOW
-    // =========================================================
-
     val lockedAppsFlow: Flow<Set<String>>
-        get() =
-            getLockedApps()
+        get() = getLockedApps()
 
 
     // =========================================================
@@ -361,22 +275,16 @@ class DataStoreManager(
     suspend fun saveFingerprintEnabled(
         enabled: Boolean
     ) {
-
         context.dataStore.edit {
-
-            it[FINGERPRINT_ENABLED] =
-                enabled
+            it[FINGERPRINT_ENABLED] = enabled
         }
     }
 
-
     fun getFingerprintEnabled(): Flow<Boolean> {
-
-        return context.dataStore.data.map {
-
-            it[FINGERPRINT_ENABLED]
-                ?: false
-        }
+        return context.dataStore.data
+            .map {
+                it[FINGERPRINT_ENABLED] ?: false
+            }
     }
 
 
@@ -387,22 +295,16 @@ class DataStoreManager(
     suspend fun saveVibrationEnabled(
         enabled: Boolean
     ) {
-
         context.dataStore.edit {
-
-            it[VIBRATION_ENABLED] =
-                enabled
+            it[VIBRATION_ENABLED] = enabled
         }
     }
 
-
     fun getVibrationEnabled(): Flow<Boolean> {
-
-        return context.dataStore.data.map {
-
-            it[VIBRATION_ENABLED]
-                ?: false
-        }
+        return context.dataStore.data
+            .map {
+                it[VIBRATION_ENABLED] ?: true
+            }
     }
 
 
@@ -413,48 +315,36 @@ class DataStoreManager(
     suspend fun saveHideTrackEnabled(
         enabled: Boolean
     ) {
-
         context.dataStore.edit {
-
-            it[HIDE_TRACK_ENABLED] =
-                enabled
+            it[HIDE_TRACK_ENABLED] = enabled
         }
     }
 
-
     fun getHideTrackEnabled(): Flow<Boolean> {
-
-        return context.dataStore.data.map {
-
-            it[HIDE_TRACK_ENABLED]
-                ?: false
-        }
+        return context.dataStore.data
+            .map {
+                it[HIDE_TRACK_ENABLED] ?: false
+            }
     }
 
 
     // =========================================================
-    // INTRUDER
+    // INTRUDER ENABLED
     // =========================================================
 
     suspend fun saveIntruderEnabled(
         enabled: Boolean
     ) {
-
         context.dataStore.edit {
-
-            it[INTRUDER_ENABLED] =
-                enabled
+            it[INTRUDER_ENABLED] = enabled
         }
     }
 
-
     fun getIntruderEnabled(): Flow<Boolean> {
-
-        return context.dataStore.data.map {
-
-            it[INTRUDER_ENABLED]
-                ?: false
-        }
+        return context.dataStore.data
+            .map {
+                it[INTRUDER_ENABLED] ?: false
+            }
     }
 
 
@@ -465,35 +355,24 @@ class DataStoreManager(
     suspend fun saveIntruderWrongAttempts(
         attempts: Int
     ) {
-
         context.dataStore.edit {
-
             it[INTRUDER_WRONG_ATTEMPTS] =
-                attempts
+                attempts.toString()
         }
     }
-
 
     fun getIntruderWrongAttempts(): Flow<Int> {
-
-        return context.dataStore.data.map {
-
-            it[INTRUDER_WRONG_ATTEMPTS]
-                ?: 0
-        }
+        return context.dataStore.data
+            .map {
+                it[INTRUDER_WRONG_ATTEMPTS]
+                    ?.toIntOrNull()
+                    ?: 0
+            }
     }
 
-
-    // =========================================================
-    // RESET INTRUDER WRONG ATTEMPTS
-    // =========================================================
-
     suspend fun resetIntruderWrongAttempts() {
-
         context.dataStore.edit {
-
-            it[INTRUDER_WRONG_ATTEMPTS] =
-                0
+            it[INTRUDER_WRONG_ATTEMPTS] = "0"
         }
     }
 
@@ -501,117 +380,79 @@ class DataStoreManager(
     // =========================================================
     // INTRUDER OBSERVATION TIME
     // =========================================================
+    //
+    // IMPORTANT:
+    // IntruderScreen uses Int for observation time.
+    // DataStore stores it as String and converts it back to Int.
+    //
+    // 0  = Never
+    // 5  = 5 Seconds
+    // 15 = 15 Seconds
+    // 30 = 30 Seconds
+    //
+    // =========================================================
 
     suspend fun saveIntruderObservationTime(
-        seconds: Int
+        time: Int
     ) {
-
         context.dataStore.edit {
-
             it[INTRUDER_OBSERVATION_TIME] =
-                seconds
+                time.toString()
         }
     }
-
 
     fun getIntruderObservationTime(): Flow<Int> {
-
-        return context.dataStore.data.map {
-
-            it[INTRUDER_OBSERVATION_TIME]
-                ?: 10
-        }
+        return context.dataStore.data
+            .map {
+                it[INTRUDER_OBSERVATION_TIME]
+                    ?.toIntOrNull()
+                    ?: 5
+            }
     }
 
 
     // =========================================================
-    // INTRUDER PHOTOS ENABLE / DISABLE
-    // =========================================================
-
-    suspend fun saveIntruderPhotos(
-        enabled: Boolean
-    ) {
-
-        context.dataStore.edit {
-
-            it[INTRUDER_PHOTOS] =
-                enabled
-        }
-    }
-
-
-    fun getIntruderPhotos(): Flow<Boolean> {
-
-        return context.dataStore.data.map {
-
-            it[INTRUDER_PHOTOS]
-                ?: false
-        }
-    }
-
-
-    // =========================================================
-    // SAVE INTRUDER PHOTO URI
+    // INTRUDER PHOTOS
     // =========================================================
 
     suspend fun saveIntruderPhoto(
         photoUri: String
     ) {
-
-        context.dataStore.edit {
+        context.dataStore.edit { preferences ->
 
             val currentPhotos =
-                it[INTRUDER_PHOTO_URIS]
+                preferences[INTRUDER_PHOTO_URIS]
                     ?: emptySet()
 
-            it[INTRUDER_PHOTO_URIS] =
+            preferences[INTRUDER_PHOTO_URIS] =
                 currentPhotos + photoUri
         }
     }
 
-
-    // =========================================================
-    // GET INTRUDER PHOTO URIS
-    // =========================================================
-
     fun getIntruderPhotosUris(): Flow<Set<String>> {
-
-        return context.dataStore.data.map {
-
-            it[INTRUDER_PHOTO_URIS]
-                ?: emptySet()
-        }
+        return context.dataStore.data
+            .map {
+                it[INTRUDER_PHOTO_URIS]
+                    ?: emptySet()
+            }
     }
-
-
-    // =========================================================
-    // REMOVE INTRUDER PHOTO URI
-    // =========================================================
 
     suspend fun removeIntruderPhoto(
         photoUri: String
     ) {
-
-        context.dataStore.edit {
+        context.dataStore.edit { preferences ->
 
             val currentPhotos =
-                it[INTRUDER_PHOTO_URIS]
+                preferences[INTRUDER_PHOTO_URIS]
                     ?: emptySet()
 
-            it[INTRUDER_PHOTO_URIS] =
+            preferences[INTRUDER_PHOTO_URIS] =
                 currentPhotos - photoUri
         }
     }
 
-
-    // =========================================================
-    // CLEAR ALL INTRUDER PHOTO URIS
-    // =========================================================
-
     suspend fun clearIntruderPhotos() {
-
         context.dataStore.edit {
-
             it[INTRUDER_PHOTO_URIS] =
                 emptySet()
         }
@@ -625,46 +466,31 @@ class DataStoreManager(
     suspend fun saveSecurityQuestion(
         question: String
     ) {
-
         context.dataStore.edit {
-
-            it[SECURITY_QUESTION] =
-                question
+            it[SECURITY_QUESTION] = question
         }
     }
-
 
     fun getSecurityQuestion(): Flow<String?> {
-
-        return context.dataStore.data.map {
-
-            it[SECURITY_QUESTION]
-        }
+        return context.dataStore.data
+            .map {
+                it[SECURITY_QUESTION]
+            }
     }
-
-
-    // =========================================================
-    // SECURITY ANSWER
-    // =========================================================
 
     suspend fun saveSecurityAnswer(
         answer: String
     ) {
-
         context.dataStore.edit {
-
-            it[SECURITY_ANSWER] =
-                answer
+            it[SECURITY_ANSWER] = answer
         }
     }
 
-
     fun getSecurityAnswer(): Flow<String?> {
-
-        return context.dataStore.data.map {
-
-            it[SECURITY_ANSWER]
-        }
+        return context.dataStore.data
+            .map {
+                it[SECURITY_ANSWER]
+            }
     }
 
 
@@ -675,22 +501,16 @@ class DataStoreManager(
     suspend fun saveHideFromRecents(
         enabled: Boolean
     ) {
-
         context.dataStore.edit {
-
-            it[HIDE_FROM_RECENTS] =
-                enabled
+            it[HIDE_FROM_RECENTS] = enabled
         }
     }
 
-
     fun getHideFromRecents(): Flow<Boolean> {
-
-        return context.dataStore.data.map {
-
-            it[HIDE_FROM_RECENTS]
-                ?: false
-        }
+        return context.dataStore.data
+            .map {
+                it[HIDE_FROM_RECENTS] ?: false
+            }
     }
 
 
@@ -701,22 +521,16 @@ class DataStoreManager(
     suspend fun saveLanguage(
         language: String
     ) {
-
         context.dataStore.edit {
-
-            it[LANGUAGE_KEY] =
-                language
+            it[LANGUAGE_KEY] = language
         }
     }
 
-
     fun getLanguage(): Flow<String> {
-
-        return context.dataStore.data.map {
-
-            it[LANGUAGE_KEY]
-                ?: "en"
-        }
+        return context.dataStore.data
+            .map {
+                it[LANGUAGE_KEY] ?: "en"
+            }
     }
 
 
@@ -727,22 +541,17 @@ class DataStoreManager(
     suspend fun saveRelockOption(
         option: String
     ) {
-
         context.dataStore.edit {
-
-            it[RELOCK_OPTION_KEY] =
-                option
+            it[RELOCK_OPTION_KEY] = option
         }
     }
 
-
     fun getRelockOption(): Flow<String> {
-
-        return context.dataStore.data.map {
-
-            it[RELOCK_OPTION_KEY]
-                ?: "relock_after_quitting"
-        }
+        return context.dataStore.data
+            .map {
+                it[RELOCK_OPTION_KEY]
+                    ?: "relock_after_quitting"
+            }
     }
 
 
@@ -753,21 +562,35 @@ class DataStoreManager(
     suspend fun saveRelockDelay(
         delay: String
     ) {
-
         context.dataStore.edit {
-
-            it[RELOCK_DELAY_KEY] =
-                delay
+            it[RELOCK_DELAY_KEY] = delay
         }
     }
 
-
     fun getRelockDelay(): Flow<String> {
+        return context.dataStore.data
+            .map {
+                it[RELOCK_DELAY_KEY] ?: "never"
+            }
+    }
 
-        return context.dataStore.data.map {
 
-            it[RELOCK_DELAY_KEY]
-                ?: "never"
+    // =========================================================
+    // PREMIUM
+    // =========================================================
+
+    suspend fun savePremium(
+        enabled: Boolean
+    ) {
+        context.dataStore.edit {
+            it[PREMIUM_KEY] = enabled
         }
+    }
+
+    fun getPremium(): Flow<Boolean> {
+        return context.dataStore.data
+            .map {
+                it[PREMIUM_KEY] ?: false
+            }
     }
 }

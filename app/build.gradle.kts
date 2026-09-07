@@ -97,11 +97,15 @@ dependencies {
     implementation(
         "io.coil-kt:coil-compose:2.7.0"
     )
+    implementation("com.android.billingclient:billing-ktx:8.0.0")
+
     implementation("androidx.camera:camera-camera2:1.5.0")
     implementation("androidx.camera:camera-lifecycle:1.5.0")
     implementation("androidx.camera:camera-core:1.5.0")
     // Debug tooling
     debugImplementation(
         "androidx.compose.ui:ui-tooling"
+
+
     )
 }

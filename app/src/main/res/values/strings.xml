@@ -165,4 +165,33 @@
     <string name="enter_digit_pin">Enter %1$d - Digit pin</string>
     <string name="pattern_not_match">Pattern does not match</string>
 
+
+
+        <!-- Onboarding Screen -->
+
+        <string name="onboarding_secure_your_apps">Secure Your Apps</string>
+        <string name="onboarding_quick_secure_access">Quick &amp; Secure Access</string>
+        <string name="onboarding_privacy_protected">Your Privacy, Protected</string>
+
+        <string name="onboarding_secure_your_apps_description">
+        Keep your private apps protected with a secure passcode and an extra layer of privacy
+    </string>
+
+        <string name="onboarding_quick_secure_access_description">
+        Unlock your protected apps instantly with your passcode or fingerprint
+    </string>
+
+        <string name="onboarding_privacy_protected_description">
+        Choose the apps you want to lock and keep your personal content safe from unwanted access
+    </string>
+
+        <string name="onboarding_next">Next</string>
+        <string name="onboarding_get_started">Get Started</string>
+
+        <string name="onboarding_image_description">Onboarding %1$d</string>
+
+
+
+
+
 </resources>

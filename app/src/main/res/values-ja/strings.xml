@@ -163,4 +163,39 @@
     <string name="enter_digit_pin">%1$d桁のPINを入力</string>
     <string name="pattern_not_match">パターンが一致しません</string>
 
+
+        <!-- Onboarding Screen -->
+
+        <string name="onboarding_secure_your_apps">アプリを安全に保護</string>
+
+        <string name="onboarding_quick_secure_access">
+        素早く安全にアクセス
+    </string>
+
+        <string name="onboarding_privacy_protected">
+        あなたのプライバシーを保護
+    </string>
+
+        <string name="onboarding_secure_your_apps_description">
+        安全なパスコードと追加のプライバシー保護機能で、プライベートなアプリをしっかり守ります
+    </string>
+
+        <string name="onboarding_quick_secure_access_description">
+        パスコードまたは指紋認証ですぐに保護されたアプリのロックを解除できます
+    </string>
+
+        <string name="onboarding_privacy_protected_description">
+        ロックしたいアプリを選択して、個人コンテンツを不正なアクセスから守ります
+    </string>
+
+        <string name="onboarding_next">次へ</string>
+
+        <string name="onboarding_get_started">始める</string>
+
+        <string name="onboarding_image_description">
+        オンボーディング %1$d
+    </string>
+
+
+
 </resources>
