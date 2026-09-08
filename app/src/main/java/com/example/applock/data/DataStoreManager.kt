@@ -195,14 +195,6 @@ class DataStoreManager(
 
     fun getAuthType(): Flow<String?> {
         return context.dataStore.data
-            .catch { exception ->
-
-                if (exception is IOException) {
-                    emit(emptyPreferences())
-                } else {
-                    throw exception
-                }
-            }
             .map {
                 it[AUTH_TYPE_KEY] ?: "pin"
             }
@@ -379,17 +371,6 @@ class DataStoreManager(
 
     // =========================================================
     // INTRUDER OBSERVATION TIME
-    // =========================================================
-    //
-    // IMPORTANT:
-    // IntruderScreen uses Int for observation time.
-    // DataStore stores it as String and converts it back to Int.
-    //
-    // 0  = Never
-    // 5  = 5 Seconds
-    // 15 = 15 Seconds
-    // 30 = 30 Seconds
-    //
     // =========================================================
 
     suspend fun saveIntruderObservationTime(
@@ -579,6 +560,10 @@ class DataStoreManager(
     // PREMIUM
     // =========================================================
 
+    /**
+     * true  = Premium user
+     * false = Free user
+     */
     suspend fun savePremium(
         enabled: Boolean
     ) {
@@ -587,8 +572,22 @@ class DataStoreManager(
         }
     }
 
+    /**
+     * Returns the saved premium status.
+     *
+     * Default:
+     * false = Free user
+     */
     fun getPremium(): Flow<Boolean> {
         return context.dataStore.data
+            .catch { exception ->
+
+                if (exception is IOException) {
+                    emit(emptyPreferences())
+                } else {
+                    throw exception
+                }
+            }
             .map {
                 it[PREMIUM_KEY] ?: false
             }

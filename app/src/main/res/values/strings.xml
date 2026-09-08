@@ -2,7 +2,7 @@
 <resources>
 
     <string name="app_name" translatable="false">App locker</string>
-
+    <string name="lifetime" translatable="false">lifetime</string>
     <!-- Common -->
     <string name="back">Back</string>
     <string name="close_selection">Close selection</string>

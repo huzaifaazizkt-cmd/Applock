@@ -203,7 +203,7 @@ fun LanguagesScreen(
                                 start = 18.dp,
                                 top = 39.dp
                             )
-                            .size(23.dp)
+                            .size(25.dp)
                             .clickable (
                                 indication = null,
                                 interactionSource = remember {
@@ -237,7 +237,7 @@ fun LanguagesScreen(
                         Color(0xFF888888),
 
                     fontSize =
-                        18.sp,
+                       24.sp,
 
                     fontWeight =
                         FontWeight.SemiBold
@@ -247,7 +247,7 @@ fun LanguagesScreen(
 
             Spacer(
                 modifier =
-                    Modifier.height(1.dp)
+                    Modifier.height(12.dp)
             )
 
 
@@ -261,7 +261,8 @@ fun LanguagesScreen(
                     .padding(
                         start = 20.dp,
                         end = 15.dp
-                    )
+                    ),
+                verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
 
                 languages.forEach { language ->
@@ -307,7 +308,7 @@ fun LanguagesScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(29.dp)
+                        .height(32.dp)
                         .clip(
                             RoundedCornerShape(20.dp)
                         )
@@ -414,8 +415,8 @@ private fun LanguageRow(
 
             modifier =
                 Modifier.size(
-                    width = 29.dp,
-                    height = 29.dp
+                    width = 30.dp,
+                    height = 30.dp
                 ),
 
             contentScale =
@@ -447,7 +448,7 @@ private fun LanguageRow(
                 },
 
             fontSize =
-                12.sp
+                20.sp
         )
 
 
@@ -461,7 +462,7 @@ private fun LanguageRow(
             },
 
             modifier =
-                Modifier.size(24.dp),
+                Modifier.size(20.dp),
 
             colors =
                 RadioButtonDefaults.colors(

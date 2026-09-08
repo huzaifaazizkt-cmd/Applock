@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 
+import com.example.applock.Design.screens.ExitScreen
 import com.example.applock.Design.screens.HomeScreen
 import com.example.applock.Design.screens.IntruderScreen
 import com.example.applock.Design.screens.LanguagesScreen
@@ -19,64 +20,44 @@ import com.example.applock.Design.screens.PremiumScreen
 import com.example.applock.Design.screens.StartScreen
 import com.example.applock.Design.screens.WelcomeScreen
 
-
 @Composable
 fun NavGraph(
     context: Context
 ) {
-
-    val navController =
-        rememberNavController()
-
+    val navController = rememberNavController()
 
     NavHost(
         navController = navController,
-
-        startDestination =
-            "startScreen"
+        startDestination = "startScreen"
     ) {
 
-        composable(
-            "startScreen"
-        ) {
-
+        // ------------------------------------------------
+        // START
+        // ------------------------------------------------
+        composable("startScreen") {
             StartScreen(
-                navController =
-                    navController
+                navController = navController
             )
         }
 
-        composable(
-            "welcomeScreen"
-        ) {
-
+        // ------------------------------------------------
+        // WELCOME
+        // ------------------------------------------------
+        composable("welcomeScreen") {
             WelcomeScreen(
-                navController =
-                    navController
+                navController = navController
             )
         }
 
-        composable(
-            "languagesSetup"
-        ) {
-
+        // ------------------------------------------------
+        // LANGUAGE SETUP
+        // ------------------------------------------------
+        composable("languagesSetup") {
             LanguagesScreen(
-
-                // IMPORTANT:
-                // null = no back icon
-
                 onBackClick = null,
-
-
                 onLanguageSelected = {
-
-                    navController.navigate(
-                        "onboardingScreen"
-                    ) {
-
-                        popUpTo(
-                            "languagesSetup"
-                        ) {
+                    navController.navigate("onboardingScreen") {
+                        popUpTo("languagesSetup") {
                             inclusive = true
                         }
                     }
@@ -84,48 +65,40 @@ fun NavGraph(
             )
         }
 
-        composable(
-            "onboardingScreen"
-        ) {
-
+        // ------------------------------------------------
+        // ONBOARDING
+        // ------------------------------------------------
+        composable("onboardingScreen") {
             OnboardingScreen(
-                navController =
-                    navController
+                navController = navController
             )
         }
 
-        composable(
-            "premium"
-        ) {
-
+        // ------------------------------------------------
+        // PREMIUM
+        // ------------------------------------------------
+        composable("premium") {
             PremiumScreen(
-                navController =
-                    navController
+                navController = navController
             )
         }
 
-        composable(
-            "create"
-        ) {
-
+        // ------------------------------------------------
+        // PIN / PATTERN CREATE
+        // ------------------------------------------------
+        composable("create") {
             PinCreateScreen(
-
-                onNext = {
-                        type,
-                        value ->
+                onNext = { type, value ->
 
                     when (type) {
 
                         "pin" -> {
-
                             navController.navigate(
                                 "confirm/pin/$value"
                             )
                         }
 
-
                         "pattern" -> {
-
                             navController.navigate(
                                 "confirm/pattern/$value"
                             )
@@ -135,124 +108,83 @@ fun NavGraph(
             )
         }
 
+        // ------------------------------------------------
+        // PIN / PATTERN CONFIRM
+        // ------------------------------------------------
         composable(
-
-            route =
-                "confirm/{type}/{value}",
-
-            arguments =
-                listOf(
-
-                    navArgument(
-                        "type"
-                    ) {
-
-                        type =
-                            NavType.StringType
-                    },
-
-
-                    navArgument(
-                        "value"
-                    ) {
-
-                        type =
-                            NavType.StringType
-                    }
-                )
+            route = "confirm/{type}/{value}",
+            arguments = listOf(
+                navArgument("type") {
+                    type = NavType.StringType
+                },
+                navArgument("value") {
+                    type = NavType.StringType
+                }
+            )
         ) { backStackEntry ->
 
-
             val type =
-                backStackEntry
-                    .arguments
-                    ?.getString(
-                        "type"
-                    )
+                backStackEntry.arguments
+                    ?.getString("type")
                     ?: "pin"
 
-
             val value =
-                backStackEntry
-                    .arguments
-                    ?.getString(
-                        "value"
-                    )
+                backStackEntry.arguments
+                    ?.getString("value")
                     ?: ""
 
-
             PinConfirmScreen(
-
-                navController =
-                    navController,
-
-                context =
-                    context,
-
-                type =
-                    type,
-
-                value =
-                    value
+                navController = navController,
+                context = context,
+                type = type,
+                value = value
             )
         }
 
-        composable(
-            "home"
-        ) {
-
+        // ------------------------------------------------
+        // HOME
+        // ------------------------------------------------
+        composable("home") {
             HomeScreen(
                 navController
             )
         }
 
-        composable(
-            "appList"
-        ) {
+        // ------------------------------------------------
+        // MAIN / APP LIST
+        // ------------------------------------------------
+        composable("appList") {
 
             val openSettings =
                 navController
                     .currentBackStackEntry
                     ?.savedStateHandle
-                    ?.get<Boolean>(
-                        "openSettings"
-                    )
+                    ?.get<Boolean>("openSettings")
                     ?: false
 
-
             MainScreen(
-
-                context =
-                    context,
-
+                context = context,
 
                 onIntruderClick = {
-
-                    navController.navigate(
-                        "intruder"
-                    )
+                    navController.navigate("intruder")
                 },
-
 
                 onLanguageClick = {
-
-                    navController.navigate(
-                        "languages"
-                    )
+                    navController.navigate("languages")
                 },
 
+                openSettings = openSettings,
 
-                openSettings =
-                    openSettings
+                navController = navController
             )
         }
 
-        composable(
-            "languages"
-        ) {
+        // ------------------------------------------------
+        // LANGUAGES
+        // ------------------------------------------------
+        composable("languages") {
 
             LanguagesScreen(
-
                 onBackClick = {
 
                     navController
@@ -263,22 +195,19 @@ fun NavGraph(
                             true
                         )
 
-
-                    navController
-                        .popBackStack()
+                    navController.popBackStack()
                 },
 
                 onLanguageSelected = null
             )
         }
 
-
-        composable(
-            "intruder"
-        ) {
+        // ------------------------------------------------
+        // INTRUDER
+        // ------------------------------------------------
+        composable("intruder") {
 
             IntruderScreen(
-
                 onBackClick = {
 
                     navController
@@ -289,10 +218,19 @@ fun NavGraph(
                             true
                         )
 
-
-                    navController
-                        .popBackStack()
+                    navController.popBackStack()
                 }
+            )
+        }
+
+        // ------------------------------------------------
+        // EXIT
+        // ------------------------------------------------
+        composable("exit") {
+
+            ExitScreen(
+                navController = navController,
+
             )
         }
     }

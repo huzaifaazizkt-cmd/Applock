@@ -167,6 +167,10 @@ object AppListCache {
                                             .toString()
 
 
+                                    // =================================================
+                                    // APP ICON
+                                    // =================================================
+
                                     val iconBitmap =
                                         try {
 
@@ -225,7 +229,6 @@ object AppListCache {
             } catch (e: Exception) {
 
                 e.printStackTrace()
-
             }
         }
     }
@@ -332,6 +335,7 @@ fun AppListScreen(
                 ?: emptyList()
         )
     }
+
 
     LaunchedEffect(Unit) {
 
@@ -478,8 +482,8 @@ fun AppListScreen(
 
             modifier =
                 Modifier.padding(
-                    start = 60.dp,
-                    top = 10.dp
+                    start = 20.dp,
+                    top = 15.dp
                 )
         )
 
@@ -532,7 +536,7 @@ fun AppListScreen(
 
 
             // =================================================
-            // UNLOCKED
+            // UNLOCKED TAB
             // =================================================
 
             Tab(
@@ -638,7 +642,7 @@ fun AppListScreen(
 
 
             // =================================================
-            // LOCKED
+            // LOCKED TAB
             // =================================================
 
             Tab(
@@ -890,6 +894,18 @@ fun AppListScreen(
 
 
         // =====================================================
+        // SMALL SPACE
+        // =====================================================
+
+        Spacer(
+            modifier =
+                Modifier.height(
+                    10.dp
+                )
+        )
+
+
+        // =====================================================
         // GENERAL
         // =====================================================
 
@@ -904,25 +920,42 @@ fun AppListScreen(
                 Color(0xFF878585),
 
             fontSize =
-                12.sp,
+                14.sp,
 
             modifier =
                 Modifier.padding(
                     start = 18.dp,
                     top = 7.dp,
-                    bottom = 7.dp
+                    bottom = 3.dp
+                )
+        )
+
+
+        // =====================================================
+        // SPACE BEFORE APP LIST
+        // =====================================================
+
+        Spacer(
+            modifier =
+                Modifier.height(
+                    18.dp
                 )
         )
 
 
         // =====================================================
         // APP LIST
+        // IMPORTANT:
+        // weight(1f) gives LazyColumn remaining screen height
+        // top padding gives first card room for complete shadow
         // =====================================================
 
         LazyColumn(
 
             modifier =
-                Modifier.fillMaxWidth(),
+                Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
 
             verticalArrangement =
                 Arrangement.spacedBy(
@@ -933,6 +966,7 @@ fun AppListScreen(
                 PaddingValues(
                     start = 14.dp,
                     end = 14.dp,
+                    top = 4.dp,
                     bottom = 16.dp
                 )
         ) {
@@ -969,7 +1003,7 @@ fun AppListScreen(
 
 
                 // =================================================
-                // APP ROW
+                // APP CARD
                 // =================================================
 
                 Row(
@@ -1009,7 +1043,7 @@ fun AppListScreen(
 
 
                     // =================================================
-                    // ICON
+                    // APP ICON
                     // =================================================
 
                     if (
@@ -1075,7 +1109,7 @@ fun AppListScreen(
 
 
                     // =================================================
-                    // LOCK / UNLOCK
+                    // LOCK / UNLOCK BUTTON
                     // =================================================
 
                     IconButton(

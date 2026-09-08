@@ -1,3 +1,4 @@
+
 package com.example.applock.Design.screens
 
 import androidx.compose.foundation.Image
@@ -11,12 +12,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -25,7 +25,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
@@ -33,32 +32,60 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.applock.R
-import kotlinx.coroutines.delay
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 
 @Composable
 fun StartScreen(
     navController: NavController
 ) {
 
-    var progress by remember {
-        mutableFloatStateOf(0f)
+    // ---------------------------------------------------------
+    // LOTTIE LOADING BAR
+    // ---------------------------------------------------------
+
+    val composition by rememberLottieComposition(
+        LottieCompositionSpec.RawRes(R.raw.loadingbar)
+    )
+
+    var navigationDone by remember {
+        mutableStateOf(false)
     }
 
-    // Splash loading
-    LaunchedEffect(Unit) {
+    val progress by animateLottieCompositionAsState(
+        composition = composition,
+        iterations = 1
+    )
 
-        progress = 1f
+    // ---------------------------------------------------------
+    // JSON ANIMATION COMPLETE
+    // ---------------------------------------------------------
 
-        // 2.5 seconds loading
-        delay(3500)
+    LaunchedEffect(progress) {
 
-        // Loading ke baad Welcome Screen
-        navController.navigate("welcomeScreen") {
-            popUpTo("startScreen") {
-                inclusive = true
+        if (
+            composition != null &&
+            progress >= 1f &&
+            !navigationDone
+        ) {
+
+            navigationDone = true
+
+            navController.navigate("welcomeScreen") {
+
+                popUpTo("startScreen") {
+                    inclusive = true
+                }
             }
         }
     }
+
+    // ---------------------------------------------------------
+    // UI
+    // ---------------------------------------------------------
 
     Box(
         modifier = Modifier
@@ -66,12 +93,10 @@ fun StartScreen(
             .background(Color.White)
     ) {
 
-
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
 
             Image(
                 painter = painterResource(
@@ -85,17 +110,13 @@ fun StartScreen(
                 modifier = Modifier.height(10.dp)
             )
 
-
             Text(
                 text = buildAnnotatedString {
 
                     withStyle(
                         style = SpanStyle(
-                            color =
-                                Color(0xFF333333),
-
-                            fontWeight =
-                                FontWeight.Bold
+                            color = Color(0xFF333333),
+                            fontWeight = FontWeight.Bold
                         )
                     ) {
                         append("App ")
@@ -103,23 +124,19 @@ fun StartScreen(
 
                     withStyle(
                         style = SpanStyle(
-                            color =
-                                Color(0xFF2196F3),
-
-                            fontWeight =
-                                FontWeight.Bold
+                            color = Color(0xFF2196F3),
+                            fontWeight = FontWeight.Bold
                         )
                     ) {
                         append("Lock")
                     }
                 },
-
                 fontSize = 34.sp
             )
+
             Spacer(
                 modifier = Modifier.height(9.dp)
             )
-
 
             Text(
                 text = "Secure your apps. Protect your privacy.",
@@ -128,46 +145,31 @@ fun StartScreen(
             )
         }
 
-
+        // -----------------------------------------------------
+        // JSON LOADING BAR
+        // -----------------------------------------------------
 
         Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
                 .padding(
-                    start = 45.dp,
-                    end = 45.dp,
+                    start = 100.dp,
+                    end = 100.dp,
                     bottom = 20.dp
                 ),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-
-            Box(
+            LottieAnimation(
+                composition = composition,
+                progress = {
+                    progress
+                },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(8.dp)
-                    .clip(
-                        RoundedCornerShape(20.dp)
-                    )
-                    .background(
-                        Color(0xFFE1E5E9)
-                    )
-            ) {
-
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(progress)
-                        .height(8.dp)
-                        .clip(
-                            RoundedCornerShape(20.dp)
-                        )
-                        .background(
-                            Color(0xFF2196F3)
-                        )
-                )
-            }
+                    .height(25.dp)
+            )
 
             Spacer(
                 modifier = Modifier.height(10.dp)
@@ -175,9 +177,10 @@ fun StartScreen(
 
             Text(
                 text = "This action may contain ads",
-                fontSize = 11.sp,
+                fontSize = 14.sp,
                 color = Color.Gray
             )
         }
     }
 }
+

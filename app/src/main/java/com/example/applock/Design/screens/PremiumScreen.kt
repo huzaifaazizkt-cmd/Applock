@@ -5,6 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,8 +24,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,74 +41,68 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.applock.BillingManager
+import com.example.applock.Billing
 import com.example.applock.R
-import com.example.applock.data.DataStoreManager
-import kotlinx.coroutines.launch
-import androidx.compose.runtime.rememberCoroutineScope
 
 @Composable
 fun PremiumScreen(
     navController: NavController
 ) {
 
-    val context =
-        LocalContext.current
+    // =========================================================
+    // CONTEXT / ACTIVITY
+    // =========================================================
 
-    val activity =
-        context as? Activity
+    val context = LocalContext.current
 
-    val scope =
-        rememberCoroutineScope()
-
-    val dataStoreManager =
-        remember {
-            DataStoreManager(context)
-        }
-
+    val activity = context as? Activity
 
     // =========================================================
-    // BILLING INITIALIZE
+    // BILLING
+    // =========================================================
+
+    val billing = remember(context) {
+        Billing(context)
+    }
+
+    // =========================================================
+    // LIFETIME PRICE
+    // =========================================================
+
+    var lifetimePrice by remember {
+        mutableStateOf("$6.99")
+    }
+
+    // =========================================================
+    // LOAD ACTUAL GOOGLE PLAY PRICE
     // =========================================================
 
     LaunchedEffect(Unit) {
 
-        BillingManager.initialize(
-            context
-        )
-    }
+        billing.lifetimeprice { price ->
 
-
-    // =========================================================
-    // PREMIUM STATE
-    // =========================================================
-
-    val billingPremium by
-    BillingManager.isPremium.collectAsState()
-
-
-    // =========================================================
-    // SAVE PREMIUM WHEN PURCHASE SUCCESSFUL
-    // =========================================================
-
-    LaunchedEffect(
-        billingPremium
-    ) {
-
-        if (billingPremium) {
-
-            dataStoreManager.savePremium(
-                true
-            )
+            lifetimePrice = price
         }
     }
 
+    // =========================================================
+    // CLOSE BILLING CONNECTION
+    // =========================================================
+
+    DisposableEffect(Unit) {
+
+        onDispose {
+
+            billing.endConnection()
+        }
+    }
+
+    // =========================================================
+    // COLORS
+    // =========================================================
 
     val blueColor =
         Color(0xFF2196F3)
-
-    val lightBlue =
-        Color(0xFFF1F7FF)
 
     val darkText =
         Color(0xFF333333)
@@ -115,12 +110,13 @@ fun PremiumScreen(
     val grayText =
         Color(0xFF777777)
 
+    // =========================================================
+    // SELECTED PLAN
+    // =========================================================
 
-    var selectedPlan by
-    remember {
+    var selectedPlan by remember {
         mutableStateOf(true)
     }
-
 
     // =========================================================
     // UI
@@ -129,9 +125,7 @@ fun PremiumScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                Color.White
-            )
+            .background(Color.White)
     ) {
 
         Column(
@@ -145,10 +139,10 @@ fun PremiumScreen(
                 )
         ) {
 
-
             // =================================================
             // CLOSE
             // =================================================
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -159,11 +153,8 @@ fun PremiumScreen(
                     painter = painterResource(
                         id = R.drawable.cross
                     ),
-
                     contentDescription = "Close",
-
                     tint = Color(0xFF777777),
-
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .size(9.dp)
@@ -175,6 +166,7 @@ fun PremiumScreen(
                         ) {
 
                             navController.navigate("create") {
+
                                 popUpTo("premium") {
                                     inclusive = true
                                 }
@@ -182,7 +174,6 @@ fun PremiumScreen(
                         }
                 )
             }
-
 
             // =================================================
             // PREMIUM IMAGE
@@ -192,98 +183,59 @@ fun PremiumScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(150.dp),
-
-                contentAlignment =
-                    Alignment.Center
+                contentAlignment = Alignment.Center
             ) {
 
                 Image(
-                    painter =
-                        painterResource(
-                            id = R.drawable.`in`
-                        ),
-
-                    contentDescription =
-                        "Premium",
-
-                    modifier =
-                        Modifier
-                            .size(125.dp)
+                    painter = painterResource(
+                        id = R.drawable.`in`
+                    ),
+                    contentDescription = "Premium",
+                    modifier = Modifier.size(125.dp)
                 )
             }
 
-
             Spacer(
-                modifier =
-                    Modifier.height(20.dp)
+                modifier = Modifier.height(20.dp)
             )
-
 
             // =================================================
             // TITLE
             // =================================================
 
             Column(
-                modifier =
-                    Modifier.fillMaxWidth(),
-
-                horizontalAlignment =
-                    Alignment.CenterHorizontally
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
                 Row {
 
                     Text(
-                        text =
-                            "Unlock",
-
-                        color =
-                            darkText,
-
-                        fontSize =
-                            26.sp,
-
-                        fontWeight =
-                            FontWeight.Bold
+                        text = "Unlock",
+                        color = darkText,
+                        fontSize = 26.sp,
+                        fontWeight = FontWeight.Bold
                     )
 
                     Text(
-                        text =
-                            " All Features",
-
-                        color =
-                            blueColor,
-
-                        fontSize =
-                            26.sp,
-
-                        fontWeight =
-                            FontWeight.Bold
+                        text = " All Features",
+                        color = blueColor,
+                        fontSize = 26.sp,
+                        fontWeight = FontWeight.Bold
                     )
                 }
 
-
                 Text(
-                    text =
-                        "Forever ",
-
-                    color =
-                        darkText,
-
-                    fontSize =
-                        26.sp,
-
-                    fontWeight =
-                        FontWeight.Bold
+                    text = "Forever ",
+                    color = darkText,
+                    fontSize = 26.sp,
+                    fontWeight = FontWeight.Bold
                 )
             }
 
-
             Spacer(
-                modifier =
-                    Modifier.height(8.dp)
+                modifier = Modifier.height(8.dp)
             )
-
 
             // =================================================
             // DESCRIPTION
@@ -291,506 +243,341 @@ fun PremiumScreen(
 
             Text(
                 text =
-                    "One-time payment. Enjoy lifetime access\nwith no recurring charges.",
-
-                color =
-                    grayText,
-
-                fontSize =
-                    12.sp,
-
-                lineHeight =
-                    17.sp,
-
-                modifier =
-                    Modifier.padding(
-                        start = 70.5.dp
-                    ),
-
-                textAlign =
-                    TextAlign.Center
+                    "One-time payment. Enjoy lifetime access\n" +
+                            "with no recurring charges.",
+                color = grayText,
+                fontSize = 12.sp,
+                lineHeight = 17.sp,
+                modifier = Modifier.padding(
+                    start = 70.5.dp
+                ),
+                textAlign = TextAlign.Center
             )
-
 
             Spacer(
-                modifier =
-                    Modifier.height(20.dp)
+                modifier = Modifier.height(20.dp)
             )
-
 
             // =================================================
             // PREMIUM BENEFITS TITLE
             // =================================================
 
             Text(
-                text =
-                    "Premium Benefits",
-
-                color =
-                    darkText,
-
-                fontSize =
-                    14.sp,
-
-                fontWeight =
-                    FontWeight.Medium
+                text = "Premium Benefits",
+                color = darkText,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium
             )
-
 
             Spacer(
-                modifier =
-                    Modifier.height(14.dp)
+                modifier = Modifier.height(14.dp)
             )
 
-
             // =================================================
-            // BENEFITS
+            // BENEFIT 1
             // =================================================
 
             PremiumBenefitRow(
-                icon =
-                    R.drawable.hideinapp,
-
-                text =
-                    "Hide Unlimited photos & videos"
+                icon = R.drawable.hideinapp,
+                text = "Hide Unlimited photos & videos"
             )
-
 
             Spacer(
-                modifier =
-                    Modifier.height(10.dp)
+                modifier = Modifier.height(10.dp)
             )
 
+            // =================================================
+            // BENEFIT 2
+            // =================================================
 
             PremiumBenefitRow(
-                icon =
-                    R.drawable.selfie,
-
-                text =
-                    "Intruder selfie"
+                icon = R.drawable.selfie,
+                text = "Intruder selfie"
             )
-
 
             Spacer(
-                modifier =
-                    Modifier.height(10.dp)
+                modifier = Modifier.height(10.dp)
             )
 
+            // =================================================
+            // BENEFIT 3
+            // =================================================
 
             PremiumBenefitRow(
-                icon =
-                    R.drawable.noads,
-
-                text =
-                    "No Ads"
+                icon = R.drawable.noads,
+                text = "No Ads"
             )
-
 
             Spacer(
-                modifier =
-                    Modifier.height(10.dp)
+                modifier = Modifier.height(10.dp)
             )
 
+            // =================================================
+            // BENEFIT 4
+            // =================================================
 
             PremiumBenefitRow(
-                icon =
-                    R.drawable.priority,
-
-                text =
-                    "Priority Support"
+                icon = R.drawable.priority,
+                text = "Priority Support"
             )
-
 
             Spacer(
-                modifier =
-                    Modifier.height(15.dp)
+                modifier = Modifier.height(15.dp)
             )
-
 
             // =================================================
             // ONE TIME PURCHASE CARD
             // =================================================
 
             Box(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .height(76.dp)
-                        .border(
-                            width = 1.dp,
-
-                            color =
-                                blueColor,
-
-                            shape =
-                                RoundedCornerShape(
-                                    16.dp
-                                )
-                        )
-
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(76.dp)
+                    .border(
+                        width = 1.dp,
+                        color = blueColor,
+                        shape = RoundedCornerShape(16.dp)
+                    )
             ) {
-
 
                 // =================================================
                 // BEST VALUE
                 // =================================================
 
                 Box(
-                    modifier =
-                        Modifier
-                            .align(
-                                Alignment.TopEnd
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .offset(
+                            x = (-40).dp
+                        )
+                        .height(17.dp)
+                        .background(
+                            color = blueColor,
+                            shape = RoundedCornerShape(
+                                bottomStart = 3.dp
                             )
-                            .offset(
-                                x = (-40).dp
-                            )
-                            .height(17.dp)
-                            .background(
-                                color =
-                                    blueColor,
-
-                                shape =
-                                    RoundedCornerShape(
-                                        bottomStart =
-                                            3.dp
-                                    )
-                            )
-                            .padding(
-                                horizontal =
-                                    8.dp
-                            ),
-
-                    contentAlignment =
-                        Alignment.Center
+                        )
+                        .padding(
+                            horizontal = 8.dp
+                        ),
+                    contentAlignment = Alignment.Center
                 ) {
 
                     Text(
-                        text =
-                            "Best Value",
-
-                        color =
-                            Color.White,
-
-                        fontSize =
-                            8.sp,
-
-                        fontWeight =
-                            FontWeight.Medium
+                        text = "Best Value",
+                        color = Color.White,
+                        fontSize = 8.sp,
+                        fontWeight = FontWeight.Medium
                     )
                 }
-
 
                 // =================================================
                 // PLAN
                 // =================================================
 
                 Row(
-                    modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .padding(
-                                start = 12.dp,
-                                end = 12.dp,
-                                top = 15.dp,
-                                bottom = 8.dp
-                            ),
-
-                    verticalAlignment =
-                        Alignment.CenterVertically
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(
+                            start = 12.dp,
+                            end = 12.dp,
+                            top = 15.dp,
+                            bottom = 8.dp
+                        ),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
 
-
+                    // =================================================
                     // RADIO
+                    // =================================================
 
                     Box(
-                        modifier =
-                            Modifier
-                                .size(15.dp)
-                                .border(
-                                    width = 1.3.dp,
-
-                                    color =
-                                        blueColor,
-
-                                    shape =
-                                        CircleShape
-                                ),
-
-                        contentAlignment =
-                            Alignment.Center
+                        modifier = Modifier
+                            .size(15.dp)
+                            .border(
+                                width = 1.3.dp,
+                                color = blueColor,
+                                shape = CircleShape
+                            ),
+                        contentAlignment = Alignment.Center
                     ) {
 
-                        if (
-                            selectedPlan
-                        ) {
+                        if (selectedPlan) {
 
                             Box(
-                                modifier =
-                                    Modifier
-                                        .size(7.dp)
-                                        .background(
-                                            blueColor,
-                                            CircleShape
-                                        )
+                                modifier = Modifier
+                                    .size(7.dp)
+                                    .background(
+                                        color = blueColor,
+                                        shape = CircleShape
+                                    )
                             )
                         }
                     }
 
-
                     Spacer(
-                        modifier =
-                            Modifier.width(15.dp)
+                        modifier = Modifier.width(15.dp)
                     )
 
-
+                    // =================================================
                     // PLAN NAME
+                    // =================================================
 
                     Column(
-                        modifier =
-                            Modifier.weight(
-                                1f
-                            )
+                        modifier = Modifier.weight(1f)
                     ) {
 
                         Text(
-                            text =
-                                "One-time purchase",
-
-                            color =
-                                darkText,
-
-                            fontSize =
-                                16.sp,
-
-                            fontWeight =
-                                FontWeight.Medium
+                            text = "One-time purchase",
+                            color = darkText,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium
                         )
-
 
                         Spacer(
-                            modifier =
-                                Modifier.height(3.dp)
+                            modifier = Modifier.height(3.dp)
                         )
 
-
                         Text(
-                            text =
-                                "Lifetime access",
-
-                            color =
-                                Color(0xFF888888),
-
-                            fontSize =
-                                13.sp
+                            text = "Lifetime access",
+                            color = Color(0xFF888888),
+                            fontSize = 13.sp
                         )
                     }
 
-
+                    // =================================================
                     // PRICE
+                    // =================================================
 
                     Column(
-                        horizontalAlignment =
-                            Alignment.End
+                        horizontalAlignment = Alignment.End
                     ) {
 
                         Text(
-                            text =
-                                "$6.99",
-
-                            color =
-                                blueColor,
-
-                            fontSize =
-                                15.sp,
-
-                            fontWeight =
-                                FontWeight.Bold
+                            text = lifetimePrice,
+                            color = blueColor,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold
                         )
-
 
                         Spacer(
-                            modifier =
-                                Modifier.height(3.dp)
+                            modifier = Modifier.height(3.dp)
                         )
 
-
                         Text(
-                            text =
-                                "One-time Payment",
-
-                            color =
-                                Color(0xFF888888),
-
-                            fontSize =
-                                13.sp
+                            text = "One-time Payment",
+                            color = Color(0xFF888888),
+                            fontSize = 13.sp
                         )
                     }
                 }
             }
 
-
             Spacer(
-                modifier =
-                    Modifier.height(16.dp)
+                modifier = Modifier.height(16.dp)
             )
-
 
             // =================================================
             // NO SUBSCRIPTION
             // =================================================
 
             Row(
-                modifier =
-                    Modifier.fillMaxWidth(),
-
-                horizontalArrangement =
-                    Arrangement.Center,
-
-                verticalAlignment =
-                    Alignment.CenterVertically
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
             ) {
 
                 Icon(
-                    painter =
-                        painterResource(
-                            id = R.drawable.shield
-                        ),
-
-                    contentDescription =
-                        "shield"
+                    painter = painterResource(
+                        id = R.drawable.shield
+                    ),
+                    contentDescription = "shield"
                 )
-
 
                 Spacer(
-                    modifier =
-                        Modifier.width(8.dp)
+                    modifier = Modifier.width(8.dp)
                 )
-
 
                 Text(
                     text =
                         "No subscription. Pay once and it’s yours forever.",
-
-                    color =
-                        Color(0xFF777777),
-
-                    fontSize =
-                        10.sp
+                    color = Color(0xFF777777),
+                    fontSize = 10.sp
                 )
             }
 
-
             Spacer(
-                modifier =
-                    Modifier.height(16.dp)
+                modifier = Modifier.height(16.dp)
             )
-
 
             // =================================================
             // UNLOCK PREMIUM BUTTON
             // =================================================
 
             Box(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .height(50.dp)
-                        .clip(
-                            RoundedCornerShape(
-                                13.dp
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp)
+                    .clip(
+                        RoundedCornerShape(13.dp)
+                    )
+                    .background(
+                        blueColor
+                    )
+                    .clickable {
+
+                        activity?.let {
+
+                            billing.initPurchaselifetime(
+                                it
                             )
-                        )
-                        .background(
-                            blueColor
-                        )
-                        .clickable {
-
-                            if (
-                                activity != null
-                            ) {
-
-                                BillingManager
-                                    .launchPurchase(
-                                        activity
-                                    )
-                            }
-                        },
-
-                contentAlignment =
-                    Alignment.Center
+                        }
+                    },
+                contentAlignment = Alignment.Center
             ) {
 
                 Text(
                     text =
                         "Unlock Premium - One-time Purchase",
-
-                    color =
-                        Color.White,
-
-                    fontSize =
-                        13.sp,
-
-                    fontWeight =
-                        FontWeight.Bold,
-
-                    textAlign =
-                        TextAlign.Center
+                    color = Color.White,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
                 )
             }
 
-
             Spacer(
-                modifier =
-                    Modifier.height(14.dp)
+                modifier = Modifier.height(14.dp)
             )
-
 
             // =================================================
             // TERMS + PRIVACY
             // =================================================
 
             Row(
-                modifier =
-                    Modifier.fillMaxWidth(),
-
-                horizontalArrangement =
-                    Arrangement.SpaceBetween,
-
-                verticalAlignment =
-                    Alignment.CenterVertically
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
 
                 Text(
-                    text =
-                        "Terms of Use",
+                    text = "Terms of Use",
+                    color = Color(0xFF555555),
+                    fontSize = 10.sp,
+                    modifier = Modifier.clickable {
 
-                    color =
-                        Color(0xFF555555),
-
-                    fontSize =
-                        10.sp,
-
-                    modifier =
-                        Modifier.clickable {
-                            // Terms screen
-                        }
+                        // Terms screen
+                    }
                 )
 
-
                 Text(
-                    text =
-                        "Privacy Policy",
+                    text = "Privacy Policy",
+                    color = Color(0xFF555555),
+                    fontSize = 10.sp,
+                    modifier = Modifier.clickable {
 
-                    color =
-                        Color(0xFF555555),
-
-                    fontSize =
-                        10.sp,
-
-                    modifier =
-                        Modifier.clickable {
-                            // Privacy screen
-                        }
+                        // Privacy screen
+                    }
                 )
             }
         }
@@ -809,64 +596,48 @@ private fun PremiumBenefitRow(
 ) {
 
     Row(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .height(40.dp),
-
-        verticalAlignment =
-            Alignment.CenterVertically
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(40.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
 
+        // =====================================================
+        // ICON CIRCLE
+        // =====================================================
+
         Box(
-            modifier =
-                Modifier
-                    .size(34.dp)
-                    .background(
-                        color =
-                            Color(0xFFF2F7FF),
-
-                        shape =
-                            CircleShape
-                    ),
-
-            contentAlignment =
-                Alignment.Center
+            modifier = Modifier
+                .size(34.dp)
+                .background(
+                    color = Color(0xFFF2F7FF),
+                    shape = CircleShape
+                ),
+            contentAlignment = Alignment.Center
         ) {
 
             Image(
-                painter =
-                    painterResource(
-                        id = icon
-                    ),
-
-                contentDescription =
-                    text,
-
-                modifier =
-                    Modifier.size(27.dp)
+                painter = painterResource(
+                    id = icon
+                ),
+                contentDescription = text,
+                modifier = Modifier.size(27.dp)
             )
         }
 
-
         Spacer(
-            modifier =
-                Modifier.width(8.dp)
+            modifier = Modifier.width(8.dp)
         )
 
+        // =====================================================
+        // BENEFIT TEXT
+        // =====================================================
 
         Text(
-            text =
-                text,
-
-            color =
-                Color(0xFF444444),
-
-            fontSize =
-                14.sp,
-
-            fontWeight =
-                FontWeight.SemiBold
+            text = text,
+            color = Color(0xFF444444),
+            fontSize = 14.sp,
+            fontWeight = FontWeight.SemiBold
         )
     }
 }

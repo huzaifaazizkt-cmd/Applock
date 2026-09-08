@@ -97,8 +97,11 @@ dependencies {
     implementation(
         "io.coil-kt:coil-compose:2.7.0"
     )
-    implementation("com.android.billingclient:billing-ktx:8.0.0")
+    implementation("com.airbnb.android:lottie-compose:6.6.7")
+    val billing_version = "9.1.0"
 
+    implementation("com.android.billingclient:billing-ktx:$billing_version")
+    implementation("com.google.android.play:review:2.0.2")
     implementation("androidx.camera:camera-camera2:1.5.0")
     implementation("androidx.camera:camera-lifecycle:1.5.0")
     implementation("androidx.camera:camera-core:1.5.0")
