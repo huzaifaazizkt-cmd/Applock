@@ -193,4 +193,64 @@
     <string name="onboarding_image_description">
         ऑनबोर्डिंग %1$d
     </string>
+
+    <!-- Premium Screen -->
+
+    <string name="premium_close">बंद करें</string>
+    <string name="premium_image_description">प्रीमियम</string>
+
+    <string name="premium_unlock">अनलॉक करें</string>
+    <string name="premium_all_features"> सभी सुविधाएँ</string>
+    <string name="premium_forever">हमेशा के लिए</string>
+
+    <string name="premium_description">एक बार भुगतान करें और बिना किसी बार-बार शुल्क के
+जीवनभर एक्सेस का आनंद लें।</string>
+
+    <string name="premium_benefits">प्रीमियम लाभ</string>
+
+    <string name="premium_hide_unlimited">असीमित फ़ोटो और वीडियो छिपाएँ</string>
+    <string name="premium_intruder_selfie">घुसपैठिए की सेल्फी</string>
+    <string name="premium_no_ads">कोई विज्ञापन नहीं</string>
+    <string name="premium_priority_support">प्राथमिकता सहायता</string>
+
+    <string name="premium_best_value">सबसे अच्छा मूल्य</string>
+
+    <string name="premium_one_time_purchase">एक बार की खरीदारी</string>
+    <string name="premium_lifetime_access">जीवनभर एक्सेस</string>
+    <string name="premium_one_time_payment">एक बार का भुगतान</string>
+
+    <string name="premium_shield_description">सुरक्षा ढाल</string>
+
+    <string name="premium_no_subscription">कोई सदस्यता नहीं। एक बार भुगतान करें और यह हमेशा आपका है।</string>
+
+    <string name="premium_unlock_button">प्रीमियम अनलॉक करें - एक बार की खरीदारी</string>
+
+    <string name="premium_terms_of_use">उपयोग की शर्तें</string>
+    <string name="premium_privacy_policy">गोपनीयता नीति</string>
+
+
+    <!-- Exit Screen -->
+
+    <string name="exit_screen_back">वापस</string>
+    <string name="exit_screen_title">ऐप लॉक से बाहर निकलें</string>
+
+    <string name="exit_image_description">ऐप लॉक से बाहर निकलें</string>
+
+    <string name="exit_app_lock_title">ऐप लॉक से बाहर निकलें?</string>
+
+    <string name="exit_app_lock_description">ऐप लॉक का उपयोग करने के लिए आपको
+अपना पासकोड फिर से दर्ज करना होगा।</string>
+
+    <string name="exit_rating_description">आपकी एक छोटी सी रेटिंग हमारी टीम के लिए
+बहुत मायने रखती है।</string>
+
+    <string name="exit_stay_protected_description">सुरक्षित रहें</string>
+    <string name="exit_stay_protected">सुरक्षित रहें</string>
+
+    <string name="exit_anyway_description">फिर भी बाहर निकलें</string>
+    <string name="exit_anyway">फिर भी बाहर निकलें</string>
+
+
+
+
 </resources>

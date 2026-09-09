@@ -196,6 +196,60 @@
     </string>
 
 
+    <!-- Premium Screen -->
 
+    <string name="premium_close">Kapat</string>
+    <string name="premium_image_description">Premium</string>
+
+    <string name="premium_unlock">Kilidi Aç</string>
+    <string name="premium_all_features"> Tüm Özellikler</string>
+    <string name="premium_forever">Sonsuza Kadar</string>
+
+    <string name="premium_description">Tek seferlik ödeme yapın ve tekrarlayan ücretler olmadan
+ömür boyu erişimin keyfini çıkarın.</string>
+
+    <string name="premium_benefits">Premium Avantajları</string>
+
+    <string name="premium_hide_unlimited">Sınırsız fotoğraf ve videoyu gizleyin</string>
+    <string name="premium_intruder_selfie">Davetsiz misafir selfiesi</string>
+    <string name="premium_no_ads">Reklam Yok</string>
+    <string name="premium_priority_support">Öncelikli Destek</string>
+
+    <string name="premium_best_value">En İyi Değer</string>
+
+    <string name="premium_one_time_purchase">Tek seferlik satın alma</string>
+    <string name="premium_lifetime_access">Ömür boyu erişim</string>
+    <string name="premium_one_time_payment">Tek seferlik ödeme</string>
+
+    <string name="premium_shield_description">koruma kalkanı</string>
+
+    <string name="premium_no_subscription">Abonelik yok. Bir kez ödeyin ve sonsuza kadar sizin olsun.</string>
+
+    <string name="premium_unlock_button">Premium\'u Aç - Tek Seferlik Satın Alma</string>
+
+    <string name="premium_terms_of_use">Kullanım Şartları</string>
+    <string name="premium_privacy_policy">Gizlilik Politikası</string>
+
+
+    <!-- Exit Screen -->
+
+    <string name="exit_screen_back">Geri</string>
+    <string name="exit_screen_title">App Lock\'tan Çık</string>
+
+    <string name="exit_image_description">App Lock\'tan Çık</string>
+
+    <string name="exit_app_lock_title">App Lock\'tan çıkılsın mı?</string>
+
+    <string name="exit_app_lock_description">App Lock\'a tekrar erişmek için
+şifrenizi yeniden girmeniz gerekecek.</string>
+
+    <string name="exit_rating_description">Sizin vereceğiniz hızlı bir puan
+ekibimiz için çok şey ifade ediyor.</string>
+
+    <string name="exit_stay_protected_description">Korumada Kal</string>
+    <string name="exit_stay_protected">Korumada Kal</string>
+
+    <string name="exit_anyway_description">Yine de Çık</string>
+    <string name="exit_anyway">Yine de Çık</string>
 
 </resources>

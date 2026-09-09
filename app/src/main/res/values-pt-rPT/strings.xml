@@ -192,6 +192,60 @@
         Introdução %1$d
     </string>
 
+    <!-- Premium Screen -->
 
+    <string name="premium_close">Fechar</string>
+    <string name="premium_image_description">Premium</string>
+
+    <string name="premium_unlock">Desbloquear</string>
+    <string name="premium_all_features"> Todos os recursos</string>
+    <string name="premium_forever">Para sempre</string>
+
+    <string name="premium_description">Faça um pagamento único e aproveite o acesso vitalício
+sem cobranças recorrentes.</string>
+
+    <string name="premium_benefits">Benefícios Premium</string>
+
+    <string name="premium_hide_unlimited">Ocultar fotos e vídeos ilimitados</string>
+    <string name="premium_intruder_selfie">Selfie do intruso</string>
+    <string name="premium_no_ads">Sem anúncios</string>
+    <string name="premium_priority_support">Suporte prioritário</string>
+
+    <string name="premium_best_value">Melhor valor</string>
+
+    <string name="premium_one_time_purchase">Compra única</string>
+    <string name="premium_lifetime_access">Acesso vitalício</string>
+    <string name="premium_one_time_payment">Pagamento único</string>
+
+    <string name="premium_shield_description">escudo de proteção</string>
+
+    <string name="premium_no_subscription">Sem assinatura. Pague uma vez e será seu para sempre.</string>
+
+    <string name="premium_unlock_button">Desbloquear Premium - Compra única</string>
+
+    <string name="premium_terms_of_use">Termos de uso</string>
+    <string name="premium_privacy_policy">Política de privacidade</string>
+
+
+    <!-- Exit Screen -->
+
+    <string name="exit_screen_back">Voltar</string>
+    <string name="exit_screen_title">Sair do App Lock</string>
+
+    <string name="exit_image_description">Sair do App Lock</string>
+
+    <string name="exit_app_lock_title">Sair do App Lock?</string>
+
+    <string name="exit_app_lock_description">Você precisará inserir sua senha novamente
+para acessar o App Lock.</string>
+
+    <string name="exit_rating_description">Uma avaliação rápida sua significa
+muito para nossa equipe.</string>
+
+    <string name="exit_stay_protected_description">Continuar protegido</string>
+    <string name="exit_stay_protected">Continuar protegido</string>
+
+    <string name="exit_anyway_description">Sair mesmo assim</string>
+    <string name="exit_anyway">Sair mesmo assim</string>
 
 </resources>

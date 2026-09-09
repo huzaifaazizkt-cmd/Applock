@@ -1,4 +1,3 @@
-
 package com.example.applock.Design.screens
 
 import androidx.compose.foundation.Image
@@ -21,7 +20,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
@@ -31,12 +29,11 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.applock.R
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
-import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
+import com.example.applock.R
 
 @Composable
 fun StartScreen(
@@ -74,7 +71,9 @@ fun StartScreen(
 
             navigationDone = true
 
-            navController.navigate("welcomeScreen") {
+            // Loading complete hone ke baad
+            // direct AppList par jayega
+            navController.navigate("appList") {
 
                 popUpTo("startScreen") {
                     inclusive = true
@@ -183,4 +182,3 @@ fun StartScreen(
         }
     }
 }
-

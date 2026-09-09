@@ -6,7 +6,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,7 +16,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -34,6 +32,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -45,6 +44,7 @@ import com.example.applock.R
 fun ExitScreen(
     navController: NavController
 ) {
+
     val context = LocalContext.current
     val activity = context as? Activity
 
@@ -52,7 +52,9 @@ fun ExitScreen(
         mutableIntStateOf(0)
     }
 
-
+    // ---------------------------------------------------------
+    // ANDROID BACK BUTTON
+    // ---------------------------------------------------------
     BackHandler {
         navController.popBackStack()
     }
@@ -63,50 +65,47 @@ fun ExitScreen(
             .background(Color.White)
     ) {
 
-        // ------------------------------------------------
+        // ---------------------------------------------------------
         // TOP BAR
-        // ------------------------------------------------
+        // ---------------------------------------------------------
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(72.dp)
-                .padding(
-                    horizontal = 16.dp,
-
-                ),
+                .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
 
             Icon(
                 imageVector = Icons.Default.ArrowBack,
-                contentDescription = "Back",
+                contentDescription = stringResource(
+                    R.string.exit_screen_back
+                ),
                 tint = Color(0xFF3D3D3D),
                 modifier = Modifier
                     .size(28.dp)
-                    .clickable(
-                        interactionSource = remember {
-                            MutableInteractionSource()
-                        },
-                        indication = null
-                    ) {
+                    .clickable {
                         navController.popBackStack()
                     }
             )
 
             Spacer(
-                modifier = Modifier.width(18.dp)
+                modifier = Modifier.size(18.dp)
             )
 
             Text(
-                text = "Exit App lock",
+                text = stringResource(
+                    R.string.exit_screen_title
+                ),
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Normal,
                 color = Color(0xFF3D3D3D)
             )
         }
-        // ------------------------------------------------
+
+        // ---------------------------------------------------------
         // CONTENT
-        // ------------------------------------------------
+        // ---------------------------------------------------------
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -119,87 +118,96 @@ fun ExitScreen(
                 modifier = Modifier.height(40.dp)
             )
 
+            // -----------------------------------------------------
             // EXIT IMAGE
+            // -----------------------------------------------------
             Image(
                 painter = painterResource(
                     id = R.drawable.exitlock
                 ),
-                contentDescription = "Exit App Lock",
-                modifier = Modifier.size(200.dp)
+                contentDescription = stringResource(
+                    R.string.exit_image_description
+                ),
+                modifier = Modifier.size(130.dp)
             )
 
             Spacer(
-                modifier = Modifier.height(34.dp)
+                modifier = Modifier.height(25.dp)
             )
 
-            // TITLE
+            // -----------------------------------------------------
+            // EXIT TITLE
+            // -----------------------------------------------------
             Text(
-                text = "Exit App Lock?",
-                fontSize = 25.sp,
+                text = stringResource(
+                    R.string.exit_app_lock_title
+                ),
+                fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF383838)
+                color = Color(0xFF333333),
+                textAlign = TextAlign.Center
             )
 
             Spacer(
                 modifier = Modifier.height(8.dp)
             )
 
-            // DESCRIPTION
+            // -----------------------------------------------------
+            // EXIT DESCRIPTION
+            // -----------------------------------------------------
             Text(
-                text = "You will need to enter your passcode\nagain to access App Lock.",
+                text = stringResource(
+                    R.string.exit_app_lock_description
+                ),
                 fontSize = 13.sp,
-                lineHeight = 19.sp,
-                color = Color(0xFF666666),
-                modifier = Modifier.fillMaxWidth(),
+                lineHeight = 17.sp,
+                color = Color(0xFF555555),
                 textAlign = TextAlign.Center
             )
 
             Spacer(
-                modifier = Modifier.height(22.dp)
+                modifier = Modifier.height(30.dp)
             )
 
-            // ------------------------------------------------
+            // -----------------------------------------------------
             // RATING STARS
-            // ------------------------------------------------
+            // -----------------------------------------------------
             Row(
-                horizontalArrangement = Arrangement.spacedBy(11.dp),
+                horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
 
                 for (index in 1..5) {
 
-                    val isSelected = index <= selectedRating
-
                     Text(
-                        text = if (isSelected) "★" else "☆",
-                        fontSize = 39.sp,
-                        color = if (isSelected) {
-                            Color(0xFF2196F3)
+                        text = if (index <= selectedRating) {
+                            "★"
                         } else {
-                            Color(0xFF444444)
+                            "☆"
+                        },
+                        fontSize = 30.sp,
+                        color = if (index <= selectedRating) {
+                            Color(0xFFFFC107)
+                        } else {
+                            Color(0xFFBDBDBD)
                         },
                         modifier = Modifier
-                            .size(39.dp)
-                            .clickable(
-                                interactionSource = remember {
-                                    MutableInteractionSource()
-                                },
-                                indication = null
-                            ) {
-                                selectedRating =
-                                    if (selectedRating == index) 0 else index
+                            .clickable {
+                                selectedRating = index
                             }
+                            .padding(horizontal = 3.dp)
                     )
                 }
             }
 
             Spacer(
-                modifier = Modifier.height(12.dp)
+                modifier = Modifier.height(7.dp)
             )
 
-            // RATING DESCRIPTION
             Text(
-                text = "A Quick rating from you means\n a lot to our team.",
+                text = stringResource(
+                    R.string.exit_rating_description
+                ),
                 fontSize = 13.sp,
                 lineHeight = 17.sp,
                 color = Color(0xFF555555),
@@ -210,9 +218,9 @@ fun ExitScreen(
                 modifier = Modifier.height(26.dp)
             )
 
-            // ------------------------------------------------
-            // STAY PROTECTED BUTTON
-            // ------------------------------------------------
+            // -----------------------------------------------------
+            // STAY PROTECTED
+            // -----------------------------------------------------
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -225,7 +233,7 @@ fun ExitScreen(
                     )
                     .clickable {
 
-
+                        // Back to exact previous screen
                         navController.popBackStack()
                     },
                 contentAlignment = Alignment.Center
@@ -240,16 +248,20 @@ fun ExitScreen(
                         painter = painterResource(
                             id = R.drawable.stay
                         ),
-                        contentDescription = "Stay Protected",
+                        contentDescription = stringResource(
+                            R.string.exit_stay_protected_description
+                        ),
                         modifier = Modifier.size(19.dp)
                     )
 
                     Spacer(
-                        modifier = Modifier.width(10.dp)
+                        modifier = Modifier.size(10.dp)
                     )
 
                     Text(
-                        text = "Stay Protected",
+                        text = stringResource(
+                            R.string.exit_stay_protected
+                        ),
                         fontSize = 15.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = Color.White
@@ -261,9 +273,9 @@ fun ExitScreen(
                 modifier = Modifier.height(17.dp)
             )
 
-            // ------------------------------------------------
-            // EXIT ANYWAY BUTTON
-            // ------------------------------------------------
+            // -----------------------------------------------------
+            // EXIT ANYWAY
+            // -----------------------------------------------------
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -279,11 +291,12 @@ fun ExitScreen(
                     )
                     .clickable {
 
-                        navController.popBackStack()
-                        activity?.moveTaskToBack(true)
+                        // Completely exit application
+                        activity?.finishAffinity()
                     },
                 contentAlignment = Alignment.Center
             ) {
+
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
@@ -293,22 +306,27 @@ fun ExitScreen(
                         painter = painterResource(
                             id = R.drawable.anyway
                         ),
-                        contentDescription = "Exit Anyway",
+                        contentDescription = stringResource(
+                            R.string.exit_anyway_description
+                        ),
                         modifier = Modifier.size(19.dp)
                     )
 
                     Spacer(
-                        modifier = Modifier.width(10.dp)
+                        modifier = Modifier.size(10.dp)
                     )
 
                     Text(
-                        text = "Exit Anyway",
+                        text = stringResource(
+                            R.string.exit_anyway
+                        ),
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Medium,
                         color = Color(0xFF2196F3)
                     )
                 }
             }
+
             Spacer(
                 modifier = Modifier.height(30.dp)
             )

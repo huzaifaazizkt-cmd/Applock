@@ -196,6 +196,60 @@
         オンボーディング %1$d
     </string>
 
+    <!-- Premium Screen -->
 
+    <string name="premium_close">閉じる</string>
+    <string name="premium_image_description">プレミアム</string>
+
+    <string name="premium_unlock">ロック解除</string>
+    <string name="premium_all_features"> すべての機能</string>
+    <string name="premium_forever">永久</string>
+
+    <string name="premium_description">一度のお支払いで、追加料金なしで
+生涯アクセスをお楽しみいただけます。</string>
+
+    <string name="premium_benefits">プレミアム特典</string>
+
+    <string name="premium_hide_unlimited">写真と動画を無制限に非表示</string>
+    <string name="premium_intruder_selfie">侵入者セルフィー</string>
+    <string name="premium_no_ads">広告なし</string>
+    <string name="premium_priority_support">優先サポート</string>
+
+    <string name="premium_best_value">お得なプラン</string>
+
+    <string name="premium_one_time_purchase">一度きりの購入</string>
+    <string name="premium_lifetime_access">生涯アクセス</string>
+    <string name="premium_one_time_payment">一度きりのお支払い</string>
+
+    <string name="premium_shield_description">保護シールド</string>
+
+    <string name="premium_no_subscription">サブスクリプションなし。一度支払えば永久に利用できます。</string>
+
+    <string name="premium_unlock_button">プレミアムを解除 - 一度きりの購入</string>
+
+    <string name="premium_terms_of_use">利用規約</string>
+    <string name="premium_privacy_policy">プライバシーポリシー</string>
+
+
+    <!-- Exit Screen -->
+
+    <string name="exit_screen_back">戻る</string>
+    <string name="exit_screen_title">App Lockを終了</string>
+
+    <string name="exit_image_description">App Lockを終了</string>
+
+    <string name="exit_app_lock_title">App Lockを終了しますか？</string>
+
+    <string name="exit_app_lock_description">App Lockにアクセスするには、
+もう一度パスコードを入力する必要があります。</string>
+
+    <string name="exit_rating_description">あなたからの簡単な評価が
+私たちのチームにとって大きな励みになります。</string>
+
+    <string name="exit_stay_protected_description">保護を続ける</string>
+    <string name="exit_stay_protected">保護を続ける</string>
+
+    <string name="exit_anyway_description">終了する</string>
+    <string name="exit_anyway">終了する</string>
 
 </resources>

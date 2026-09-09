@@ -5,7 +5,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,6 +35,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -153,7 +153,10 @@ fun PremiumScreen(
                     painter = painterResource(
                         id = R.drawable.cross
                     ),
-                    contentDescription = "Close",
+                    contentDescription =
+                        stringResource(
+                            R.string.premium_close
+                        ),
                     tint = Color(0xFF777777),
                     modifier = Modifier
                         .align(Alignment.TopEnd)
@@ -190,7 +193,10 @@ fun PremiumScreen(
                     painter = painterResource(
                         id = R.drawable.`in`
                     ),
-                    contentDescription = "Premium",
+                    contentDescription =
+                        stringResource(
+                            R.string.premium_image_description
+                        ),
                     modifier = Modifier.size(125.dp)
                 )
             }
@@ -205,20 +211,25 @@ fun PremiumScreen(
 
             Column(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment =
+                    Alignment.CenterHorizontally
             ) {
 
                 Row {
 
                     Text(
-                        text = "Unlock",
+                        text = stringResource(
+                            R.string.premium_unlock
+                        ),
                         color = darkText,
                         fontSize = 26.sp,
                         fontWeight = FontWeight.Bold
                     )
 
                     Text(
-                        text = " All Features",
+                        text = stringResource(
+                            R.string.premium_all_features
+                        ),
                         color = blueColor,
                         fontSize = 26.sp,
                         fontWeight = FontWeight.Bold
@@ -226,7 +237,9 @@ fun PremiumScreen(
                 }
 
                 Text(
-                    text = "Forever ",
+                    text = stringResource(
+                        R.string.premium_forever
+                    ),
                     color = darkText,
                     fontSize = 26.sp,
                     fontWeight = FontWeight.Bold
@@ -242,9 +255,9 @@ fun PremiumScreen(
             // =================================================
 
             Text(
-                text =
-                    "One-time payment. Enjoy lifetime access\n" +
-                            "with no recurring charges.",
+                text = stringResource(
+                    R.string.premium_description
+                ),
                 color = grayText,
                 fontSize = 12.sp,
                 lineHeight = 17.sp,
@@ -263,7 +276,9 @@ fun PremiumScreen(
             // =================================================
 
             Text(
-                text = "Premium Benefits",
+                text = stringResource(
+                    R.string.premium_benefits
+                ),
                 color = darkText,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium
@@ -279,7 +294,9 @@ fun PremiumScreen(
 
             PremiumBenefitRow(
                 icon = R.drawable.hideinapp,
-                text = "Hide Unlimited photos & videos"
+                text = stringResource(
+                    R.string.premium_hide_unlimited
+                )
             )
 
             Spacer(
@@ -292,7 +309,9 @@ fun PremiumScreen(
 
             PremiumBenefitRow(
                 icon = R.drawable.selfie,
-                text = "Intruder selfie"
+                text = stringResource(
+                    R.string.premium_intruder_selfie
+                )
             )
 
             Spacer(
@@ -305,7 +324,9 @@ fun PremiumScreen(
 
             PremiumBenefitRow(
                 icon = R.drawable.noads,
-                text = "No Ads"
+                text = stringResource(
+                    R.string.premium_no_ads
+                )
             )
 
             Spacer(
@@ -318,7 +339,9 @@ fun PremiumScreen(
 
             PremiumBenefitRow(
                 icon = R.drawable.priority,
-                text = "Priority Support"
+                text = stringResource(
+                    R.string.premium_priority_support
+                )
             )
 
             Spacer(
@@ -364,7 +387,9 @@ fun PremiumScreen(
                 ) {
 
                     Text(
-                        text = "Best Value",
+                        text = stringResource(
+                            R.string.premium_best_value
+                        ),
                         color = Color.White,
                         fontSize = 8.sp,
                         fontWeight = FontWeight.Medium
@@ -384,7 +409,8 @@ fun PremiumScreen(
                             top = 15.dp,
                             bottom = 8.dp
                         ),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment =
+                        Alignment.CenterVertically
                 ) {
 
                     // =================================================
@@ -399,7 +425,8 @@ fun PremiumScreen(
                                 color = blueColor,
                                 shape = CircleShape
                             ),
-                        contentAlignment = Alignment.Center
+                        contentAlignment =
+                            Alignment.Center
                     ) {
 
                         if (selectedPlan) {
@@ -428,7 +455,9 @@ fun PremiumScreen(
                     ) {
 
                         Text(
-                            text = "One-time purchase",
+                            text = stringResource(
+                                R.string.premium_one_time_purchase
+                            ),
                             color = darkText,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Medium
@@ -439,7 +468,9 @@ fun PremiumScreen(
                         )
 
                         Text(
-                            text = "Lifetime access",
+                            text = stringResource(
+                                R.string.premium_lifetime_access
+                            ),
                             color = Color(0xFF888888),
                             fontSize = 13.sp
                         )
@@ -450,7 +481,8 @@ fun PremiumScreen(
                     // =================================================
 
                     Column(
-                        horizontalAlignment = Alignment.End
+                        horizontalAlignment =
+                            Alignment.End
                     ) {
 
                         Text(
@@ -465,7 +497,9 @@ fun PremiumScreen(
                         )
 
                         Text(
-                            text = "One-time Payment",
+                            text = stringResource(
+                                R.string.premium_one_time_payment
+                            ),
                             color = Color(0xFF888888),
                             fontSize = 13.sp
                         )
@@ -483,15 +517,20 @@ fun PremiumScreen(
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
+                horizontalArrangement =
+                    Arrangement.Center,
+                verticalAlignment =
+                    Alignment.CenterVertically
             ) {
 
                 Icon(
                     painter = painterResource(
                         id = R.drawable.shield
                     ),
-                    contentDescription = "shield"
+                    contentDescription =
+                        stringResource(
+                            R.string.premium_shield_description
+                        )
                 )
 
                 Spacer(
@@ -499,8 +538,9 @@ fun PremiumScreen(
                 )
 
                 Text(
-                    text =
-                        "No subscription. Pay once and it’s yours forever.",
+                    text = stringResource(
+                        R.string.premium_no_subscription
+                    ),
                     color = Color(0xFF777777),
                     fontSize = 10.sp
                 )
@@ -537,8 +577,9 @@ fun PremiumScreen(
             ) {
 
                 Text(
-                    text =
-                        "Unlock Premium - One-time Purchase",
+                    text = stringResource(
+                        R.string.premium_unlock_button
+                    ),
                     color = Color.White,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Bold,
@@ -556,12 +597,16 @@ fun PremiumScreen(
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                horizontalArrangement =
+                    Arrangement.SpaceBetween,
+                verticalAlignment =
+                    Alignment.CenterVertically
             ) {
 
                 Text(
-                    text = "Terms of Use",
+                    text = stringResource(
+                        R.string.premium_terms_of_use
+                    ),
                     color = Color(0xFF555555),
                     fontSize = 10.sp,
                     modifier = Modifier.clickable {
@@ -571,7 +616,9 @@ fun PremiumScreen(
                 )
 
                 Text(
-                    text = "Privacy Policy",
+                    text = stringResource(
+                        R.string.premium_privacy_policy
+                    ),
                     color = Color(0xFF555555),
                     fontSize = 10.sp,
                     modifier = Modifier.clickable {
@@ -599,7 +646,8 @@ private fun PremiumBenefitRow(
         modifier = Modifier
             .fillMaxWidth()
             .height(40.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment =
+            Alignment.CenterVertically
     ) {
 
         // =====================================================
@@ -613,7 +661,8 @@ private fun PremiumBenefitRow(
                     color = Color(0xFFF2F7FF),
                     shape = CircleShape
                 ),
-            contentAlignment = Alignment.Center
+            contentAlignment =
+                Alignment.Center
         ) {
 
             Image(

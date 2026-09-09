@@ -195,5 +195,59 @@
         Introducción %1$d
     </string>
 
+    <!-- Premium Screen -->
 
+    <string name="premium_close">Cerrar</string>
+    <string name="premium_image_description">Premium</string>
+
+    <string name="premium_unlock">Desbloquear</string>
+    <string name="premium_all_features"> Todas las funciones</string>
+    <string name="premium_forever">Para siempre</string>
+
+    <string name="premium_description">Realiza un pago único y disfruta de acceso de por vida
+sin cargos recurrentes.</string>
+
+    <string name="premium_benefits">Beneficios Premium</string>
+
+    <string name="premium_hide_unlimited">Ocultar fotos y vídeos ilimitados</string>
+    <string name="premium_intruder_selfie">Selfie del intruso</string>
+    <string name="premium_no_ads">Sin anuncios</string>
+    <string name="premium_priority_support">Soporte prioritario</string>
+
+    <string name="premium_best_value">Mejor valor</string>
+
+    <string name="premium_one_time_purchase">Compra única</string>
+    <string name="premium_lifetime_access">Acceso de por vida</string>
+    <string name="premium_one_time_payment">Pago único</string>
+
+    <string name="premium_shield_description">escudo de protección</string>
+
+    <string name="premium_no_subscription">Sin suscripción. Paga una vez y será tuyo para siempre.</string>
+
+    <string name="premium_unlock_button">Desbloquear Premium - Compra única</string>
+
+    <string name="premium_terms_of_use">Términos de uso</string>
+    <string name="premium_privacy_policy">Política de privacidad</string>
+
+
+    <!-- Exit Screen -->
+
+    <string name="exit_screen_back">Atrás</string>
+    <string name="exit_screen_title">Salir de App Lock</string>
+
+    <string name="exit_image_description">Salir de App Lock</string>
+
+    <string name="exit_app_lock_title">¿Salir de App Lock?</string>
+
+    <string name="exit_app_lock_description">Tendrás que introducir tu código de acceso
+de nuevo para acceder a App Lock.</string>
+
+    <string name="exit_rating_description">Una pequeña valoración por tu parte significa
+mucho para nuestro equipo.</string>
+
+    <string name="exit_stay_protected_description">Seguir protegido</string>
+    <string name="exit_stay_protected">Seguir protegido</string>
+
+    <string name="exit_anyway_description">Salir de todos modos</string>
+    <string name="exit_anyway">Salir de todos modos</string>
 </resources>

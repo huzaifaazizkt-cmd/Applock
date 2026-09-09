@@ -166,7 +166,7 @@ fun PermissionsRequiredScreen(
 
                     onAllowClick = {
 
-                        // Permission action yahan add kar sakte hain
+
 
                     }
                 )
@@ -217,7 +217,7 @@ fun PermissionsRequiredScreen(
 
                     onAllowClick = {
 
-                        // Accessibility permission action yahan add kar sakte hain
+
 
                     }
                 )
@@ -268,7 +268,6 @@ fun PermissionsRequiredScreen(
 
                     onAllowClick = {
 
-                        // Auto Start permission action yahan add kar sakte hain
 
                     }
                 )

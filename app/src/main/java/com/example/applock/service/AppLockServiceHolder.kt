@@ -11,7 +11,6 @@ object AppLockServiceHolder {
     @Volatile
     var lastUnlockTime: Long = 0L
 
-
     fun clear() {
 
         isLockScreenOpen = false

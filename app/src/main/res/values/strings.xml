@@ -190,8 +190,59 @@
 
         <string name="onboarding_image_description">Onboarding %1$d</string>
 
+    <!-- Premium Screen -->
 
+    <string name="premium_close">Close</string>
+    <string name="premium_image_description">Premium</string>
 
+    <string name="premium_unlock">Unlock</string>
+    <string name="premium_all_features"> All Features</string>
+    <string name="premium_forever">Forever</string>
 
+    <string name="premium_description">One-time payment. Enjoy lifetime access
+with no recurring charges.</string>
+
+    <string name="premium_benefits">Premium Benefits</string>
+
+    <string name="premium_hide_unlimited">Hide Unlimited photos &amp; videos</string>
+    <string name="premium_intruder_selfie">Intruder selfie</string>
+    <string name="premium_no_ads">No Ads</string>
+    <string name="premium_priority_support">Priority Support</string>
+
+    <string name="premium_best_value">Best Value</string>
+
+    <string name="premium_one_time_purchase">One-time purchase</string>
+    <string name="premium_lifetime_access">Lifetime access</string>
+    <string name="premium_one_time_payment">One-time Payment</string>
+
+    <string name="premium_shield_description">shield</string>
+
+    <string name="premium_no_subscription">No subscription. Pay once and it’s yours forever.</string>
+
+    <string name="premium_unlock_button">Unlock Premium - One-time Purchase</string>
+
+    <string name="premium_terms_of_use">Terms of Use</string>
+    <string name="premium_privacy_policy">Privacy Policy</string>
+
+    <!-- Exit Screen -->
+
+    <string name="exit_screen_back">Back</string>
+    <string name="exit_screen_title">Exit App lock</string>
+
+    <string name="exit_image_description">Exit App Lock</string>
+
+    <string name="exit_app_lock_title">Exit App Lock?</string>
+
+    <string name="exit_app_lock_description">You will need to enter your passcode
+again to access App Lock.</string>
+
+    <string name="exit_rating_description">A Quick rating from you means
+a lot to our team.</string>
+
+    <string name="exit_stay_protected_description">Stay Protected</string>
+    <string name="exit_stay_protected">Stay Protected</string>
+
+    <string name="exit_anyway_description">Exit Anyway</string>
+    <string name="exit_anyway">Exit Anyway</string>
 
 </resources>

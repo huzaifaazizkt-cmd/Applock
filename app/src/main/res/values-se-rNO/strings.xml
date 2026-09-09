@@ -194,5 +194,61 @@
         Introduksjon %1$d
     </string>
 
+    <!-- Premium Screen -->
+
+    <string name="premium_close">Lukk</string>
+    <string name="premium_image_description">Premium</string>
+
+    <string name="premium_unlock">Lås opp</string>
+    <string name="premium_all_features"> Alle funksjoner</string>
+    <string name="premium_forever">For alltid</string>
+
+    <string name="premium_description">Betal én gang og nyt livslang tilgang
+uten gjentakende kostnader.</string>
+
+    <string name="premium_benefits">Premium-fordeler</string>
+
+    <string name="premium_hide_unlimited">Skjul ubegrenset antall bilder og videoer</string>
+    <string name="premium_intruder_selfie">Selfie av inntrenger</string>
+    <string name="premium_no_ads">Ingen annonser</string>
+    <string name="premium_priority_support">Prioritert kundestøtte</string>
+
+    <string name="premium_best_value">Beste verdi</string>
+
+    <string name="premium_one_time_purchase">Engangskjøp</string>
+    <string name="premium_lifetime_access">Livslang tilgang</string>
+    <string name="premium_one_time_payment">Engangsbetaling</string>
+
+    <string name="premium_shield_description">beskyttelsesskjold</string>
+
+    <string name="premium_no_subscription">Ingen abonnement. Betal én gang, så er det ditt for alltid.</string>
+
+    <string name="premium_unlock_button">Lås opp Premium - engangskjøp</string>
+
+    <string name="premium_terms_of_use">Bruksvilkår</string>
+    <string name="premium_privacy_policy">Personvernerklæring</string>
+
+
+    <!-- Exit Screen -->
+
+    <string name="exit_screen_back">Tilbake</string>
+    <string name="exit_screen_title">Avslutt App Lock</string>
+
+    <string name="exit_image_description">Avslutt App Lock</string>
+
+    <string name="exit_app_lock_title">Avslutte App Lock?</string>
+
+    <string name="exit_app_lock_description">Du må skrive inn passordet ditt på nytt
+for å få tilgang til App Lock.</string>
+
+    <string name="exit_rating_description">En rask vurdering fra deg betyr
+mye for teamet vårt.</string>
+
+    <string name="exit_stay_protected_description">Hold deg beskyttet</string>
+    <string name="exit_stay_protected">Hold deg beskyttet</string>
+
+    <string name="exit_anyway_description">Avslutt likevel</string>
+    <string name="exit_anyway">Avslutt likevel</string>
+
 
 </resources>

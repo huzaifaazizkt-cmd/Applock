@@ -194,5 +194,60 @@
         Pengenalan %1$d
     </string>
 
+    <!-- Premium Screen -->
+
+    <string name="premium_close">Tutup</string>
+    <string name="premium_image_description">Premium</string>
+
+    <string name="premium_unlock">Buka Kunci</string>
+    <string name="premium_all_features"> Semua Fitur</string>
+    <string name="premium_forever">Selamanya</string>
+
+    <string name="premium_description">Lakukan pembayaran satu kali dan nikmati akses seumur hidup
+tanpa biaya berulang.</string>
+
+    <string name="premium_benefits">Manfaat Premium</string>
+
+    <string name="premium_hide_unlimited">Sembunyikan foto &amp; video tanpa batas</string>
+    <string name="premium_intruder_selfie">Selfie penyusup</string>
+    <string name="premium_no_ads">Tanpa Iklan</string>
+    <string name="premium_priority_support">Dukungan Prioritas</string>
+
+    <string name="premium_best_value">Nilai Terbaik</string>
+
+    <string name="premium_one_time_purchase">Pembelian satu kali</string>
+    <string name="premium_lifetime_access">Akses seumur hidup</string>
+    <string name="premium_one_time_payment">Pembayaran satu kali</string>
+
+    <string name="premium_shield_description">perisai perlindungan</string>
+
+    <string name="premium_no_subscription">Tanpa langganan. Bayar sekali dan menjadi milik Anda selamanya.</string>
+
+    <string name="premium_unlock_button">Buka Premium - Pembelian Satu Kali</string>
+
+    <string name="premium_terms_of_use">Ketentuan Penggunaan</string>
+    <string name="premium_privacy_policy">Kebijakan Privasi</string>
+
+
+    <!-- Exit Screen -->
+
+    <string name="exit_screen_back">Kembali</string>
+    <string name="exit_screen_title">Keluar dari App Lock</string>
+
+    <string name="exit_image_description">Keluar dari App Lock</string>
+
+    <string name="exit_app_lock_title">Keluar dari App Lock?</string>
+
+    <string name="exit_app_lock_description">Anda perlu memasukkan kode sandi lagi
+untuk mengakses App Lock.</string>
+
+    <string name="exit_rating_description">Penilaian singkat dari Anda sangat berarti
+bagi tim kami.</string>
+
+    <string name="exit_stay_protected_description">Tetap Terlindungi</string>
+    <string name="exit_stay_protected">Tetap Terlindungi</string>
+
+    <string name="exit_anyway_description">Tetap Keluar</string>
+    <string name="exit_anyway">Tetap Keluar</string>
 
 </resources>

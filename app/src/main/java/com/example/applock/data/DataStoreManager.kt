@@ -37,6 +37,14 @@ class DataStoreManager(
 
 
         // =====================================================
+        // APP INITIALIZED
+        // =====================================================
+
+        val APP_INITIALIZED_KEY =
+            booleanPreferencesKey("app_initialized")
+
+
+        // =====================================================
         // LOCKED APPS
         // =====================================================
 
@@ -197,6 +205,34 @@ class DataStoreManager(
         return context.dataStore.data
             .map {
                 it[AUTH_TYPE_KEY] ?: "pin"
+            }
+    }
+
+
+    // =========================================================
+    // APP INITIALIZED
+    // =========================================================
+
+    suspend fun saveAppInitialized(
+        value: Boolean
+    ) {
+        context.dataStore.edit {
+            it[APP_INITIALIZED_KEY] = value
+        }
+    }
+
+    fun getAppInitialized(): Flow<Boolean> {
+        return context.dataStore.data
+            .catch { exception ->
+
+                if (exception is IOException) {
+                    emit(emptyPreferences())
+                } else {
+                    throw exception
+                }
+            }
+            .map {
+                it[APP_INITIALIZED_KEY] ?: false
             }
     }
 
@@ -560,10 +596,6 @@ class DataStoreManager(
     // PREMIUM
     // =========================================================
 
-    /**
-     * true  = Premium user
-     * false = Free user
-     */
     suspend fun savePremium(
         enabled: Boolean
     ) {
@@ -572,12 +604,6 @@ class DataStoreManager(
         }
     }
 
-    /**
-     * Returns the saved premium status.
-     *
-     * Default:
-     * false = Free user
-     */
     fun getPremium(): Flow<Boolean> {
         return context.dataStore.data
             .catch { exception ->

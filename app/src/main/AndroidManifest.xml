@@ -3,21 +3,36 @@
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.applock">
+
+    <!-- Camera -->
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
+
+    <!-- App permissions -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+
+    <!-- Media permissions -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+
+    <!-- Android 12 and below -->
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
 
-    <application
+    <!-- Foreground Service -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
+    <!-- Android 14+ Special Use Foreground Service -->
+    <uses-permission
+        android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+
+    <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:enableOnBackInvokedCallback="false"
@@ -28,6 +43,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppLock">
+
+        <!-- Main Activity -->
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -43,6 +60,8 @@
             </intent-filter>
 
         </activity>
+
+        <!-- Lock Screen -->
         <activity
             android:name=".Design.screens.LockScreenActivity"
             android:exported="false"
@@ -52,20 +71,29 @@
             android:showWhenLocked="true"
             android:turnScreenOn="true" />
 
+        <!-- AppLock Accessibility + Foreground Service -->
         <service
             android:name=".service.AppLockService"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
-            android:exported="true">
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
 
             <intent-filter>
-                <action android:name="android.accessibilityservice.AccessibilityService" />
+                <action
+                    android:name="android.accessibilityservice.AccessibilityService" />
             </intent-filter>
 
             <meta-data
                 android:name="android.accessibilityservice"
                 android:resource="@xml/accessibility_service_config" />
 
+            <!-- Android 14+ Special Use explanation -->
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="AppLock accessibility service for app locking and monitoring locked applications" />
+
         </service>
+
     </application>
 
 </manifest>

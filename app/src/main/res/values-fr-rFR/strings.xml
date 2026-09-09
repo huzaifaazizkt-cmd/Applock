@@ -195,4 +195,59 @@
         Présentation %1$d
     </string>
 
+    <!-- Premium Screen -->
+
+    <string name="premium_close">Fermer</string>
+    <string name="premium_image_description">Premium</string>
+
+    <string name="premium_unlock">Déverrouiller</string>
+    <string name="premium_all_features"> Toutes les fonctionnalités</string>
+    <string name="premium_forever">Pour toujours</string>
+
+    <string name="premium_description">Effectuez un paiement unique et profitez d\'un accès à vie
+sans frais récurrents.</string>
+
+    <string name="premium_benefits">Avantages Premium</string>
+
+    <string name="premium_hide_unlimited">Masquer un nombre illimité de photos et vidéos</string>
+    <string name="premium_intruder_selfie">Selfie de l\'intrus</string>
+    <string name="premium_no_ads">Sans publicité</string>
+    <string name="premium_priority_support">Assistance prioritaire</string>
+
+    <string name="premium_best_value">Meilleure offre</string>
+
+    <string name="premium_one_time_purchase">Achat unique</string>
+    <string name="premium_lifetime_access">Accès à vie</string>
+    <string name="premium_one_time_payment">Paiement unique</string>
+
+    <string name="premium_shield_description">bouclier de protection</string>
+
+    <string name="premium_no_subscription">Aucun abonnement. Payez une fois et profitez-en pour toujours.</string>
+
+    <string name="premium_unlock_button">Déverrouiller Premium - Achat unique</string>
+
+    <string name="premium_terms_of_use">Conditions d\'utilisation</string>
+    <string name="premium_privacy_policy">Politique de confidentialité</string>
+
+
+    <!-- Exit Screen -->
+
+    <string name="exit_screen_back">Retour</string>
+    <string name="exit_screen_title">Quitter App Lock</string>
+
+    <string name="exit_image_description">Quitter App Lock</string>
+
+    <string name="exit_app_lock_title">Quitter App Lock ?</string>
+
+    <string name="exit_app_lock_description">Vous devrez saisir à nouveau votre code d\'accès
+pour accéder à App Lock.</string>
+
+    <string name="exit_rating_description">Une petite évaluation de votre part compte
+beaucoup pour notre équipe.</string>
+
+    <string name="exit_stay_protected_description">Rester protégé</string>
+    <string name="exit_stay_protected">Rester protégé</string>
+
+    <string name="exit_anyway_description">Quitter quand même</string>
+    <string name="exit_anyway">Quitter quand même</string>
 </resources>

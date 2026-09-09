@@ -12,6 +12,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -520,16 +521,17 @@ fun PinConfirmScreen(
         }
     }
 
+    // =========================================================
+    // APP INITIALIZED + GO TO APP LIST
+    // =========================================================
+
     fun goToAppList() {
 
-        if (
-            isNavigatingToAppList
-        ) {
+        if (isNavigatingToAppList) {
             return
         }
 
-        isNavigatingToAppList =
-            true
+        isNavigatingToAppList = true
 
         showSecurityDialog =
             false
@@ -537,18 +539,41 @@ fun PinConfirmScreen(
         showPermissionDialog =
             false
 
-        navController.navigate(
-            "appList"
-        ) {
+        /*
+         * Coroutine Main thread par start hoti hai.
+         *
+         * DataStore ka save suspend function hai,
+         * is liye UI thread block nahi hoti.
+         *
+         * Save complete hone ke baad navigation
+         * Main thread par hi hoti hai.
+         */
+        scope.launch {
 
-            popUpTo("create") {
+            try {
 
-                inclusive =
+                // Setup complete
+                dataStore.saveAppInitialized(
                     true
+                )
+
+            } catch (e: Exception) {
+
+                e.printStackTrace()
             }
 
-            launchSingleTop =
-                true
+            navController.navigate(
+                "appList"
+            ) {
+
+                popUpTo(
+                    "create"
+                ) {
+                    inclusive = true
+                }
+
+                launchSingleTop = true
+            }
         }
     }
 
@@ -876,36 +901,31 @@ fun PinConfirmScreen(
                 ) {
 
                     Text(
-
                         text =
                             stringResource(
                                 R.string.continue_text
                             ),
 
                         color =
-                            if (
-                                patternConfirmed
-                            ) {
-
+                            if (patternConfirmed) {
                                 Color.White
-
                             } else {
-
                                 Color.White.copy(
                                     alpha = 0.35f
                                 )
                             },
 
-                        fontSize =
-                            20.sp,
+                        fontSize = 20.sp,
 
                         modifier =
                             Modifier
                                 .clickable(
-                                    enabled =
-                                        patternConfirmed
+                                    enabled = patternConfirmed,
+                                    indication = null,
+                                    interactionSource = remember {
+                                        MutableInteractionSource()
+                                    }
                                 ) {
-
                                     continueWithPattern()
                                 }
                                 .padding(
@@ -1090,7 +1110,6 @@ fun PinConfirmScreen(
                 ) {
 
                     Text(
-
                         text =
                             stringResource(
                                 R.string.continue_text
@@ -1101,27 +1120,28 @@ fun PinConfirmScreen(
                                 confirmPin.length ==
                                 pinLength
                             ) {
-
                                 Color.White
-
                             } else {
-
                                 Color.White.copy(
                                     alpha = 0.35f
                                 )
                             },
 
-                        fontSize =
-                            20.sp,
+                        fontSize = 20.sp,
 
                         modifier =
                             Modifier
                                 .clickable(
-
                                     enabled =
                                         confirmPin.length ==
-                                                pinLength
+                                                pinLength,
 
+                                    indication = null,
+
+                                    interactionSource =
+                                        remember {
+                                            MutableInteractionSource()
+                                        }
                                 ) {
 
                                     if (
@@ -1129,9 +1149,6 @@ fun PinConfirmScreen(
                                         value
                                     ) {
 
-                                        // IMPORTANT:
-                                        // Composable ke bahar
-                                        // stringResource() nahi.
                                         error =
                                             enterCorrectPasswordText
 
@@ -1140,7 +1157,6 @@ fun PinConfirmScreen(
 
                                         return@clickable
                                     }
-
 
                                     continueWithPin()
                                 }
@@ -2293,7 +2309,12 @@ private fun SecurityQuestionDialog(
 
                         modifier =
                             Modifier
-                                .clickable {
+                                .clickable(
+                                    indication = null,
+                                    interactionSource = remember {
+                                        MutableInteractionSource()
+                                    }
+                                ) {
                                     onSkip()
                                 }
                                 .padding(
@@ -2317,38 +2338,29 @@ private fun SecurityQuestionDialog(
 
 
                     Text(
-
-                        text =
-                            stringResource(
-                                R.string.save
-                            ),
+                        text = stringResource(R.string.save),
 
                         color =
                             if (saveEnabled) {
-
                                 Color(0xFF2196F3)
-
                             } else {
-
                                 Color(0xFF90CAF9)
                             },
 
-                        fontSize =
-                            16.sp,
+                        fontSize = 16.sp,
 
-                        modifier =
-                            Modifier
-                                .clickable(
-                                    enabled =
-                                        saveEnabled
-                                ) {
-
-                                    onSave()
-                                }
-                                .padding(
-                                    horizontal = 20.dp,
-                                    vertical = 10.dp
-                                )
+                        modifier = Modifier
+                            .clickable(
+                                enabled = saveEnabled,
+                                indication = null,
+                                interactionSource = remember { MutableInteractionSource() }
+                            ) {
+                                onSave()
+                            }
+                            .padding(
+                                horizontal = 20.dp,
+                                vertical = 10.dp
+                            )
                     )
                 }
             }
@@ -2733,6 +2745,7 @@ private fun getConfirmPositions(
 
     val y3 =
         height * 0.8333f
+
     return listOf(
 
         Offset(x1, y1),
@@ -2748,6 +2761,7 @@ private fun getConfirmPositions(
         Offset(x3, y3)
     )
 }
+
 private fun findConfirmDot(
 
     touch: Offset,
@@ -2767,6 +2781,7 @@ private fun findConfirmDot(
             height =
                 height
         )
+
     positions.forEachIndexed {
             index,
             dot ->
@@ -2782,11 +2797,14 @@ private fun findConfirmDot(
                 dx * dx +
                         dy * dy
             )
+
         if (
             distance <= 55f
         ) {
+
             return index
         }
     }
+
     return null
 }
