@@ -2,7 +2,6 @@ package com.example.applock.Design.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -37,7 +36,8 @@ import com.example.applock.R
 
 @Composable
 fun StartScreen(
-    navController: NavController
+    navController: NavController,
+    appInitialized: Boolean
 ) {
 
     // ---------------------------------------------------------
@@ -61,7 +61,10 @@ fun StartScreen(
     // JSON ANIMATION COMPLETE
     // ---------------------------------------------------------
 
-    LaunchedEffect(progress) {
+    LaunchedEffect(
+        progress,
+        appInitialized
+    ) {
 
         if (
             composition != null &&
@@ -71,12 +74,41 @@ fun StartScreen(
 
             navigationDone = true
 
-            // Loading complete hone ke baad
-            // direct AppList par jayega
-            navController.navigate("appList") {
+            /*
+             * Agar setup pehle complete ho chuka hai:
+             *
+             * StartScreen
+             *       ↓
+             *    AppList
+             *
+             * Welcome / Language / Onboarding /
+             * Premium / PIN Create nahi aayenge.
+             */
+            if (appInitialized) {
 
-                popUpTo("startScreen") {
-                    inclusive = true
+                navController.navigate("appList") {
+
+                    popUpTo("startScreen") {
+                        inclusive = true
+                    }
+
+                    launchSingleTop = true
+                }
+
+            } else {
+
+                /*
+                 * First installation:
+                 *
+                 * StartScreen
+                 *       ↓
+                 * WelcomeScreen
+                 */
+                navController.navigate("welcomeScreen") {
+
+                    popUpTo("startScreen") {
+                        inclusive = true
+                    }
                 }
             }
         }

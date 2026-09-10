@@ -231,8 +231,23 @@ class DataStoreManager(
                     throw exception
                 }
             }
-            .map {
-                it[APP_INITIALIZED_KEY] ?: false
+            .map { preferences ->
+
+                /*
+                 * Agar APP_INITIALIZED_KEY already saved hai,
+                 * to usi ki value use hogi.
+                 *
+                 * Agar APP_INITIALIZED_KEY exist nahi karti,
+                 * to existing PIN ya Pattern check hoga.
+                 *
+                 * Isse purane installed app mein bhi
+                 * StartScreen dobara show nahi hoga.
+                 */
+                preferences[APP_INITIALIZED_KEY]
+                    ?: (
+                            preferences[PIN_KEY] != null ||
+                                    preferences[PATTERN_KEY] != null
+                            )
             }
     }
 
