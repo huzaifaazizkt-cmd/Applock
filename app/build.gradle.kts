@@ -28,87 +28,30 @@ android {
 
 dependencies {
 
-    // Compose BOM
-    implementation(
-        platform(
-            "androidx.compose:compose-bom:2026.02.01"
-        )
-    )
-
-    // Compose UI
-    implementation(
-        "androidx.compose.ui:ui"
-    )
-
-    implementation(
-        "androidx.compose.ui:ui-tooling-preview"
-    )
-
-    implementation(
-        "androidx.compose.ui:ui-graphics"
-    )
-
-    // Foundation
-    implementation(
-        "androidx.compose.foundation:foundation"
-    )
-
-    // Material 3
-    implementation(
-        "androidx.compose.material3:material3"
-    )
-
-    // Material Icons
-    implementation(
-        "androidx.compose.material:material-icons-extended"
-    )
-
-    // Activity
-    implementation(
-        "androidx.activity:activity-compose:1.13.0"
-    )
-
-    // Navigation
-    implementation(
-        "androidx.navigation:navigation-compose:2.9.8"
-    )
-
-    // DataStore
-    implementation(
-        "androidx.datastore:datastore-preferences:1.1.7"
-    )
-
-    // Lifecycle
-    implementation(
-        "androidx.lifecycle:lifecycle-runtime-ktx:2.11.0"
-    )
-
-    // Material Components
-    implementation(
-        "com.google.android.material:material:1.13.0"
-    )
-
-    // Biometric
-    implementation(
-        "androidx.biometric:biometric:1.1.0"
-    )
-
-    // Coil
-    implementation(
-        "io.coil-kt:coil-compose:2.7.0"
-    )
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    implementation(platform("androidx.compose:compose-bom:2026.02.01"))
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.ui:ui-tooling-preview")
+    implementation("androidx.compose.ui:ui-graphics")
+    implementation("androidx.compose.foundation:foundation")
+    implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.material:material-icons-extended")
+    implementation("androidx.activity:activity-compose:1.13.0")
+    implementation("androidx.navigation:navigation-compose:2.9.8")
+    implementation("androidx.datastore:datastore-preferences:1.1.7")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.11.0")
+    implementation("com.google.android.material:material:1.13.0")
+    implementation("androidx.biometric:biometric:1.1.0")
+    implementation("io.coil-kt:coil-compose:2.7.0")
     implementation("com.airbnb.android:lottie-compose:6.6.7")
     val billing_version = "9.1.0"
-
     implementation("com.android.billingclient:billing-ktx:$billing_version")
     implementation("com.google.android.play:review:2.0.2")
     implementation("androidx.camera:camera-camera2:1.5.0")
     implementation("androidx.camera:camera-lifecycle:1.5.0")
     implementation("androidx.camera:camera-core:1.5.0")
-    // Debug tooling
-    debugImplementation(
-        "androidx.compose.ui:ui-tooling"
-
-
-    )
+    debugImplementation("androidx.compose.ui:ui-tooling")
 }

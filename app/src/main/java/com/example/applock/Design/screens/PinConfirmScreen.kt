@@ -53,16 +53,20 @@ import com.example.applock.data.DataStoreManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 import kotlin.math.sqrt
+
 
 @Composable
 fun PinConfirmScreen(
     navController: NavController,
     context: Context,
     type: String,
-    value: String
+    value: String,
+    isReset: Boolean = false
 ) {
 
     val scope =
@@ -161,6 +165,14 @@ fun PinConfirmScreen(
         mutableStateOf(false)
     }
 
+    var securityAnswerError by remember {
+        mutableStateOf(false)
+    }
+
+    var securityVerified by remember {
+        mutableStateOf(!isReset)
+    }
+
     val isPattern =
         type.equals(
             "pattern",
@@ -179,7 +191,6 @@ fun PinConfirmScreen(
     val errorColor =
         Color.Red
 
-
     val pinLength =
         value.length
 
@@ -192,6 +203,7 @@ fun PinConfirmScreen(
         stringResource(
             R.string.enter_correct_password
         )
+
 
     fun checkPermissions() {
 
@@ -206,6 +218,7 @@ fun PinConfirmScreen(
             )
     }
 
+
     fun allPermissionsAllowed(): Boolean {
 
         return overlayAllowed &&
@@ -219,18 +232,58 @@ fun PinConfirmScreen(
         showPermissionDialog =
             false
 
-        selectedQuestion =
-            ""
-
         securityAnswer =
             ""
+
+        securityAnswerError =
+            false
 
         securityDropdownExpanded =
             false
 
-        showSecurityDialog =
-            true
+        if (isReset) {
+
+            scope.launch {
+
+                try {
+
+                    selectedQuestion =
+                        dataStore
+                            .getSecurityQuestion()
+                            .first()
+                            .orEmpty()
+
+                } catch (e: Exception) {
+
+                    e.printStackTrace()
+
+                    selectedQuestion =
+                        ""
+                }
+
+                showSecurityDialog =
+                    true
+            }
+
+        } else {
+
+            selectedQuestion =
+                ""
+
+            showSecurityDialog =
+                true
+        }
     }
+
+
+    LaunchedEffect(isReset) {
+
+        if (isReset) {
+
+            openSecurityQuestion()
+        }
+    }
+
 
     val currentShowPermissionDialog by
     rememberUpdatedState(
@@ -307,7 +360,6 @@ fun PinConfirmScreen(
     }
 
 
-
     LaunchedEffect(
         showPermissionDialog
     ) {
@@ -382,7 +434,6 @@ fun PinConfirmScreen(
         patternConfirmed =
             false
 
-
         error =
             passwordNotMatchText
 
@@ -405,7 +456,96 @@ fun PinConfirmScreen(
             }
     }
 
+
+    // =========================================================
+    // RESET PASSWORD FINAL SAVE
+    // =========================================================
+
+    fun finishReset() {
+
+        if (
+            isNavigatingToAppList
+        ) {
+            return
+        }
+
+        isNavigatingToAppList =
+            true
+
+        showSecurityDialog =
+            false
+
+        showPermissionDialog =
+            false
+
+        scope.launch(
+            Dispatchers.IO
+        ) {
+
+            try {
+
+                if (isPattern) {
+
+                    dataStore.savePattern(
+                        value
+                    )
+
+                    dataStore.saveAuthType(
+                        "pattern"
+                    )
+
+                } else {
+
+                    dataStore.savePin(
+                        value
+                    )
+
+                    dataStore.saveAuthType(
+                        "pin"
+                    )
+                }
+
+            } catch (e: Exception) {
+
+                e.printStackTrace()
+            }
+
+            withContext(
+                Dispatchers.Main
+            ) {
+
+                if (
+                    !navController.popBackStack(
+                        "appList",
+                        false
+                    )
+                ) {
+
+                    navController.navigate(
+                        "appList"
+                    ) {
+
+                        launchSingleTop =
+                            true
+                    }
+                }
+            }
+        }
+    }
+
+
+    // =========================================================
+    // NORMAL SETUP / RESET CONTINUE
+    // =========================================================
+
     fun continueWithPin() {
+
+        if (isReset) {
+
+            finishReset()
+
+            return
+        }
 
         checkPermissions()
 
@@ -433,7 +573,15 @@ fun PinConfirmScreen(
         }
     }
 
+
     fun continueWithPattern() {
+
+        if (isReset) {
+
+            finishReset()
+
+            return
+        }
 
         checkPermissions()
 
@@ -460,6 +608,7 @@ fun PinConfirmScreen(
             }
         }
     }
+
 
     fun openOverlayPermission() {
 
@@ -505,6 +654,7 @@ fun PinConfirmScreen(
         }
     }
 
+
     fun openAccessibilitySettings() {
 
         try {
@@ -521,17 +671,21 @@ fun PinConfirmScreen(
         }
     }
 
+
     // =========================================================
-    // APP INITIALIZED + GO TO APP LIST
+    // NORMAL SETUP APP LIST
     // =========================================================
 
     fun goToAppList() {
 
-        if (isNavigatingToAppList) {
+        if (
+            isNavigatingToAppList
+        ) {
             return
         }
 
-        isNavigatingToAppList = true
+        isNavigatingToAppList =
+            true
 
         showSecurityDialog =
             false
@@ -539,20 +693,10 @@ fun PinConfirmScreen(
         showPermissionDialog =
             false
 
-        /*
-         * Coroutine Main thread par start hoti hai.
-         *
-         * DataStore ka save suspend function hai,
-         * is liye UI thread block nahi hoti.
-         *
-         * Save complete hone ke baad navigation
-         * Main thread par hi hoti hai.
-         */
         scope.launch {
 
             try {
 
-                // Setup complete
                 dataStore.saveAppInitialized(
                     true
                 )
@@ -569,10 +713,13 @@ fun PinConfirmScreen(
                 popUpTo(
                     "create"
                 ) {
-                    inclusive = true
+
+                    inclusive =
+                        true
                 }
 
-                launchSingleTop = true
+                launchSingleTop =
+                    true
             }
         }
     }
@@ -731,6 +878,7 @@ fun PinConfirmScreen(
                         40.dp
                     )
             )
+
 
             if (isPattern) {
 
@@ -908,24 +1056,34 @@ fun PinConfirmScreen(
 
                         color =
                             if (patternConfirmed) {
+
                                 Color.White
+
                             } else {
+
                                 Color.White.copy(
                                     alpha = 0.35f
                                 )
                             },
 
-                        fontSize = 20.sp,
+                        fontSize =
+                            20.sp,
 
                         modifier =
                             Modifier
                                 .clickable(
-                                    enabled = patternConfirmed,
-                                    indication = null,
-                                    interactionSource = remember {
-                                        MutableInteractionSource()
-                                    }
+                                    enabled =
+                                        patternConfirmed,
+
+                                    indication =
+                                        null,
+
+                                    interactionSource =
+                                        remember {
+                                            MutableInteractionSource()
+                                        }
                                 ) {
+
                                     continueWithPattern()
                                 }
                                 .padding(
@@ -934,10 +1092,7 @@ fun PinConfirmScreen(
                     )
                 }
 
-            }
-
-
-            else {
+            } else {
 
                 Text(
 
@@ -1120,14 +1275,18 @@ fun PinConfirmScreen(
                                 confirmPin.length ==
                                 pinLength
                             ) {
+
                                 Color.White
+
                             } else {
+
                                 Color.White.copy(
                                     alpha = 0.35f
                                 )
                             },
 
-                        fontSize = 20.sp,
+                        fontSize =
+                            20.sp,
 
                         modifier =
                             Modifier
@@ -1136,7 +1295,8 @@ fun PinConfirmScreen(
                                         confirmPin.length ==
                                                 pinLength,
 
-                                    indication = null,
+                                    indication =
+                                        null,
 
                                     interactionSource =
                                         remember {
@@ -1167,6 +1327,11 @@ fun PinConfirmScreen(
                 }
             }
         }
+
+
+        // =========================================================
+        // PERMISSION DIALOG
+        // =========================================================
 
         if (
             showPermissionDialog
@@ -1204,6 +1369,11 @@ fun PinConfirmScreen(
             )
         }
 
+
+        // =========================================================
+        // SECURITY QUESTION
+        // =========================================================
+
         if (
             showSecurityDialog
         ) {
@@ -1219,20 +1389,32 @@ fun PinConfirmScreen(
                 dropdownExpanded =
                     securityDropdownExpanded,
 
+                isReset =
+                    isReset,
+
+                answerError =
+                    securityAnswerError,
+
                 onDropdownClick = {
 
-                    securityDropdownExpanded =
-                        !securityDropdownExpanded
+                    if (!isReset) {
+
+                        securityDropdownExpanded =
+                            !securityDropdownExpanded
+                    }
                 },
 
                 onQuestionSelected = {
                         question ->
 
-                    selectedQuestion =
-                        question
+                    if (!isReset) {
 
-                    securityDropdownExpanded =
-                        false
+                        selectedQuestion =
+                            question
+
+                        securityDropdownExpanded =
+                            false
+                    }
                 },
 
                 onAnswerChanged = {
@@ -1240,46 +1422,103 @@ fun PinConfirmScreen(
 
                     securityAnswer =
                         newAnswer
+
+                    securityAnswerError =
+                        false
                 },
 
                 onSkip = {
 
-                    goToAppList()
+                    if (!isReset) {
+
+                        goToAppList()
+                    }
                 },
 
                 onSave = {
 
-                    val question =
-                        selectedQuestion
+                    if (isReset) {
 
-                    val answer =
-                        securityAnswer.trim()
+                        scope.launch {
+
+                            try {
+
+                                val savedAnswer =
+                                    dataStore
+                                        .getSecurityAnswer()
+                                        .first()
+                                        ?.trim()
+                                        .orEmpty()
+
+                                val enteredAnswer =
+                                    securityAnswer
+                                        .trim()
 
 
-                    // Navigation immediately
-                    goToAppList()
+                                if (
+                                    savedAnswer.isEmpty() ||
+                                    !enteredAnswer.equals(
+                                        savedAnswer,
+                                        ignoreCase = true
+                                    )
+                                ) {
+
+                                    securityAnswerError =
+                                        true
+
+                                } else {
+
+                                    securityAnswerError =
+                                        false
+
+                                    showSecurityDialog =
+                                        false
+
+                                    securityVerified =
+                                        true
+                                }
+
+                            } catch (e: Exception) {
+
+                                e.printStackTrace()
+
+                                securityAnswerError =
+                                    true
+                            }
+                        }
+
+                    } else {
+
+                        val question =
+                            selectedQuestion
+
+                        val answer =
+                            securityAnswer.trim()
 
 
-                    // Save in background
-                    scope.launch(
-                        Dispatchers.IO
-                    ) {
+                        goToAppList()
 
-                        try {
 
-                            dataStore
-                                .saveSecurityQuestion(
-                                    question
-                                )
+                        scope.launch(
+                            Dispatchers.IO
+                        ) {
 
-                            dataStore
-                                .saveSecurityAnswer(
-                                    answer
-                                )
+                            try {
 
-                        } catch (e: Exception) {
+                                dataStore
+                                    .saveSecurityQuestion(
+                                        question
+                                    )
 
-                            e.printStackTrace()
+                                dataStore
+                                    .saveSecurityAnswer(
+                                        answer
+                                    )
+
+                            } catch (e: Exception) {
+
+                                e.printStackTrace()
+                            }
                         }
                     }
                 }
@@ -1287,6 +1526,11 @@ fun PinConfirmScreen(
         }
     }
 }
+
+
+// =====================================================================
+// PERMISSION REQUIRED DIALOG
+// =====================================================================
 
 @Composable
 private fun PermissionRequiredDialog(
@@ -1381,6 +1625,7 @@ private fun PermissionRequiredDialog(
                         TextAlign.Center
                 )
 
+
                 PermissionRow(
 
                     icon = {
@@ -1427,6 +1672,7 @@ private fun PermissionRequiredDialog(
 
 
                 PermissionDivider()
+
 
                 PermissionRow(
 
@@ -1475,10 +1721,6 @@ private fun PermissionRequiredDialog(
 
                 PermissionDivider()
 
-
-                // =================================================
-                // AUTO START
-                // =================================================
 
                 PermissionRow(
 
@@ -1554,6 +1796,11 @@ private fun PermissionRequiredDialog(
         }
     }
 }
+
+
+// =====================================================================
+// PERMISSION ROW
+// =====================================================================
 
 @Composable
 private fun PermissionRow(
@@ -1752,9 +1999,9 @@ private fun PermissionRow(
 }
 
 
-// =============================================================
+// =====================================================================
 // DIVIDER
-// =============================================================
+// =====================================================================
 
 @Composable
 private fun PermissionDivider() {
@@ -1787,6 +2034,11 @@ private fun PermissionDivider() {
     )
 }
 
+
+// =====================================================================
+// SECURITY QUESTION DIALOG
+// =====================================================================
+
 @Composable
 private fun SecurityQuestionDialog(
 
@@ -1795,6 +2047,10 @@ private fun SecurityQuestionDialog(
     answer: String,
 
     dropdownExpanded: Boolean,
+
+    isReset: Boolean,
+
+    answerError: Boolean,
 
     onDropdownClick: () -> Unit,
 
@@ -1985,8 +2241,19 @@ private fun SecurityQuestionDialog(
                                         15.dp
                                     )
                                 )
-                                .clickable {
-                                    onDropdownClick()
+                                .clickable(
+                                    enabled = !isReset,
+                                    indication = null,
+                                    interactionSource =
+                                        remember {
+                                            MutableInteractionSource()
+                                        }
+                                ) {
+
+                                    if (!isReset) {
+
+                                        onDropdownClick()
+                                    }
                                 }
                                 .padding(
                                     start = 18.dp,
@@ -2038,28 +2305,33 @@ private fun SecurityQuestionDialog(
                         )
 
 
-                        Icon(
+                        if (!isReset) {
 
-                            imageVector =
-                                Icons.Outlined.KeyboardArrowDown,
+                            Icon(
 
-                            contentDescription =
-                                stringResource(
-                                    R.string.select_security_question
-                                ),
+                                imageVector =
+                                    Icons.Outlined.KeyboardArrowDown,
 
-                            tint =
-                                Color(0xFF8F8F8F),
+                                contentDescription =
+                                    stringResource(
+                                        R.string.select_security_question
+                                    ),
 
-                            modifier =
-                                Modifier.size(
-                                    22.dp
-                                )
-                        )
+                                tint =
+                                    Color(0xFF8F8F8F),
+
+                                modifier =
+                                    Modifier.size(
+                                        22.dp
+                                    )
+                            )
+                        }
                     }
 
+
                     if (
-                        dropdownExpanded
+                        dropdownExpanded &&
+                        !isReset
                     ) {
 
                         Popup(
@@ -2068,6 +2340,7 @@ private fun SecurityQuestionDialog(
                                 Alignment.TopEnd,
 
                             onDismissRequest = {
+
                                 onDropdownClick()
                             },
 
@@ -2274,6 +2547,32 @@ private fun SecurityQuestionDialog(
                 )
 
 
+                if (answerError) {
+
+                    Spacer(
+                        modifier =
+                            Modifier.height(
+                                5.dp
+                            )
+                    )
+
+                    Text(
+
+                        text =
+                            "Enter your correct answer",
+
+                        color =
+                            Color.Red,
+
+                        fontSize =
+                            12.sp,
+
+                        modifier =
+                            Modifier.fillMaxWidth()
+                    )
+                }
+
+
                 Spacer(
                     modifier =
                         Modifier.height(
@@ -2294,42 +2593,47 @@ private fun SecurityQuestionDialog(
                         Alignment.CenterVertically
                 ) {
 
-                    Text(
+                    if (!isReset) {
 
-                        text =
-                            stringResource(
-                                R.string.skip
-                            ),
+                        Text(
 
-                        color =
-                            Color(0xFF2196F3),
+                            text =
+                                stringResource(
+                                    R.string.skip
+                                ),
 
-                        fontSize =
-                            16.sp,
+                            color =
+                                Color(0xFF2196F3),
 
-                        modifier =
-                            Modifier
-                                .clickable(
-                                    indication = null,
-                                    interactionSource = remember {
-                                        MutableInteractionSource()
+                            fontSize =
+                                16.sp,
+
+                            modifier =
+                                Modifier
+                                    .clickable(
+                                        indication = null,
+                                        interactionSource =
+                                            remember {
+                                                MutableInteractionSource()
+                                            }
+                                    ) {
+
+                                        onSkip()
                                     }
-                                ) {
-                                    onSkip()
-                                }
-                                .padding(
-                                    horizontal = 20.dp,
-                                    vertical = 10.dp
+                                    .padding(
+                                        horizontal = 20.dp,
+                                        vertical = 10.dp
+                                    )
+                        )
+
+
+                        Spacer(
+                            modifier =
+                                Modifier.width(
+                                    20.dp
                                 )
-                    )
-
-
-                    Spacer(
-                        modifier =
-                            Modifier.width(
-                                20.dp
-                            )
-                    )
+                        )
+                    }
 
 
                     val saveEnabled =
@@ -2338,35 +2642,57 @@ private fun SecurityQuestionDialog(
 
 
                     Text(
-                        text = stringResource(R.string.save),
+
+                        text =
+                            stringResource(
+                                R.string.save
+                            ),
 
                         color =
                             if (saveEnabled) {
+
                                 Color(0xFF2196F3)
+
                             } else {
+
                                 Color(0xFF90CAF9)
                             },
 
-                        fontSize = 16.sp,
+                        fontSize =
+                            16.sp,
 
-                        modifier = Modifier
-                            .clickable(
-                                enabled = saveEnabled,
-                                indication = null,
-                                interactionSource = remember { MutableInteractionSource() }
-                            ) {
-                                onSave()
-                            }
-                            .padding(
-                                horizontal = 20.dp,
-                                vertical = 10.dp
-                            )
+                        modifier =
+                            Modifier
+                                .clickable(
+                                    enabled =
+                                        saveEnabled,
+
+                                    indication =
+                                        null,
+
+                                    interactionSource =
+                                        remember {
+                                            MutableInteractionSource()
+                                        }
+                                ) {
+
+                                    onSave()
+                                }
+                                .padding(
+                                    horizontal = 20.dp,
+                                    vertical = 10.dp
+                                )
                     )
                 }
             }
         }
     }
 }
+
+
+// =====================================================================
+// ACCESSIBILITY SERVICE CHECK
+// =====================================================================
 
 private fun isAccessibilityServiceEnabled(
     context: Context
@@ -2420,6 +2746,11 @@ private fun isAccessibilityServiceEnabled(
         false
     }
 }
+
+
+// =====================================================================
+// CONFIRM PATTERN GRID
+// =====================================================================
 
 @Composable
 private fun ConfirmPatternGrid(
@@ -2623,6 +2954,7 @@ private fun ConfirmPatternGrid(
                         size.height
                 )
 
+
             if (
                 selectedDots.size >= 2
             ) {
@@ -2660,6 +2992,7 @@ private fun ConfirmPatternGrid(
                 }
             }
 
+
             positions.forEachIndexed {
                     index,
                     position ->
@@ -2668,6 +3001,7 @@ private fun ConfirmPatternGrid(
                     selectedDots.contains(
                         index
                     )
+
 
                 drawCircle(
 
@@ -2681,6 +3015,7 @@ private fun ConfirmPatternGrid(
                         position
                 )
 
+
                 drawCircle(
 
                     color =
@@ -2692,6 +3027,7 @@ private fun ConfirmPatternGrid(
                     center =
                         position
                 )
+
 
                 drawCircle(
 
@@ -2722,6 +3058,11 @@ private fun ConfirmPatternGrid(
         }
     }
 }
+
+
+// =====================================================================
+// CONFIRM GRID POSITIONS
+// =====================================================================
 
 private fun getConfirmPositions(
     width: Float,
@@ -2762,6 +3103,11 @@ private fun getConfirmPositions(
     )
 }
 
+
+// =====================================================================
+// FIND CONFIRM DOT
+// =====================================================================
+
 private fun findConfirmDot(
 
     touch: Offset,
@@ -2782,6 +3128,7 @@ private fun findConfirmDot(
                 height
         )
 
+
     positions.forEachIndexed {
             index,
             dot ->
@@ -2798,6 +3145,7 @@ private fun findConfirmDot(
                         dy * dy
             )
 
+
         if (
             distance <= 55f
         ) {
@@ -2805,6 +3153,7 @@ private fun findConfirmDot(
             return index
         }
     }
+
 
     return null
 }
