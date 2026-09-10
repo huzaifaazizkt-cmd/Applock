@@ -24,7 +24,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
@@ -55,7 +54,9 @@ private data class SettingsItemData(
 )
 
 
-
+// =============================================================
+// SETTINGS SCREEN
+// =============================================================
 
 @Composable
 fun SettingsScreen(
@@ -70,6 +71,15 @@ fun SettingsScreen(
     }
 
     val scope = rememberCoroutineScope()
+
+
+    // =========================================================
+    // APP PROTECTION
+    // =========================================================
+
+    var appProtectionEnabled by remember {
+        mutableStateOf(false)
+    }
 
 
     // =========================================================
@@ -162,15 +172,9 @@ fun SettingsScreen(
         mutableStateOf(false)
     }
 
-
-    // SAVED RELOCK OPTION
-
     var relockOption by remember {
         mutableStateOf("relock_after_quitting")
     }
-
-
-    // TEMPORARY RELOCK OPTION
 
     var tempRelockOption by remember {
         mutableStateOf("relock_after_quitting")
@@ -185,16 +189,9 @@ fun SettingsScreen(
         mutableStateOf(false)
     }
 
-
-    // SAVED DELAY OPTION
-
     var delayOption by remember {
         mutableStateOf("never")
     }
-
-
-    // TEMPORARY DELAY OPTION
-    // Cancel par ye save nahi hogi
 
     var tempDelayOption by remember {
         mutableStateOf("never")
@@ -206,6 +203,16 @@ fun SettingsScreen(
     // =========================================================
 
     LaunchedEffect(Unit) {
+
+        // -----------------------------------------------------
+        // APP PROTECTION
+        // -----------------------------------------------------
+
+        appProtectionEnabled =
+            dataStore
+                .getAppProtectionEnabled()
+                .first()
+
 
         // -----------------------------------------------------
         // HIDE FROM RECENTS
@@ -311,6 +318,38 @@ fun SettingsScreen(
                     )
             ) {
 
+                // =================================================
+                // APPLOCK ENABLE CARD
+                // =================================================
+
+                AppProtectionCard(
+                    enabled = appProtectionEnabled,
+
+                    onEnabledChange = { enabled ->
+
+                        appProtectionEnabled =
+                            enabled
+
+                        scope.launch {
+
+                            dataStore
+                                .saveAppProtectionEnabled(
+                                    enabled
+                                )
+                        }
+                    }
+                )
+
+
+                Spacer(
+                    modifier = Modifier.height(12.dp)
+                )
+
+
+                // =================================================
+                // NORMAL SETTINGS ITEMS
+                // =================================================
+
                 settingsItems.forEach { item ->
 
                     val title =
@@ -355,8 +394,6 @@ fun SettingsScreen(
 
                         onRelockClick = {
 
-                            // Saved option ko temporary mein copy karein
-
                             tempRelockOption =
                                 relockOption
 
@@ -365,8 +402,6 @@ fun SettingsScreen(
                         },
 
                         onDelayClick = {
-
-                            // Saved delay ko temporary mein copy karein
 
                             tempDelayOption =
                                 delayOption
@@ -390,12 +425,10 @@ fun SettingsScreen(
                                     onLanguageClick()
                                 }
 
-
                                 "intruder" -> {
 
                                     onIntruderClick()
                                 }
-
 
                                 "lock_setting",
                                 "hide_settings" -> {
@@ -414,24 +447,20 @@ fun SettingsScreen(
                                         }
                                 }
 
-
                                 "rate_us" -> {
-                                    // Later Rate Us logic
+                                    // Later
                                 }
-
 
                                 "share" -> {
-                                    // Later Share logic
+                                    // Later
                                 }
-
 
                                 "about" -> {
-                                    // Later About screen
+                                    // Later
                                 }
 
-
                                 "privacy_policy" -> {
-                                    // Later Privacy Policy
+                                    // Later
                                 }
                             }
                         }
@@ -466,8 +495,6 @@ fun SettingsScreen(
 
                 onCancel = {
 
-                    // Cancel par saved value same rahegi
-
                     tempRelockOption =
                         relockOption
 
@@ -477,16 +504,11 @@ fun SettingsScreen(
 
                 onConfirm = {
 
-                    // Temporary option ko saved option banayein
-
                     relockOption =
                         tempRelockOption
 
                     showRelockDialog =
                         false
-
-
-                    // DataStore mein save
 
                     scope.launch {
 
@@ -519,8 +541,6 @@ fun SettingsScreen(
 
                 onCancel = {
 
-                    // Cancel par saved value restore
-
                     tempDelayOption =
                         delayOption
 
@@ -530,16 +550,11 @@ fun SettingsScreen(
 
                 onConfirm = {
 
-                    // Temporary delay ko saved delay banayein
-
                     delayOption =
                         tempDelayOption
 
                     showDelayDialog =
                         false
-
-
-                    // DataStore mein save
 
                     scope.launch {
 
@@ -549,6 +564,188 @@ fun SettingsScreen(
                             )
                     }
                 }
+            )
+        }
+    }
+}
+
+
+// =============================================================
+// APP PROTECTION CARD
+// =============================================================
+
+@Composable
+private fun AppProtectionCard(
+    enabled: Boolean,
+    onEnabledChange: (Boolean) -> Unit
+) {
+
+    Card(
+
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(
+                elevation = 5.dp,
+                shape = RoundedCornerShape(12.dp),
+                clip = false,
+                ambientColor =
+                    Color.Black.copy(alpha = 0.10f),
+                spotColor =
+                    Color.Black.copy(alpha = 0.10f)
+            )
+            .clip(
+                RoundedCornerShape(12.dp)
+            ),
+
+        shape =
+            RoundedCornerShape(12.dp),
+
+        colors =
+            CardDefaults.cardColors(
+                containerColor =
+                    Color.White
+            ),
+
+        elevation =
+            CardDefaults.cardElevation(
+                defaultElevation = 2.dp,
+                pressedElevation = 1.dp
+            )
+    ) {
+
+        Row(
+
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(70.dp)
+                .padding(
+                    start = 8.dp,
+                    end = 10.dp
+                ),
+
+            verticalAlignment =
+                Alignment.CenterVertically
+        ) {
+
+            // =================================================
+            // ENABLE ICON
+            // =================================================
+
+            Image(
+
+                painter =
+                    painterResource(
+                        id = R.drawable.enable
+                    ),
+
+                contentDescription =
+                    stringResource(
+                        R.string.enable_app_protection
+                    ),
+
+                modifier =
+                    Modifier.size(38.dp),
+
+                contentScale =
+                    ContentScale.Fit
+            )
+
+
+            Spacer(
+                modifier =
+                    Modifier.width(18.dp)
+            )
+
+
+            // =================================================
+            // TEXT
+            // =================================================
+
+            Column(
+
+                modifier =
+                    Modifier.weight(1f)
+            ) {
+
+                Text(
+
+                    text =
+                        stringResource(
+                            R.string.applock
+                        ),
+
+                    color =
+                        Color(0xFF333333),
+
+                    fontSize =
+                        15.sp
+                )
+
+
+                Spacer(
+                    modifier =
+                        Modifier.height(2.dp)
+                )
+
+
+                Text(
+
+                    text =
+                        stringResource(
+                            R.string.enable_app_protection
+                        ),
+
+                    color =
+                        Color(0xFF666666),
+
+                    fontSize =
+                        11.sp
+                )
+            }
+
+
+            // =================================================
+            // SWITCH
+            // =================================================
+
+            Switch(
+
+                checked =
+                    enabled,
+
+                onCheckedChange = {
+                    onEnabledChange(it)
+                },
+
+                modifier =
+                    Modifier
+                        .size(
+                            width = 42.dp,
+                            height = 24.dp
+                        )
+                        .scale(0.56f),
+
+                colors =
+                    SwitchDefaults.colors(
+
+                        checkedThumbColor =
+                            Color(0xFF0396FF),
+
+                        checkedTrackColor =
+                            Color(0xFF8DCCF7),
+
+                        uncheckedThumbColor =
+                            Color(0xFFAAAAAA),
+
+                        uncheckedTrackColor =
+                            Color(0xFFE3E3E3),
+
+                        uncheckedBorderColor =
+                            Color.Transparent,
+
+                        checkedBorderColor =
+                            Color.Transparent
+                    )
             )
         }
     }
@@ -586,7 +783,6 @@ private fun SettingsItem(
     relockOption: String,
 
     onArrowClick: () -> Unit
-
 ) {
 
     Card(
@@ -595,32 +791,19 @@ private fun SettingsItem(
             .fillMaxWidth()
             .shadow(
                 elevation = 5.dp,
-
-                shape = RoundedCornerShape(
-                    12.dp
-                ),
-
+                shape = RoundedCornerShape(12.dp),
                 clip = false,
-
                 ambientColor =
-                    Color.Black.copy(
-                        alpha = 0.10f
-                    ),
-
+                    Color.Black.copy(alpha = 0.10f),
                 spotColor =
-                    Color.Black.copy(
-                        alpha = 0.10f
-                    )
+                    Color.Black.copy(alpha = 0.10f)
             )
             .clip(
-                RoundedCornerShape(
-                    12.dp
-                )
+                RoundedCornerShape(12.dp)
             ),
 
-        shape = RoundedCornerShape(
-            12.dp
-        ),
+        shape =
+            RoundedCornerShape(12.dp),
 
         colors =
             CardDefaults.cardColors(
@@ -640,10 +823,6 @@ private fun SettingsItem(
                 Modifier.fillMaxWidth()
         ) {
 
-            // =================================================
-            // HEADER
-            // =================================================
-
             Row(
 
                 modifier = Modifier
@@ -658,10 +837,6 @@ private fun SettingsItem(
                     Alignment.CenterVertically
             ) {
 
-                // =================================================
-                // ICON
-                // =================================================
-
                 Image(
 
                     painter =
@@ -673,9 +848,7 @@ private fun SettingsItem(
                         title,
 
                     modifier =
-                        Modifier.size(
-                            38.dp
-                        ),
+                        Modifier.size(38.dp),
 
                     contentScale =
                         ContentScale.FillBounds
@@ -687,10 +860,6 @@ private fun SettingsItem(
                         Modifier.width(18.dp)
                 )
 
-
-                // =================================================
-                // TITLE
-                // =================================================
 
                 Text(
 
@@ -707,10 +876,6 @@ private fun SettingsItem(
                 )
 
 
-                // =================================================
-                // ARROW
-                // =================================================
-
                 Box(
 
                     modifier =
@@ -725,8 +890,10 @@ private fun SettingsItem(
                 ) {
 
                     val expandable =
-                        itemKey == "lock_setting" ||
-                                itemKey == "hide_settings"
+                        itemKey ==
+                                "lock_setting" ||
+                                itemKey ==
+                                "hide_settings"
 
 
                     Image(
@@ -738,11 +905,8 @@ private fun SettingsItem(
                                     if (expandable) {
 
                                         if (expanded) {
-
                                             R.drawable.uparrow
-
                                         } else {
-
                                             R.drawable.downicon
                                         }
 
@@ -779,7 +943,6 @@ private fun SettingsItem(
 
                         modifier =
                             Modifier.size(
-
                                 if (expandable) {
                                     12.dp
                                 } else {
@@ -793,10 +956,6 @@ private fun SettingsItem(
                 }
             }
 
-
-            // =================================================
-            // LOCK SETTING
-            // =================================================
 
             if (
                 expanded &&
@@ -820,10 +979,6 @@ private fun SettingsItem(
             }
 
 
-            // =================================================
-            // HIDE SETTINGS
-            // =================================================
-
             if (
                 expanded &&
                 itemKey == "hide_settings"
@@ -839,10 +994,6 @@ private fun SettingsItem(
                 )
             }
 
-
-            // =================================================
-            // OTHER SETTINGS
-            // =================================================
 
             if (
                 expanded &&
@@ -882,7 +1033,7 @@ private fun SettingsItem(
 
 
 // =============================================================
-// HIDE SETTINGS EXPANDED CONTENT
+// HIDE SETTINGS
 // =============================================================
 
 @Composable
@@ -892,7 +1043,6 @@ private fun HideSettingsExpandedContent(
 
     onHideFromRecentsChange:
         (Boolean) -> Unit
-
 ) {
 
     Column(
@@ -920,7 +1070,8 @@ private fun HideSettingsExpandedContent(
 
                 painter =
                     painterResource(
-                        id = R.drawable.eyehide
+                        id =
+                            R.drawable.eyehide
                     ),
 
                 contentDescription =
@@ -1017,21 +1168,18 @@ private fun LockSettingExpandedContent(
     delayOption: String,
 
     relockOption: String
-
 ) {
 
     val context = LocalContext.current
 
-    val dataStore = remember {
-        DataStoreManager(context)
-    }
+    val dataStore =
+        remember {
+            DataStoreManager(context)
+        }
 
-    val scope = rememberCoroutineScope()
+    val scope =
+        rememberCoroutineScope()
 
-
-    // =========================================================
-    // LOCAL STATES
-    // =========================================================
 
     var fingerprintEnabled by remember {
         mutableStateOf(false)
@@ -1045,10 +1193,6 @@ private fun LockSettingExpandedContent(
         mutableStateOf(false)
     }
 
-
-    // =========================================================
-    // LOAD SAVED SETTINGS
-    // =========================================================
 
     LaunchedEffect(Unit) {
 
@@ -1074,23 +1218,15 @@ private fun LockSettingExpandedContent(
             Modifier.fillMaxWidth()
     ) {
 
-        // =====================================================
-        // PASSWORD
-        // =====================================================
-
         Text(
-
             text =
                 stringResource(
                     R.string.password
                 ),
-
             color =
                 Color(0xFF888888),
-
             fontSize =
                 16.sp,
-
             modifier =
                 Modifier.padding(
                     start = 10.dp,
@@ -1101,20 +1237,16 @@ private fun LockSettingExpandedContent(
 
 
         LockSettingRow(
-
             iconRes =
                 R.drawable.redlock,
-
             title =
                 stringResource(
                     R.string.reset_password
                 ),
-
             subtitle =
                 stringResource(
                     R.string.pattern
                 ),
-
             onClick = {}
         )
 
@@ -1123,20 +1255,16 @@ private fun LockSettingExpandedContent(
 
 
         LockSettingRow(
-
             iconRes =
                 R.drawable.security,
-
             title =
                 stringResource(
                     R.string.security_settings
                 ),
-
             subtitle =
                 stringResource(
                     R.string.set_security_email
                 ),
-
             onClick = {}
         )
 
@@ -1144,61 +1272,44 @@ private fun LockSettingExpandedContent(
         SettingDivider()
 
 
-        // =====================================================
-        // FINGERPRINT
-        // =====================================================
-
         LockSettingSwitchRow(
-
             iconRes =
                 R.drawable.fingerprint,
-
             title =
                 stringResource(
                     R.string.fingerprint_lock
                 ),
-
             subtitle =
                 stringResource(
                     R.string.use_fingerprint_to_unlock
                 ),
-
             checked =
                 fingerprintEnabled,
-
-            onCheckedChange = { enabled ->
+            onCheckedChange = {
 
                 fingerprintEnabled =
-                    enabled
+                    it
 
                 scope.launch {
 
                     dataStore
                         .saveFingerprintEnabled(
-                            enabled
+                            it
                         )
                 }
             }
         )
 
 
-        // =====================================================
-        // UNLOCK
-        // =====================================================
-
         Text(
-
             text =
                 stringResource(
                     R.string.unlock
                 ),
-
             color =
                 Color(0xFF888888),
-
             fontSize =
                 16.sp,
-
             modifier =
                 Modifier.padding(
                     start = 10.dp,
@@ -1208,36 +1319,26 @@ private fun LockSettingExpandedContent(
         )
 
 
-        // =====================================================
-        // VIBRATION
-        // =====================================================
-
         LockSettingSwitchRow(
-
             iconRes =
                 R.drawable.vibration,
-
             title =
                 stringResource(
                     R.string.vibration
                 ),
-
-            subtitle =
-                null,
-
+            subtitle = null,
             checked =
                 vibrationEnabled,
-
-            onCheckedChange = { enabled ->
+            onCheckedChange = {
 
                 vibrationEnabled =
-                    enabled
+                    it
 
                 scope.launch {
 
                     dataStore
                         .saveVibrationEnabled(
-                            enabled
+                            it
                         )
                 }
             }
@@ -1247,38 +1348,29 @@ private fun LockSettingExpandedContent(
         SettingDivider()
 
 
-        // =====================================================
-        // HIDE TRACK
-        // =====================================================
-
         LockSettingSwitchRow(
-
             iconRes =
                 R.drawable.track,
-
             title =
                 stringResource(
                     R.string.hide_track
                 ),
-
             subtitle =
                 stringResource(
                     R.string.hide_track_description
                 ),
-
             checked =
                 hideTrackEnabled,
-
-            onCheckedChange = { enabled ->
+            onCheckedChange = {
 
                 hideTrackEnabled =
-                    enabled
+                    it
 
                 scope.launch {
 
                     dataStore
                         .saveHideTrackEnabled(
-                            enabled
+                            it
                         )
                 }
             }
@@ -1288,29 +1380,17 @@ private fun LockSettingExpandedContent(
         SettingDivider()
 
 
-        // =====================================================
-        // RE-LOCK
-        // =====================================================
-
         LockSettingRow(
-
             iconRes =
                 R.drawable.relock,
-
             title =
                 stringResource(
                     R.string.relock_option
                 ),
-
-            // IMPORTANT:
-            // Ab actual saved option show hogi
-
             subtitle =
                 getRelockText(
-                    relockOption =
-                        relockOption
+                    relockOption
                 ),
-
             onClick =
                 onRelockClick
         )
@@ -1319,25 +1399,17 @@ private fun LockSettingExpandedContent(
         SettingDivider()
 
 
-        // =====================================================
-        // DELAY TO RE-LOCK
-        // =====================================================
-
         LockSettingRow(
-
             iconRes =
                 R.drawable.delay,
-
             title =
                 stringResource(
                     R.string.delay_to_relock
                 ),
-
             subtitle =
                 getDelayText(
                     delayOption
                 ),
-
             onClick =
                 onDelayClick
         )
@@ -1363,19 +1435,16 @@ private fun getRelockText(
     return when (relockOption) {
 
         "relock_after_screen_off" ->
-
             stringResource(
                 R.string.relock_after_screen_off
             )
 
         "relock_after_quitting" ->
-
             stringResource(
                 R.string.relock_after_quitting
             )
 
         else ->
-
             stringResource(
                 R.string.relock_after_quitting
             )
@@ -1438,7 +1507,7 @@ private fun getDelayText(
 
 
 // =============================================================
-// RE-LOCK OPTION DIALOG
+// RE-LOCK DIALOG
 // =============================================================
 
 @Composable
@@ -1452,7 +1521,6 @@ private fun RelockOptionDialog(
     onCancel: () -> Unit,
 
     onConfirm: () -> Unit
-
 ) {
 
     Dialog(
@@ -1597,7 +1665,6 @@ private fun RelockOptionRow(
     selected: Boolean,
 
     onClick: () -> Unit
-
 ) {
 
     Row(
@@ -1659,7 +1726,7 @@ private fun RelockOptionRow(
 
 
 // =============================================================
-// DELAY TO RE-LOCK DIALOG
+// DELAY DIALOG
 // =============================================================
 
 @Composable
@@ -1673,19 +1740,18 @@ private fun DelayToRelockDialog(
     onCancel: () -> Unit,
 
     onConfirm: () -> Unit
-
 ) {
 
-    val delayOptions = listOf(
-
-        "never",
-        "five_seconds",
-        "fifteen_seconds",
-        "thirty_seconds",
-        "one_minute",
-        "two_minutes",
-        "five_minutes"
-    )
+    val delayOptions =
+        listOf(
+            "never",
+            "five_seconds",
+            "fifteen_seconds",
+            "thirty_seconds",
+            "one_minute",
+            "two_minutes",
+            "five_minutes"
+        )
 
 
     Dialog(
@@ -1813,7 +1879,6 @@ private fun DelayOptionRow(
     selected: Boolean,
 
     onClick: () -> Unit
-
 ) {
 
     Row(
@@ -1884,7 +1949,6 @@ private fun DialogButtons(
     onCancel: () -> Unit,
 
     onConfirm: () -> Unit
-
 ) {
 
     Row(
@@ -1971,7 +2035,6 @@ private fun LockSettingRow(
     subtitle: String?,
 
     onClick: () -> Unit
-
 ) {
 
     Row(
@@ -2046,9 +2109,7 @@ private fun LockSettingRow(
             )
 
 
-            if (
-                !subtitle.isNullOrEmpty()
-            ) {
+            if (!subtitle.isNullOrEmpty()) {
 
                 Spacer(
                     modifier =
@@ -2090,7 +2151,6 @@ private fun LockSettingSwitchRow(
 
     onCheckedChange:
         (Boolean) -> Unit
-
 ) {
 
     Row(
@@ -2162,9 +2222,7 @@ private fun LockSettingSwitchRow(
             )
 
 
-            if (
-                !subtitle.isNullOrEmpty()
-            ) {
+            if (!subtitle.isNullOrEmpty()) {
 
                 Spacer(
                     modifier =
@@ -2193,7 +2251,6 @@ private fun LockSettingSwitchRow(
                 checked,
 
             onCheckedChange = {
-
                 onCheckedChange(it)
             },
 

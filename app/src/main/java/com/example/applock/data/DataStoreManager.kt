@@ -1,3 +1,4 @@
+
 package com.example.applock.data
 
 import android.content.Context
@@ -53,17 +54,33 @@ class DataStoreManager(
 
 
         // =====================================================
+        // APP PROTECTION
+        // =====================================================
+
+        val APP_PROTECTION_ENABLED =
+            booleanPreferencesKey(
+                "app_protection_enabled"
+            )
+
+
+        // =====================================================
         // LOCK SETTINGS
         // =====================================================
 
         val FINGERPRINT_ENABLED =
-            booleanPreferencesKey("fingerprint_enabled")
+            booleanPreferencesKey(
+                "fingerprint_enabled"
+            )
 
         val VIBRATION_ENABLED =
-            booleanPreferencesKey("vibration_enabled")
+            booleanPreferencesKey(
+                "vibration_enabled"
+            )
 
         val HIDE_TRACK_ENABLED =
-            booleanPreferencesKey("hide_track_enabled")
+            booleanPreferencesKey(
+                "hide_track_enabled"
+            )
 
 
         // =====================================================
@@ -71,19 +88,29 @@ class DataStoreManager(
         // =====================================================
 
         val INTRUDER_ENABLED =
-            booleanPreferencesKey("intruder_enabled")
+            booleanPreferencesKey(
+                "intruder_enabled"
+            )
 
         val INTRUDER_WRONG_ATTEMPTS =
-            stringPreferencesKey("intruder_wrong_attempts")
+            stringPreferencesKey(
+                "intruder_wrong_attempts"
+            )
 
         val INTRUDER_OBSERVATION_TIME =
-            stringPreferencesKey("intruder_observation_time")
+            stringPreferencesKey(
+                "intruder_observation_time"
+            )
 
         val INTRUDER_PHOTOS =
-            stringSetPreferencesKey("intruder_photos")
+            stringSetPreferencesKey(
+                "intruder_photos"
+            )
 
         val INTRUDER_PHOTO_URIS =
-            stringSetPreferencesKey("intruder_photo_uris")
+            stringSetPreferencesKey(
+                "intruder_photo_uris"
+            )
 
 
         // =====================================================
@@ -91,10 +118,14 @@ class DataStoreManager(
         // =====================================================
 
         val SECURITY_QUESTION =
-            stringPreferencesKey("security_question")
+            stringPreferencesKey(
+                "security_question"
+            )
 
         val SECURITY_ANSWER =
-            stringPreferencesKey("security_answer")
+            stringPreferencesKey(
+                "security_answer"
+            )
 
 
         // =====================================================
@@ -102,7 +133,9 @@ class DataStoreManager(
         // =====================================================
 
         val HIDE_FROM_RECENTS =
-            booleanPreferencesKey("hide_from_recents")
+            booleanPreferencesKey(
+                "hide_from_recents"
+            )
 
 
         // =====================================================
@@ -110,7 +143,9 @@ class DataStoreManager(
         // =====================================================
 
         val LANGUAGE_KEY =
-            stringPreferencesKey("language_key")
+            stringPreferencesKey(
+                "language_key"
+            )
 
 
         // =====================================================
@@ -118,10 +153,14 @@ class DataStoreManager(
         // =====================================================
 
         val RELOCK_OPTION_KEY =
-            stringPreferencesKey("relock_option_key")
+            stringPreferencesKey(
+                "relock_option_key"
+            )
 
         val RELOCK_DELAY_KEY =
-            stringPreferencesKey("relock_delay_key")
+            stringPreferencesKey(
+                "relock_delay_key"
+            )
 
 
         // =====================================================
@@ -129,7 +168,9 @@ class DataStoreManager(
         // =====================================================
 
         val PREMIUM_KEY =
-            booleanPreferencesKey("premium_key")
+            booleanPreferencesKey(
+                "premium_key"
+            )
     }
 
 
@@ -233,16 +274,6 @@ class DataStoreManager(
             }
             .map { preferences ->
 
-                /*
-                 * Agar APP_INITIALIZED_KEY already saved hai,
-                 * to usi ki value use hogi.
-                 *
-                 * Agar APP_INITIALIZED_KEY exist nahi karti,
-                 * to existing PIN ya Pattern check hoga.
-                 *
-                 * Isse purane installed app mein bhi
-                 * StartScreen dobara show nahi hoga.
-                 */
                 preferences[APP_INITIALIZED_KEY]
                     ?: (
                             preferences[PIN_KEY] != null ||
@@ -312,6 +343,42 @@ class DataStoreManager(
 
 
     // =========================================================
+    // APP PROTECTION
+    // =========================================================
+
+    suspend fun saveAppProtectionEnabled(
+        enabled: Boolean
+    ) {
+        context.dataStore.edit {
+            it[APP_PROTECTION_ENABLED] =
+                enabled
+        }
+    }
+
+    fun getAppProtectionEnabled(): Flow<Boolean> {
+        return context.dataStore.data
+            .catch { exception ->
+
+                if (exception is IOException) {
+                    emit(emptyPreferences())
+                } else {
+                    throw exception
+                }
+            }
+            .map {
+                /*
+                 * If the value does not exist yet,
+                 * AppLock protection stays enabled.
+                 *
+                 * This also keeps old installations
+                 * working after this new setting was added.
+                 */
+                it[APP_PROTECTION_ENABLED] ?: true
+            }
+    }
+
+
+    // =========================================================
     // FINGERPRINT
     // =========================================================
 
@@ -319,14 +386,16 @@ class DataStoreManager(
         enabled: Boolean
     ) {
         context.dataStore.edit {
-            it[FINGERPRINT_ENABLED] = enabled
+            it[FINGERPRINT_ENABLED] =
+                enabled
         }
     }
 
     fun getFingerprintEnabled(): Flow<Boolean> {
         return context.dataStore.data
             .map {
-                it[FINGERPRINT_ENABLED] ?: false
+                it[FINGERPRINT_ENABLED]
+                    ?: false
             }
     }
 
@@ -339,14 +408,16 @@ class DataStoreManager(
         enabled: Boolean
     ) {
         context.dataStore.edit {
-            it[VIBRATION_ENABLED] = enabled
+            it[VIBRATION_ENABLED] =
+                enabled
         }
     }
 
     fun getVibrationEnabled(): Flow<Boolean> {
         return context.dataStore.data
             .map {
-                it[VIBRATION_ENABLED] ?: true
+                it[VIBRATION_ENABLED]
+                    ?: false
             }
     }
 
@@ -359,14 +430,16 @@ class DataStoreManager(
         enabled: Boolean
     ) {
         context.dataStore.edit {
-            it[HIDE_TRACK_ENABLED] = enabled
+            it[HIDE_TRACK_ENABLED] =
+                enabled
         }
     }
 
     fun getHideTrackEnabled(): Flow<Boolean> {
         return context.dataStore.data
             .map {
-                it[HIDE_TRACK_ENABLED] ?: false
+                it[HIDE_TRACK_ENABLED]
+                    ?: false
             }
     }
 
@@ -379,14 +452,16 @@ class DataStoreManager(
         enabled: Boolean
     ) {
         context.dataStore.edit {
-            it[INTRUDER_ENABLED] = enabled
+            it[INTRUDER_ENABLED] =
+                enabled
         }
     }
 
     fun getIntruderEnabled(): Flow<Boolean> {
         return context.dataStore.data
             .map {
-                it[INTRUDER_ENABLED] ?: false
+                it[INTRUDER_ENABLED]
+                    ?: false
             }
     }
 
@@ -415,7 +490,8 @@ class DataStoreManager(
 
     suspend fun resetIntruderWrongAttempts() {
         context.dataStore.edit {
-            it[INTRUDER_WRONG_ATTEMPTS] = "0"
+            it[INTRUDER_WRONG_ATTEMPTS] =
+                "0"
         }
     }
 
@@ -461,7 +537,9 @@ class DataStoreManager(
         }
     }
 
-    fun getIntruderPhotosUris(): Flow<Set<String>> {
+    fun getIntruderPhotosUris():
+            Flow<Set<String>> {
+
         return context.dataStore.data
             .map {
                 it[INTRUDER_PHOTO_URIS]
@@ -499,11 +577,14 @@ class DataStoreManager(
         question: String
     ) {
         context.dataStore.edit {
-            it[SECURITY_QUESTION] = question
+            it[SECURITY_QUESTION] =
+                question
         }
     }
 
-    fun getSecurityQuestion(): Flow<String?> {
+    fun getSecurityQuestion():
+            Flow<String?> {
+
         return context.dataStore.data
             .map {
                 it[SECURITY_QUESTION]
@@ -514,11 +595,14 @@ class DataStoreManager(
         answer: String
     ) {
         context.dataStore.edit {
-            it[SECURITY_ANSWER] = answer
+            it[SECURITY_ANSWER] =
+                answer
         }
     }
 
-    fun getSecurityAnswer(): Flow<String?> {
+    fun getSecurityAnswer():
+            Flow<String?> {
+
         return context.dataStore.data
             .map {
                 it[SECURITY_ANSWER]
@@ -534,14 +618,18 @@ class DataStoreManager(
         enabled: Boolean
     ) {
         context.dataStore.edit {
-            it[HIDE_FROM_RECENTS] = enabled
+            it[HIDE_FROM_RECENTS] =
+                enabled
         }
     }
 
-    fun getHideFromRecents(): Flow<Boolean> {
+    fun getHideFromRecents():
+            Flow<Boolean> {
+
         return context.dataStore.data
             .map {
-                it[HIDE_FROM_RECENTS] ?: false
+                it[HIDE_FROM_RECENTS]
+                    ?: false
             }
     }
 
@@ -554,14 +642,16 @@ class DataStoreManager(
         language: String
     ) {
         context.dataStore.edit {
-            it[LANGUAGE_KEY] = language
+            it[LANGUAGE_KEY] =
+                language
         }
     }
 
     fun getLanguage(): Flow<String> {
         return context.dataStore.data
             .map {
-                it[LANGUAGE_KEY] ?: "en"
+                it[LANGUAGE_KEY]
+                    ?: "en"
             }
     }
 
@@ -574,7 +664,8 @@ class DataStoreManager(
         option: String
     ) {
         context.dataStore.edit {
-            it[RELOCK_OPTION_KEY] = option
+            it[RELOCK_OPTION_KEY] =
+                option
         }
     }
 
@@ -595,14 +686,16 @@ class DataStoreManager(
         delay: String
     ) {
         context.dataStore.edit {
-            it[RELOCK_DELAY_KEY] = delay
+            it[RELOCK_DELAY_KEY] =
+                delay
         }
     }
 
     fun getRelockDelay(): Flow<String> {
         return context.dataStore.data
             .map {
-                it[RELOCK_DELAY_KEY] ?: "never"
+                it[RELOCK_DELAY_KEY]
+                    ?: "never"
             }
     }
 
@@ -615,7 +708,8 @@ class DataStoreManager(
         enabled: Boolean
     ) {
         context.dataStore.edit {
-            it[PREMIUM_KEY] = enabled
+            it[PREMIUM_KEY] =
+                enabled
         }
     }
 
@@ -630,7 +724,9 @@ class DataStoreManager(
                 }
             }
             .map {
-                it[PREMIUM_KEY] ?: false
+                it[PREMIUM_KEY]
+                    ?: false
             }
     }
 }
+

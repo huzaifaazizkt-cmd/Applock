@@ -26,6 +26,7 @@ import com.example.applock.Design.screens.StartScreen
 import com.example.applock.Design.screens.WelcomeScreen
 import com.example.applock.data.DataStoreManager
 
+
 @Composable
 fun NavGraph(
     context: Context
@@ -35,101 +36,120 @@ fun NavGraph(
     // APPLICATION CONTEXT
     // =========================================================
 
-    val appContext = remember {
-        context.applicationContext
-    }
+    val appContext =
+        remember {
+            context.applicationContext
+        }
+
 
     // =========================================================
     // DATASTORE
     // =========================================================
 
-    val dataStore = remember {
-        DataStoreManager(appContext)
-    }
+    val dataStore =
+        remember {
+            DataStoreManager(
+                appContext
+            )
+        }
+
 
     // =========================================================
     // APP INITIALIZED
-    //
-    // null  = DataStore load ho raha hai
-    // false = first installation / setup incomplete
-    // true  = setup complete
     // =========================================================
 
     val appInitialized by dataStore
         .getAppInitialized()
-        .collectAsState(initial = null)
+        .collectAsState(
+            initial = null
+        )
+
 
     // =========================================================
     // WAIT FOR DATASTORE
-    //
-    // DataStore ka result aane tak kuch show nahi hoga.
     // =========================================================
 
     if (appInitialized == null) {
         return
     }
 
+
     // =========================================================
     // NAVIGATION CONTROLLER
     // =========================================================
 
-    val navController = rememberNavController()
+    val navController =
+        rememberNavController()
+
 
     // =========================================================
-    // IMPORTANT
-    //
-    // StartScreen HAR BAAR show hoga.
-    //
-    // First install:
-    // StartScreen -> Welcome
-    //
-    // Setup complete:
-    // StartScreen -> AppList
+    // START DESTINATION
     // =========================================================
 
-    val startDestination = "startScreen"
+    val startDestination =
+        "startScreen"
+
 
     // =========================================================
     // NAV HOST
     // =========================================================
 
     NavHost(
-        navController = navController,
-        startDestination = startDestination
+
+        navController =
+            navController,
+
+        startDestination =
+            startDestination
     ) {
+
 
         // =====================================================
         // START SCREEN
         // =====================================================
 
-        composable("startScreen") {
+        composable(
+            "startScreen"
+        ) {
 
             StartScreen(
-                navController = navController,
-                appInitialized = appInitialized == true
+
+                navController =
+                    navController,
+
+                appInitialized =
+                    appInitialized == true
             )
         }
+
 
         // =====================================================
         // WELCOME SCREEN
         // =====================================================
 
-        composable("welcomeScreen") {
+        composable(
+            "welcomeScreen"
+        ) {
 
             WelcomeScreen(
-                navController = navController
+                navController =
+                    navController
             )
         }
+
 
         // =====================================================
         // LANGUAGE SETUP
         // =====================================================
 
-        composable("languagesSetup") {
+        composable(
+            "languagesSetup"
+        ) {
 
             LanguagesScreen(
 
-                onBackClick = null,
+                onBackClick =
+                    null,
 
                 onLanguageSelected = {
 
@@ -140,44 +160,59 @@ fun NavGraph(
                         popUpTo(
                             "languagesSetup"
                         ) {
-                            inclusive = true
+
+                            inclusive =
+                                true
                         }
                     }
                 }
             )
         }
 
+
         // =====================================================
         // ONBOARDING
         // =====================================================
 
-        composable("onboardingScreen") {
+        composable(
+            "onboardingScreen"
+        ) {
 
             OnboardingScreen(
-                navController = navController
+                navController =
+                    navController
             )
         }
+
 
         // =====================================================
         // PREMIUM
         // =====================================================
 
-        composable("premium") {
+        composable(
+            "premium"
+        ) {
 
             PremiumScreen(
-                navController = navController
+                navController =
+                    navController
             )
         }
+
 
         // =====================================================
         // PIN / PATTERN CREATE
         // =====================================================
 
-        composable("create") {
+        composable(
+            "create"
+        ) {
 
             PinCreateScreen(
 
-                onNext = { type, value ->
+                onNext = {
+                        type,
+                        value ->
 
                     when (type) {
 
@@ -199,63 +234,93 @@ fun NavGraph(
             )
         }
 
+
         // =====================================================
         // PIN / PATTERN CONFIRM
         // =====================================================
 
         composable(
-            route = "confirm/{type}/{value}",
 
-            arguments = listOf(
+            route =
+                "confirm/{type}/{value}",
 
-                navArgument("type") {
-                    type = NavType.StringType
-                },
+            arguments =
+                listOf(
 
-                navArgument("value") {
-                    type = NavType.StringType
-                }
-            )
+                    navArgument(
+                        "type"
+                    ) {
+
+                        type =
+                            NavType.StringType
+                    },
+
+                    navArgument(
+                        "value"
+                    ) {
+
+                        type =
+                            NavType.StringType
+                    }
+                )
         ) { backStackEntry ->
 
             val type =
-                backStackEntry.arguments
-                    ?.getString("type")
+                backStackEntry
+                    .arguments
+                    ?.getString(
+                        "type"
+                    )
                     ?: "pin"
 
+
             val value =
-                backStackEntry.arguments
-                    ?.getString("value")
+                backStackEntry
+                    .arguments
+                    ?.getString(
+                        "value"
+                    )
                     ?: ""
+
 
             PinConfirmScreen(
 
-                navController = navController,
+                navController =
+                    navController,
 
-                context = context,
+                context =
+                    context,
 
-                type = type,
+                type =
+                    type,
 
-                value = value
+                value =
+                    value
             )
         }
+
 
         // =====================================================
         // HOME
         // =====================================================
 
-        composable("home") {
+        composable(
+            "home"
+        ) {
 
             HomeScreen(
                 navController
             )
         }
 
+
         // =====================================================
         // APP LIST / MAIN SCREEN
         // =====================================================
 
-        composable("appList") {
+        composable(
+            "appList"
+        ) {
 
             val openSettings =
                 navController
@@ -266,9 +331,16 @@ fun NavGraph(
                     )
                     ?: false
 
+
             MainScreen(
 
-                context = context,
+                context =
+                    context,
+
+
+                // ------------------------------------------------
+                // SETTINGS -> INTRUDER
+                // ------------------------------------------------
 
                 onIntruderClick = {
 
@@ -277,6 +349,11 @@ fun NavGraph(
                     )
                 },
 
+
+                // ------------------------------------------------
+                // SETTINGS -> LANGUAGES
+                // ------------------------------------------------
+
                 onLanguageClick = {
 
                     navController.navigate(
@@ -284,68 +361,83 @@ fun NavGraph(
                     )
                 },
 
-                openSettings = openSettings,
 
-                navController = navController
+                openSettings =
+                    openSettings,
+
+                navController =
+                    navController
             )
         }
+
 
         // =====================================================
         // LANGUAGES
         // =====================================================
 
-        composable("languages") {
+        composable(
+            "languages"
+        ) {
 
             LanguagesScreen(
 
-                onBackClick = {
+                /*
+                 * Language Screen -> Settings
+                 */
 
-                    navController
-                        .previousBackStackEntry
-                        ?.savedStateHandle
-                        ?.set(
-                            "openSettings",
-                            true
-                        )
+                onBackClick = {
 
                     navController.popBackStack()
                 },
 
-                onLanguageSelected = null
+                /*
+                 * Language select karne ke baad
+                 * isi Languages screen par rehna hai.
+                 */
+
+                onLanguageSelected =
+                    null
             )
         }
+
 
         // =====================================================
         // INTRUDER
         // =====================================================
 
-        composable("intruder") {
+        composable(
+            "intruder"
+        ) {
 
             IntruderScreen(
 
-                onBackClick = {
+                /*
+                 * Intruder Screen -> Settings
+                 */
 
-                    navController
-                        .previousBackStackEntry
-                        ?.savedStateHandle
-                        ?.set(
-                            "openSettings",
-                            true
-                        )
+                onBackClick = {
 
                     navController.popBackStack()
                 }
             )
         }
 
+
         // =====================================================
         // EXIT SCREEN
+
+
+
+
         // =====================================================
 
-        composable("exit") {
+        composable(
+            "exit"
+        ) {
 
             ExitScreen(
-                navController = navController
+                navController =
+                    navController
             )
         }
     }

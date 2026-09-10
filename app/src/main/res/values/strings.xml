@@ -233,16 +233,17 @@ with no recurring charges.</string>
 
     <string name="exit_app_lock_title">Exit App Lock?</string>
 
-    <string name="exit_app_lock_description">You will need to enter your passcode
-again to access App Lock.</string>
+    <string name="exit_app_lock_description">You will need to enter your passcode\nagain to access App Lock.</string>
 
-    <string name="exit_rating_description">A Quick rating from you means
-a lot to our team.</string>
+    <string name="exit_rating_description">A Quick rating from you means\na lot to our team.</string>
 
     <string name="exit_stay_protected_description">Stay Protected</string>
     <string name="exit_stay_protected">Stay Protected</string>
 
     <string name="exit_anyway_description">Exit Anyway</string>
     <string name="exit_anyway">Exit Anyway</string>
+
+    <string name="applock">AppLock</string>
+    <string name="enable_app_protection">Enable App Protection</string>
 
 </resources>

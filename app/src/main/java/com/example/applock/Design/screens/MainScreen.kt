@@ -27,7 +27,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -77,21 +76,10 @@ fun MainScreen(
 
     // ====================================================
     // TAB HISTORY
-    //
-    // Example:
-    //
-    // AppList -> Vault -> Settings
-    //
-    // history = [AppList, Vault]
-    //
-    // Back -> Vault
-    //
-    // history = [AppList]
-    //
-    // Back -> AppList
     // ====================================================
 
     val tabHistory = remember {
+
         mutableStateListOf<Int>()
     }
 
@@ -107,7 +95,24 @@ fun MainScreen(
 
 
     // ====================================================
-    // HANDLE OPEN SETTINGS / FORCE APP LIST
+    // PREVIOUS TAB FOR SETTINGS
+    //
+    // 0 = AppList
+    // 1 = Vault
+    // ====================================================
+
+    var settingsPreviousTab by remember {
+
+        mutableIntStateOf(
+            savedStateHandle
+                ?.get<Int>("settingsPreviousTab")
+                ?: 0
+        )
+    }
+
+
+    // ====================================================
+    // HANDLE SPECIAL NAVIGATION
     // ====================================================
 
     LaunchedEffect(
@@ -125,8 +130,9 @@ fun MainScreen(
 
                 selectedTab = 0
 
-                // Clear previous tab history
                 tabHistory.clear()
+
+                settingsPreviousTab = 0
 
                 savedStateHandle?.remove<Boolean>(
                     "forceAppList"
@@ -134,6 +140,11 @@ fun MainScreen(
 
                 savedStateHandle?.remove<Boolean>(
                     "openSettings"
+                )
+
+                savedStateHandle?.set(
+                    "settingsPreviousTab",
+                    0
                 )
             }
 
@@ -146,8 +157,9 @@ fun MainScreen(
 
                 selectedTab = 2
 
-
-                tabHistory.clear()
+                savedStateHandle?.remove<Boolean>(
+                    "openSettings"
+                )
             }
         }
     }
@@ -164,9 +176,43 @@ fun MainScreen(
         }
 
 
-        tabHistory.add(selectedTab)
+        // =================================================
+        // SETTINGS OPEN KARNE SE PEHLE CURRENT TAB SAVE
+        // =================================================
 
-        // New tab open karo.
+        if (tab == 2) {
+
+            /*
+             * Agar current screen AppList ya Vault hai,
+             * to usko Settings ka previous tab bana do.
+             */
+
+            if (selectedTab == 0 || selectedTab == 1) {
+
+                settingsPreviousTab =
+                    selectedTab
+
+                savedStateHandle?.set(
+                    "settingsPreviousTab",
+                    selectedTab
+                )
+            }
+        }
+
+
+        // =================================================
+        // NORMAL TAB HISTORY
+        // =================================================
+
+        tabHistory.add(
+            selectedTab
+        )
+
+
+        // =================================================
+        // NEW TAB
+        // =================================================
+
         selectedTab = tab
     }
 
@@ -174,39 +220,56 @@ fun MainScreen(
     // ====================================================
     // BACK BUTTON
     // ====================================================
-    //
-    // History available:
-    //
-    //     Back -> previous tab
-    //
-    // History empty:
-    //
-    //     AppList -> ExitScreen
-    //
-    // ====================================================
 
     BackHandler {
 
-        if (tabHistory.isNotEmpty()) {
+        when {
 
-            // Last visited tab
-            val previousTab =
-                tabHistory.removeAt(
-                    tabHistory.lastIndex
+            // =================================================
+            // SETTINGS
+            // =================================================
+            //
+            // Settings -> Previous tab
+            //
+            // AppList -> Settings -> Back = AppList
+            //
+            // Vault -> Settings -> Back = Vault
+            // =================================================
+
+            selectedTab == 2 -> {
+
+                selectedTab =
+                    settingsPreviousTab
+
+                tabHistory.clear()
+            }
+
+
+            // =================================================
+            // OTHER TABS WITH HISTORY
+            // =================================================
+
+            tabHistory.isNotEmpty() -> {
+
+                val previousTab =
+                    tabHistory.removeAt(
+                        tabHistory.lastIndex
+                    )
+
+                selectedTab =
+                    previousTab
+            }
+
+
+            // =================================================
+            // APP LIST
+            // =================================================
+
+            selectedTab == 0 -> {
+
+                navController.navigate(
+                    "exit"
                 )
-
-            // Previous tab open karo
-            selectedTab = previousTab
-
-        } else {
-
-            // History empty hai.
-            //
-            // Agar AppList par hain to ExitScreen.
-            //
-            if (selectedTab == 0) {
-
-                navController.navigate("exit")
             }
         }
     }
@@ -238,9 +301,9 @@ fun MainScreen(
 
             when (selectedTab) {
 
-                // ====================================================
+                // =================================================
                 // APP LIST
-                // ====================================================
+                // =================================================
 
                 0 -> {
 
@@ -250,9 +313,9 @@ fun MainScreen(
                 }
 
 
-                // ====================================================
+                // =================================================
                 // VAULT
-                // ====================================================
+                // =================================================
 
                 1 -> {
 
@@ -260,15 +323,19 @@ fun MainScreen(
                 }
 
 
-                // ====================================================
+                // =================================================
                 // SETTINGS
-                // ====================================================
+                // =================================================
 
                 2 -> {
 
                     SettingsScreen(
-                        onIntruderClick = onIntruderClick,
-                        onLanguageClick = onLanguageClick
+
+                        onIntruderClick =
+                            onIntruderClick,
+
+                        onLanguageClick =
+                            onLanguageClick
                     )
                 }
             }
@@ -280,16 +347,21 @@ fun MainScreen(
         // ====================================================
 
         AppLockBottomNavigation(
-            selectedTab = selectedTab,
+
+            selectedTab =
+                selectedTab,
 
             onTabSelected = { tab ->
 
-                selectTab(tab)
+                selectTab(
+                    tab
+                )
             },
 
-            modifier = Modifier.align(
-                Alignment.BottomCenter
-            )
+            modifier =
+                Modifier.align(
+                    Alignment.BottomCenter
+                )
         )
     }
 }
@@ -307,6 +379,7 @@ private fun AppLockBottomNavigation(
 ) {
 
     Row(
+
         modifier = modifier
             .fillMaxWidth()
             .height(74.dp)
@@ -325,23 +398,28 @@ private fun AppLockBottomNavigation(
             Alignment.CenterVertically
     ) {
 
-
         // ====================================================
         // APP LIST
         // ====================================================
 
         BottomNavigationItem(
-            selected = selectedTab == 0,
 
-            icon = R.drawable.group6,
+            selected =
+                selectedTab == 0,
 
-            text = stringResource(
-                R.string.apps_lock
-            ),
+            icon =
+                R.drawable.group6,
+
+            text =
+                stringResource(
+                    R.string.apps_lock
+                ),
 
             onClick = {
 
-                onTabSelected(0)
+                onTabSelected(
+                    0
+                )
             }
         )
 
@@ -351,17 +429,23 @@ private fun AppLockBottomNavigation(
         // ====================================================
 
         BottomNavigationItem(
-            selected = selectedTab == 1,
 
-            icon = R.drawable.group8,
+            selected =
+                selectedTab == 1,
 
-            text = stringResource(
-                R.string.vault
-            ),
+            icon =
+                R.drawable.group8,
+
+            text =
+                stringResource(
+                    R.string.vault
+                ),
 
             onClick = {
 
-                onTabSelected(1)
+                onTabSelected(
+                    1
+                )
             }
         )
 
@@ -371,17 +455,23 @@ private fun AppLockBottomNavigation(
         // ====================================================
 
         BottomNavigationItem(
-            selected = selectedTab == 2,
 
-            icon = R.drawable.group7,
+            selected =
+                selectedTab == 2,
 
-            text = stringResource(
-                R.string.settings
-            ),
+            icon =
+                R.drawable.group7,
+
+            text =
+                stringResource(
+                    R.string.settings
+                ),
 
             onClick = {
 
-                onTabSelected(2)
+                onTabSelected(
+                    2
+                )
             }
         )
     }
@@ -408,44 +498,59 @@ private fun BottomNavigationItem(
 
 
     Box(
+
         modifier = Modifier
             .height(38.dp)
 
             .clickable(
-                indication = null,
-                interactionSource = remember {
-                    MutableInteractionSource()
-                }
+
+                indication =
+                    null,
+
+                interactionSource =
+                    remember {
+                        MutableInteractionSource()
+                    }
+
             ) {
+
                 onClick()
             }
 
             .background(
-                color = if (selected) {
-                    blueColor
-                } else {
-                    Color.Transparent
-                },
-                shape = RoundedCornerShape(22.dp)
+
+                color =
+                    if (selected) {
+                        blueColor
+                    } else {
+                        Color.Transparent
+                    },
+
+                shape =
+                    RoundedCornerShape(
+                        22.dp
+                    )
             )
 
             .padding(
-                horizontal = if (selected) {
-                    12.dp
-                } else {
-                    5.dp
-                }
+
+                horizontal =
+                    if (selected) {
+                        12.dp
+                    } else {
+                        5.dp
+                    }
             ),
 
-        contentAlignment = Alignment.Center
+        contentAlignment =
+            Alignment.Center
     ) {
 
-
         Row(
+
             verticalAlignment =
                 Alignment.CenterVertically
         ) {
-
 
             // =================================================
             // ICON
@@ -453,11 +558,13 @@ private fun BottomNavigationItem(
 
             Image(
 
-                painter = painterResource(
-                    id = icon
-                ),
+                painter =
+                    painterResource(
+                        id = icon
+                    ),
 
-                contentDescription = text,
+                contentDescription =
+                    text,
 
                 colorFilter =
                     ColorFilter.tint(
@@ -469,17 +576,17 @@ private fun BottomNavigationItem(
                         }
                     ),
 
-                modifier = Modifier
-                    .size(22.dp)
+                modifier =
+                    Modifier
+                        .size(22.dp)
+                        .alpha(
 
-                    .alpha(
-
-                        if (selected) {
-                            1f
-                        } else {
-                            0.9f
-                        }
-                    )
+                            if (selected) {
+                                1f
+                            } else {
+                                0.9f
+                            }
+                        )
             )
 
 
@@ -488,9 +595,10 @@ private fun BottomNavigationItem(
             // =================================================
 
             Spacer(
-                modifier = Modifier.width(
-                    5.dp
-                )
+                modifier =
+                    Modifier.width(
+                        5.dp
+                    )
             )
 
 
@@ -500,15 +608,18 @@ private fun BottomNavigationItem(
 
             Text(
 
-                text = text,
+                text =
+                    text,
 
-                color = if (selected) {
-                    Color.White
-                } else {
-                    grayColor
-                },
+                color =
+                    if (selected) {
+                        Color.White
+                    } else {
+                        grayColor
+                    },
 
-                fontSize = 12.sp
+                fontSize =
+                    12.sp
             )
         }
     }
