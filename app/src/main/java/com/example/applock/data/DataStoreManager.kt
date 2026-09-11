@@ -1,4 +1,3 @@
-
 package com.example.applock.data
 
 import android.content.Context
@@ -97,6 +96,18 @@ class DataStoreManager(
                 "intruder_wrong_attempts"
             )
 
+        // Number of wrong attempts required
+        // 0 = Never
+        // 3 = 3 attempts
+        // 5 = 5 attempts
+        // 10 = 10 attempts
+        val INTRUDER_OBSERVATION_ATTEMPTS =
+            stringPreferencesKey(
+                "intruder_observation_attempts"
+            )
+
+        // Delay before taking photo
+        // Default = 5 seconds
         val INTRUDER_OBSERVATION_TIME =
             stringPreferencesKey(
                 "intruder_observation_time"
@@ -366,14 +377,9 @@ class DataStoreManager(
                 }
             }
             .map {
-                /*
-                 * If the value does not exist yet,
-                 * AppLock protection stays enabled.
-                 *
-                 * This also keeps old installations
-                 * working after this new setting was added.
-                 */
-                it[APP_PROTECTION_ENABLED] ?: true
+
+                it[APP_PROTECTION_ENABLED]
+                    ?: true
             }
     }
 
@@ -493,6 +499,29 @@ class DataStoreManager(
             it[INTRUDER_WRONG_ATTEMPTS] =
                 "0"
         }
+    }
+
+
+    // =========================================================
+    // INTRUDER OBSERVATION ATTEMPTS
+    // =========================================================
+
+    suspend fun saveIntruderObservationAttempts(
+        attempts: Int
+    ) {
+        context.dataStore.edit {
+            it[INTRUDER_OBSERVATION_ATTEMPTS] =
+                attempts.toString()
+        }
+    }
+
+    fun getIntruderObservationAttempts(): Flow<Int> {
+        return context.dataStore.data
+            .map {
+                it[INTRUDER_OBSERVATION_ATTEMPTS]
+                    ?.toIntOrNull()
+                    ?: 3
+            }
     }
 
 
@@ -729,4 +758,3 @@ class DataStoreManager(
             }
     }
 }
-

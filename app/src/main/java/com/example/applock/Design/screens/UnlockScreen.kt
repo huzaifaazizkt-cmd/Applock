@@ -47,17 +47,12 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlin.math.sqrt
 
-
 @Composable
 fun UnlockScreen(
     onUnlockSuccess: () -> Unit,
     onIntruderCapture: (Long) -> Unit = {},
     onFingerprintRequest: () -> Unit = {}
 ) {
-
-    // =========================================================
-    // CONTEXT
-    // =========================================================
 
     val context =
         LocalContext.current
@@ -70,11 +65,6 @@ fun UnlockScreen(
     val scope =
         rememberCoroutineScope()
 
-
-    // =========================================================
-    // STRING RESOURCES
-    // =========================================================
-
     val patternNotMatchText =
         stringResource(
             R.string.pattern_not_match
@@ -84,11 +74,6 @@ fun UnlockScreen(
         stringResource(
             R.string.enter_correct_password
         )
-
-
-    // =========================================================
-    // STATES
-    // =========================================================
 
     var authType by remember {
         mutableStateOf("pin")
@@ -134,10 +119,9 @@ fun UnlockScreen(
         mutableStateOf(false)
     }
 
-
-    // =========================================================
-    // LOAD SAVED AUTH + SETTINGS
-    // =========================================================
+    var intruderObservationAttempts by remember {
+        mutableStateOf(3)
+    }
 
     LaunchedEffect(Unit) {
 
@@ -175,10 +159,10 @@ fun UnlockScreen(
                 .getHideTrackEnabled()
                 .first()
 
-
-        // =====================================================
-        // AUTOMATIC FINGERPRINT
-        // =====================================================
+        intruderObservationAttempts =
+            dataStore
+                .getIntruderObservationAttempts()
+                .first()
 
         if (
             fingerprintEnabled
@@ -189,11 +173,6 @@ fun UnlockScreen(
             onFingerprintRequest()
         }
     }
-
-
-    // =========================================================
-    // COLORS
-    // =========================================================
 
     val backgroundColor =
         Color(0xFF29A0F0)
@@ -207,20 +186,11 @@ fun UnlockScreen(
     val errorColor =
         Color.Red
 
-
-    // =========================================================
-    // REGISTER WRONG ATTEMPT
-    // =========================================================
-
     fun registerWrongAttempt() {
 
         scope.launch {
 
             try {
-
-                // =================================================
-                // CHECK INTRUDER ENABLED
-                // =================================================
 
                 val enabled =
                     dataStore
@@ -228,151 +198,117 @@ fun UnlockScreen(
                         .first()
 
                 if (!enabled) {
-
                     return@launch
                 }
 
+                val selectedAttempts =
+                    dataStore
+                        .getIntruderObservationAttempts()
+                        .first()
 
-                // =================================================
-                // GET CURRENT WRONG ATTEMPTS
-                // =================================================
+                intruderObservationAttempts =
+                    selectedAttempts
+
+                android.util.Log.d(
+                    "INTRUDER_DEBUG",
+                    "SELECTED ATTEMPTS = $selectedAttempts"
+                )
+
+                if (
+                    selectedAttempts <= 0
+                ) {
+
+                    dataStore
+                        .resetIntruderWrongAttempts()
+
+                    android.util.Log.d(
+                        "INTRUDER_DEBUG",
+                        "INTRUDER CAPTURE DISABLED - NEVER"
+                    )
+
+                    return@launch
+                }
 
                 val currentAttempts =
                     dataStore
                         .getIntruderWrongAttempts()
                         .first()
 
-
                 val newAttempts =
                     currentAttempts + 1
 
+                android.util.Log.d(
+                    "INTRUDER_DEBUG",
+                    "WRONG ATTEMPT = $newAttempts / $selectedAttempts"
+                )
+
+                dataStore
+                    .saveIntruderWrongAttempts(
+                        newAttempts
+                    )
+
+                if (
+                    newAttempts < selectedAttempts
+                ) {
+
+                    return@launch
+                }
+
+                dataStore
+                    .resetIntruderWrongAttempts()
+
+                val observationTime =
+                    dataStore
+                        .getIntruderObservationTime()
+                        .first()
 
                 android.util.Log.d(
                     "INTRUDER_DEBUG",
-                    "WRONG ATTEMPT = $newAttempts / 3"
+                    "OBSERVATION TIME = $observationTime seconds"
                 )
 
+                val delayMillis =
+                    observationTime
+                        .toLong()
+                        .coerceAtLeast(0L) * 1_000L
 
-                // =================================================
-                // 3 WRONG ATTEMPTS
-                // =================================================
+                android.util.Log.d(
+                    "INTRUDER_DEBUG",
+                    "CAPTURE DELAY = $delayMillis ms"
+                )
 
                 if (
-                    newAttempts >= 3
+                    delayMillis > 0L
                 ) {
 
-                    // -------------------------------------------------
-                    // RESET COUNTER
-                    // -------------------------------------------------
-
-                    dataStore
-                        .resetIntruderWrongAttempts()
-
-
-                    // -------------------------------------------------
-                    // GET OBSERVATION TIME
-                    // -------------------------------------------------
-
-                    val observationTime =
-                        dataStore
-                            .getIntruderObservationTime()
-                            .first()
-
-
-                    android.util.Log.d(
-                        "INTRUDER_DEBUG",
-                        "OBSERVATION TIME = $observationTime"
+                    delay(
+                        delayMillis
                     )
-
-
-                    // =================================================
-                    // OBSERVATION TIME
-                    //
-                    // 0  = Immediately
-                    // 5  = 5 seconds
-                    // 15 = 15 seconds
-                    // 30 = 30 seconds
-                    // -1 = Never
-                    // =================================================
-
-                    val delayMillis =
-                        when (
-                            observationTime
-                        ) {
-
-                            // Immediately
-                            0 ->
-                                0L
-
-
-                            // 5 seconds
-                            5 ->
-                                5_000L
-
-
-                            // 15 seconds
-                            15 ->
-                                15_000L
-
-
-                            // 30 seconds
-                            30 ->
-                                30_000L
-
-
-                            // Never
-                            -1 ->
-                                return@launch
-
-
-                            // Other values are treated
-                            // as seconds
-                            else ->
-                                observationTime
-                                    .coerceAtLeast(0)
-                                    .toLong() * 1_000L
-                        }
-
-
-                    android.util.Log.d(
-                        "INTRUDER_DEBUG",
-                        "CAPTURE DELAY = $delayMillis ms"
-                    )
-
-
-                    // =================================================
-                    // WAIT
-                    // =================================================
-
-                    if (
-                        delayMillis > 0L
-                    ) {
-
-                        delay(
-                            delayMillis
-                        )
-                    }
-
-
-                    // =================================================
-                    // CAPTURE INTRUDER PHOTO
-                    // =================================================
-
-                    onIntruderCapture(
-                        System.currentTimeMillis()
-                    )
-
-                } else {
-
-                    // =================================================
-                    // SAVE WRONG ATTEMPT
-                    // =================================================
-
-                    dataStore
-                        .saveIntruderWrongAttempts(
-                            newAttempts
-                        )
                 }
+
+                val stillEnabled =
+                    dataStore
+                        .getIntruderEnabled()
+                        .first()
+
+                if (!stillEnabled) {
+
+                    android.util.Log.d(
+                        "INTRUDER_DEBUG",
+                        "INTRUDER TURNED OFF BEFORE CAPTURE"
+                    )
+
+                    return@launch
+                }
+
+                android.util.Log.d(
+                    "INTRUDER_DEBUG",
+                    "STARTING INTRUDER CAPTURE"
+                )
+
+                onIntruderCapture(
+                    System.currentTimeMillis()
+                )
 
             } catch (
                 e: Exception
@@ -386,11 +322,6 @@ fun UnlockScreen(
             }
         }
     }
-
-
-    // =========================================================
-    // SHOW PATTERN ERROR
-    // =========================================================
 
     fun showPatternError() {
 
@@ -425,11 +356,6 @@ fun UnlockScreen(
             }
     }
 
-
-    // =========================================================
-    // CHECK PIN
-    // =========================================================
-
     fun checkPin(
         pin: String
     ) {
@@ -444,11 +370,6 @@ fun UnlockScreen(
 
             enteredPin =
                 ""
-
-
-            // =====================================================
-            // RESET WRONG ATTEMPTS AFTER SUCCESS
-            // =====================================================
 
             scope.launch {
 
@@ -469,7 +390,6 @@ fun UnlockScreen(
                 }
             }
 
-
             onUnlockSuccess()
 
         } else {
@@ -483,11 +403,6 @@ fun UnlockScreen(
                 ""
         }
     }
-
-
-    // =========================================================
-    // ROOT
-    // =========================================================
 
     Box(
         modifier =
@@ -541,16 +456,10 @@ fun UnlockScreen(
                     FontWeight.Normal
             )
 
-
             Spacer(
                 modifier =
                     Modifier.height(15.dp)
             )
-
-
-            // =================================================
-            // PIN
-            // =================================================
 
             if (
                 authType ==
@@ -569,7 +478,6 @@ fun UnlockScreen(
                         6
                     }
 
-
                 Text(
                     text =
                         stringResource(
@@ -584,12 +492,10 @@ fun UnlockScreen(
                         16.sp
                 )
 
-
                 Spacer(
                     modifier =
                         Modifier.height(18.dp)
                 )
-
 
                 Row(
                     horizontalArrangement =
@@ -629,12 +535,10 @@ fun UnlockScreen(
                     }
                 }
 
-
                 Spacer(
                     modifier =
                         Modifier.height(25.dp)
                 )
-
 
                 if (
                     error.isNotEmpty()
@@ -652,12 +556,10 @@ fun UnlockScreen(
                     )
                 }
 
-
                 Spacer(
                     modifier =
                         Modifier.height(35.dp)
                 )
-
 
                 NumberPad(
 
@@ -678,7 +580,6 @@ fun UnlockScreen(
 
                             error =
                                 ""
-
 
                             if (
                                 newPin.length ==
@@ -711,14 +612,8 @@ fun UnlockScreen(
                     buttonColor =
                         numberButtonColor
                 )
-            }
 
-
-            // =================================================
-            // PATTERN
-            // =================================================
-
-            else {
+            } else {
 
                 Box(
                     modifier =
@@ -748,7 +643,6 @@ fun UnlockScreen(
                     }
                 }
 
-
                 UnlockPatternGrid(
 
                     selectedDots =
@@ -769,7 +663,6 @@ fun UnlockScreen(
                         enteredPattern =
                             dots
 
-
                         if (
                             patternError
                         ) {
@@ -787,7 +680,6 @@ fun UnlockScreen(
                         }
                     },
 
-
                     onPatternFinished = {
                             pattern ->
 
@@ -798,7 +690,6 @@ fun UnlockScreen(
                                     it.toIntOrNull()
                                 }
 
-
                         if (
                             pattern !=
                             originalPattern
@@ -808,7 +699,6 @@ fun UnlockScreen(
 
                             return@UnlockPatternGrid
                         }
-
 
                         clearErrorJob?.cancel()
 
@@ -823,11 +713,6 @@ fun UnlockScreen(
 
                         enteredPattern =
                             emptyList()
-
-
-                        // =================================================
-                        // RESET WRONG ATTEMPTS AFTER SUCCESS
-                        // =================================================
 
                         scope.launch {
 
@@ -848,10 +733,8 @@ fun UnlockScreen(
                             }
                         }
 
-
                         onUnlockSuccess()
                     },
-
 
                     dotColor =
                         patternDotColor,
@@ -866,11 +749,6 @@ fun UnlockScreen(
         }
     }
 }
-
-
-// =============================================================
-// PATTERN GRID
-// =============================================================
 
 @Composable
 private fun UnlockPatternGrid(
@@ -907,7 +785,6 @@ private fun UnlockPatternGrid(
     val context =
         LocalContext.current
 
-
     val latestOnPatternChanged by
     rememberUpdatedState(
         onPatternChanged
@@ -917,7 +794,6 @@ private fun UnlockPatternGrid(
     rememberUpdatedState(
         onPatternFinished
     )
-
 
     Box(
         modifier =
@@ -933,11 +809,6 @@ private fun UnlockPatternGrid(
                     var patternFinished =
                         false
 
-
-                    // =================================================
-                    // VIBRATION
-                    // =================================================
-
                     fun vibrate() {
 
                         if (
@@ -946,7 +817,6 @@ private fun UnlockPatternGrid(
 
                             return
                         }
-
 
                         try {
 
@@ -959,7 +829,6 @@ private fun UnlockPatternGrid(
                                     context.getSystemService(
                                         Context.VIBRATOR_MANAGER_SERVICE
                                     ) as VibratorManager
-
 
                                 vibratorManager
                                     .defaultVibrator
@@ -981,7 +850,6 @@ private fun UnlockPatternGrid(
                                     context.getSystemService(
                                         Context.VIBRATOR_SERVICE
                                     ) as Vibrator
-
 
                                 if (
                                     Build.VERSION.SDK_INT >=
@@ -1020,16 +888,7 @@ private fun UnlockPatternGrid(
                         }
                     }
 
-
-                    // =================================================
-                    // DRAG GESTURES
-                    // =================================================
-
                     detectDragGestures(
-
-                        // =================================================
-                        // DRAG START
-                        // =================================================
 
                         onDragStart = {
                                 offset ->
@@ -1039,7 +898,6 @@ private fun UnlockPatternGrid(
 
                             patternFinished =
                                 false
-
 
                             val dot =
                                 findUnlockDot(
@@ -1053,7 +911,6 @@ private fun UnlockPatternGrid(
                                     height =
                                         size.height.toFloat()
                                 )
-
 
                             if (
                                 dot != null
@@ -1071,17 +928,11 @@ private fun UnlockPatternGrid(
                             }
                         },
 
-
-                        // =================================================
-                        // DRAG
-                        // =================================================
-
                         onDrag = {
                                 change,
                                 _ ->
 
                             change.consume()
-
 
                             val dot =
                                 findUnlockDot(
@@ -1095,7 +946,6 @@ private fun UnlockPatternGrid(
                                     height =
                                         size.height.toFloat()
                                 )
-
 
                             if (
                                 dot != null &&
@@ -1116,11 +966,6 @@ private fun UnlockPatternGrid(
                             }
                         },
 
-
-                        // =================================================
-                        // DRAG END
-                        // =================================================
-
                         onDragEnd = {
 
                             if (
@@ -1130,10 +975,8 @@ private fun UnlockPatternGrid(
                                 patternFinished =
                                     true
 
-
                                 val finalPattern =
                                     currentDots.toList()
-
 
                                 if (
                                     finalPattern.isNotEmpty()
@@ -1146,11 +989,6 @@ private fun UnlockPatternGrid(
                             }
                         },
 
-
-                        // =================================================
-                        // DRAG CANCEL
-                        // =================================================
-
                         onDragCancel = {
 
                             if (
@@ -1160,10 +998,8 @@ private fun UnlockPatternGrid(
                                 patternFinished =
                                     true
 
-
                                 val finalPattern =
                                     currentDots.toList()
-
 
                                 if (
                                     finalPattern.isNotEmpty()
@@ -1192,11 +1028,6 @@ private fun UnlockPatternGrid(
                     height =
                         size.height
                 )
-
-
-            // =====================================================
-            // TRACK / LINES
-            // =====================================================
 
             if (
                 !hideTrack &&
@@ -1238,11 +1069,6 @@ private fun UnlockPatternGrid(
                 }
             }
 
-
-            // =====================================================
-            // DOTS
-            // =====================================================
-
             positions.forEachIndexed {
                     index,
                     position ->
@@ -1252,8 +1078,6 @@ private fun UnlockPatternGrid(
                         index
                     )
 
-
-                // Outer circle
                 drawCircle(
 
                     color =
@@ -1266,8 +1090,6 @@ private fun UnlockPatternGrid(
                         position
                 )
 
-
-                // Inner background
                 drawCircle(
 
                     color =
@@ -1280,8 +1102,6 @@ private fun UnlockPatternGrid(
                         position
                 )
 
-
-                // Selected dot
                 drawCircle(
 
                     color =
@@ -1312,11 +1132,6 @@ private fun UnlockPatternGrid(
     }
 }
 
-
-// =============================================================
-// POSITIONS
-// =============================================================
-
 private fun getUnlockPositions(
     width: Float,
     height: Float
@@ -1331,7 +1146,6 @@ private fun getUnlockPositions(
     val x3 =
         width * 0.8333f
 
-
     val y1 =
         height * 0.1667f
 
@@ -1340,7 +1154,6 @@ private fun getUnlockPositions(
 
     val y3 =
         height * 0.8333f
-
 
     return listOf(
 
@@ -1391,11 +1204,6 @@ private fun getUnlockPositions(
     )
 }
 
-
-// =============================================================
-// FIND DOT
-// =============================================================
-
 private fun findUnlockDot(
     touch: Offset,
     width: Float,
@@ -1410,7 +1218,6 @@ private fun findUnlockDot(
             height =
                 height
         )
-
 
     positions.forEachIndexed {
             index,
@@ -1428,7 +1235,6 @@ private fun findUnlockDot(
                         dy * dy
             )
 
-
         if (
             distance <= 55f
         ) {
@@ -1436,7 +1242,6 @@ private fun findUnlockDot(
             return index
         }
     }
-
 
     return null
 }

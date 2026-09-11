@@ -28,13 +28,13 @@
     <string name="intruder_photo_preview">Intruder photo preview</string>
 
     <!-- Observation Time -->
-    <string name="set_observation_time">Set Observation Time</string>
+    <string name="set_observation_time">Set Observation Attempts</string>
     <string name="failed_to_unblock">Number of times failed to unblocked</string>
     <string name="immediately">Immediately</string>
     <string name="never">Never</string>
-    <string name="five_seconds">5 Seconds</string>
-    <string name="fifteen_seconds">15 Seconds</string>
-    <string name="thirty_seconds">30 Seconds</string>
+    <string name="five_seconds">3 Attempts</string>
+    <string name="fifteen_seconds">5 Attempts</string>
+    <string name="thirty_seconds">10 Attempts</string>
     <string name="cancel">Cancel</string>
     <string name="confirm">Confirm</string>
 

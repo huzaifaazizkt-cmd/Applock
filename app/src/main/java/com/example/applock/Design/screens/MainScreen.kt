@@ -22,7 +22,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -37,21 +36,24 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.applock.R
 
+
 @Composable
 fun MainScreen(
     context: Context,
     onIntruderClick: () -> Unit,
     onLanguageClick: () -> Unit,
+    onResetPasswordClick: () -> Unit,
     openSettings: Boolean = false,
     navController: NavController
 ) {
 
     // ====================================================
-    // SAVED STATE
+    // SAVED STATE HANDLE
     // ====================================================
 
     val savedStateHandle =
-        navController.currentBackStackEntry?.savedStateHandle
+        navController.currentBackStackEntry
+            ?.savedStateHandle
 
 
     // ====================================================
@@ -75,26 +77,6 @@ fun MainScreen(
 
 
     // ====================================================
-    // TAB HISTORY
-    // ====================================================
-
-    val tabHistory = remember {
-
-        mutableStateListOf<Int>()
-    }
-
-
-    // ====================================================
-    // FORCE APP LIST
-    // ====================================================
-
-    val forceAppList =
-        savedStateHandle
-            ?.get<Boolean>("forceAppList")
-            ?: false
-
-
-    // ====================================================
     // PREVIOUS TAB FOR SETTINGS
     //
     // 0 = AppList
@@ -105,34 +87,66 @@ fun MainScreen(
 
         mutableIntStateOf(
             savedStateHandle
-                ?.get<Int>("settingsPreviousTab")
+                ?.get<Int>(
+                    "settingsPreviousTab"
+                )
                 ?: 0
         )
     }
 
 
     // ====================================================
-    // HANDLE SPECIAL NAVIGATION
+    // FORCE APP LIST
+    // ====================================================
+
+    val forceAppList =
+        savedStateHandle
+            ?.get<Boolean>(
+                "forceAppList"
+            )
+            ?: false
+
+
+    // ====================================================
+    // RETURN TO SETTINGS
+    // ====================================================
+
+    val returnToSettings =
+        savedStateHandle
+            ?.get<Boolean>(
+                "returnToSettings"
+            )
+            ?: false
+
+
+    // ====================================================
+    // HANDLE NAVIGATION STATE
     // ====================================================
 
     LaunchedEffect(
         openSettings,
-        forceAppList
+        forceAppList,
+        returnToSettings
     ) {
 
         when {
 
-            // ------------------------------------------------
+            // =================================================
             // FORCE APP LIST
-            // ------------------------------------------------
+            // =================================================
 
             forceAppList -> {
 
-                selectedTab = 0
+                selectedTab =
+                    0
 
-                tabHistory.clear()
+                settingsPreviousTab =
+                    0
 
-                settingsPreviousTab = 0
+                savedStateHandle?.set(
+                    "settingsPreviousTab",
+                    0
+                )
 
                 savedStateHandle?.remove<Boolean>(
                     "forceAppList"
@@ -142,20 +156,38 @@ fun MainScreen(
                     "openSettings"
                 )
 
-                savedStateHandle?.set(
-                    "settingsPreviousTab",
-                    0
+                savedStateHandle?.remove<Boolean>(
+                    "returnToSettings"
                 )
             }
 
 
-            // ------------------------------------------------
+            // =================================================
+            // RETURN TO SETTINGS
+            //
+            // Language -> Settings
+            // Intruder -> Settings
+            // =================================================
+
+            returnToSettings -> {
+
+                selectedTab =
+                    2
+
+                savedStateHandle?.remove<Boolean>(
+                    "returnToSettings"
+                )
+            }
+
+
+            // =================================================
             // OPEN SETTINGS
-            // ------------------------------------------------
+            // =================================================
 
             openSettings -> {
 
-                selectedTab = 2
+                selectedTab =
+                    2
 
                 savedStateHandle?.remove<Boolean>(
                     "openSettings"
@@ -169,25 +201,30 @@ fun MainScreen(
     // TAB SELECTION
     // ====================================================
 
-    fun selectTab(tab: Int) {
+    fun selectTab(
+        tab: Int
+    ) {
 
-        if (tab == selectedTab) {
+        if (
+            tab ==
+            selectedTab
+        ) {
             return
         }
 
 
         // =================================================
-        // SETTINGS OPEN KARNE SE PEHLE CURRENT TAB SAVE
+        // SAVE CURRENT TAB BEFORE SETTINGS
         // =================================================
 
-        if (tab == 2) {
+        if (
+            tab == 2
+        ) {
 
-            /*
-             * Agar current screen AppList ya Vault hai,
-             * to usko Settings ka previous tab bana do.
-             */
-
-            if (selectedTab == 0 || selectedTab == 1) {
+            if (
+                selectedTab == 0 ||
+                selectedTab == 1
+            ) {
 
                 settingsPreviousTab =
                     selectedTab
@@ -200,20 +237,8 @@ fun MainScreen(
         }
 
 
-        // =================================================
-        // NORMAL TAB HISTORY
-        // =================================================
-
-        tabHistory.add(
-            selectedTab
-        )
-
-
-        // =================================================
-        // NEW TAB
-        // =================================================
-
-        selectedTab = tab
+        selectedTab =
+            tab
     }
 
 
@@ -227,9 +252,6 @@ fun MainScreen(
 
             // =================================================
             // SETTINGS
-            // =================================================
-            //
-            // Settings -> Previous tab
             //
             // AppList -> Settings -> Back = AppList
             //
@@ -238,31 +260,50 @@ fun MainScreen(
 
             selectedTab == 2 -> {
 
-                selectedTab =
-                    settingsPreviousTab
+                val previousTab =
+                    savedStateHandle
+                        ?.get<Int>(
+                            "settingsPreviousTab"
+                        )
+                        ?: settingsPreviousTab
 
-                tabHistory.clear()
+
+                selectedTab =
+                    if (
+                        previousTab == 1
+                    ) {
+
+                        1
+
+                    } else {
+
+                        0
+                    }
             }
 
 
             // =================================================
-            // OTHER TABS WITH HISTORY
+            // VAULT
+            //
+            // Vault -> Back = AppList
             // =================================================
 
-            tabHistory.isNotEmpty() -> {
-
-                val previousTab =
-                    tabHistory.removeAt(
-                        tabHistory.lastIndex
-                    )
+            selectedTab == 1 -> {
 
                 selectedTab =
-                    previousTab
+                    0
+
+                savedStateHandle?.set(
+                    "settingsPreviousTab",
+                    0
+                )
             }
 
 
             // =================================================
             // APP LIST
+            //
+            // AppList -> Back = Exit
             // =================================================
 
             selectedTab == 0 -> {
@@ -280,26 +321,33 @@ fun MainScreen(
     // ====================================================
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Color.White
-            )
+
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(
+                    Color.White
+                )
     ) {
+
 
         // ====================================================
         // CONTENT
         // ====================================================
 
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(
-                    bottom = 74.dp
-                )
+
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(
+                        bottom = 74.dp
+                    )
         ) {
 
-            when (selectedTab) {
+            when (
+                selectedTab
+            ) {
 
                 // =================================================
                 // APP LIST
@@ -331,11 +379,18 @@ fun MainScreen(
 
                     SettingsScreen(
 
-                        onIntruderClick =
-                            onIntruderClick,
+                        onIntruderClick = {
 
-                        onLanguageClick =
-                            onLanguageClick
+                            onIntruderClick()
+                        },
+
+                        onLanguageClick = {
+
+                            onLanguageClick()
+                        },
+
+                        onResetPasswordClick =
+                            onResetPasswordClick
                     )
                 }
             }
@@ -373,23 +428,30 @@ fun MainScreen(
 
 @Composable
 private fun AppLockBottomNavigation(
+
     selectedTab: Int,
-    onTabSelected: (Int) -> Unit,
-    modifier: Modifier = Modifier
+
+    onTabSelected:
+        (Int) -> Unit,
+
+    modifier: Modifier =
+        Modifier
+
 ) {
 
     Row(
 
-        modifier = modifier
-            .fillMaxWidth()
-            .height(74.dp)
-            .background(
-                Color.White
-            )
-            .padding(
-                horizontal = 28.dp,
-                vertical = 10.dp
-            ),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .height(74.dp)
+                .background(
+                    Color.White
+                )
+                .padding(
+                    horizontal = 28.dp,
+                    vertical = 10.dp
+                ),
 
         horizontalArrangement =
             Arrangement.SpaceBetween,
@@ -397,6 +459,7 @@ private fun AppLockBottomNavigation(
         verticalAlignment =
             Alignment.CenterVertically
     ) {
+
 
         // ====================================================
         // APP LIST
@@ -484,10 +547,15 @@ private fun AppLockBottomNavigation(
 
 @Composable
 private fun BottomNavigationItem(
+
     selected: Boolean,
+
     icon: Int,
+
     text: String,
+
     onClick: () -> Unit
+
 ) {
 
     val blueColor =
@@ -499,48 +567,54 @@ private fun BottomNavigationItem(
 
     Box(
 
-        modifier = Modifier
-            .height(38.dp)
+        modifier =
+            Modifier
+                .height(38.dp)
+                .clickable(
 
-            .clickable(
+                    indication =
+                        null,
 
-                indication =
-                    null,
+                    interactionSource =
+                        remember {
+                            MutableInteractionSource()
+                        }
 
-                interactionSource =
-                    remember {
-                        MutableInteractionSource()
-                    }
+                ) {
 
-            ) {
+                    onClick()
+                }
 
-                onClick()
-            }
+                .background(
 
-            .background(
+                    color =
+                        if (selected) {
 
-                color =
-                    if (selected) {
-                        blueColor
-                    } else {
-                        Color.Transparent
-                    },
+                            blueColor
 
-                shape =
-                    RoundedCornerShape(
-                        22.dp
-                    )
-            )
+                        } else {
 
-            .padding(
+                            Color.Transparent
+                        },
 
-                horizontal =
-                    if (selected) {
-                        12.dp
-                    } else {
-                        5.dp
-                    }
-            ),
+                    shape =
+                        RoundedCornerShape(
+                            22.dp
+                        )
+                )
+
+                .padding(
+
+                    horizontal =
+                        if (selected) {
+
+                            12.dp
+
+                        } else {
+
+                            5.dp
+                        }
+                ),
 
         contentAlignment =
             Alignment.Center
@@ -570,8 +644,11 @@ private fun BottomNavigationItem(
                     ColorFilter.tint(
 
                         if (selected) {
+
                             Color.White
+
                         } else {
+
                             grayColor
                         }
                     ),
@@ -582,8 +659,11 @@ private fun BottomNavigationItem(
                         .alpha(
 
                             if (selected) {
+
                                 1f
+
                             } else {
+
                                 0.9f
                             }
                         )
@@ -613,8 +693,11 @@ private fun BottomNavigationItem(
 
                 color =
                     if (selected) {
+
                         Color.White
+
                     } else {
+
                         grayColor
                     },
 

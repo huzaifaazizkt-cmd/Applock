@@ -2,14 +2,17 @@ package com.example.applock.navigation
 
 import android.content.Context
 import android.net.Uri
+
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+
 import com.example.applock.Design.screens.ExitScreen
 import com.example.applock.Design.screens.HomeScreen
 import com.example.applock.Design.screens.IntruderScreen
@@ -21,7 +24,9 @@ import com.example.applock.Design.screens.PinCreateScreen
 import com.example.applock.Design.screens.PremiumScreen
 import com.example.applock.Design.screens.StartScreen
 import com.example.applock.Design.screens.WelcomeScreen
+
 import com.example.applock.data.DataStoreManager
+
 
 @Composable
 fun NavGraph(
@@ -31,86 +36,155 @@ fun NavGraph(
     val appContext =
         context.applicationContext
 
+
     val dataStore =
-        DataStoreManager(appContext)
+        DataStoreManager(
+            appContext
+        )
+
 
     val appInitialized by
     dataStore
         .getAppInitialized()
-        .collectAsState(initial = null)
+        .collectAsState(
+            initial = null
+        )
 
-    if (appInitialized == null) {
+
+    if (
+        appInitialized == null
+    ) {
+
         return
     }
+
 
     val navController =
         rememberNavController()
 
+
     NavHost(
-        navController = navController,
-        startDestination = "startScreen"
+
+        navController =
+            navController,
+
+        startDestination =
+            "startScreen"
     ) {
 
-        composable("startScreen") {
+
+        // =====================================================
+        // START SCREEN
+        // =====================================================
+
+        composable(
+            "startScreen"
+        ) {
 
             StartScreen(
-                navController = navController,
+
+                navController =
+                    navController,
+
                 appInitialized =
                     appInitialized == true
             )
         }
 
-        composable("welcomeScreen") {
+
+        // =====================================================
+        // WELCOME
+        // =====================================================
+
+        composable(
+            "welcomeScreen"
+        ) {
 
             WelcomeScreen(
-                navController = navController
+                navController =
+                    navController
             )
         }
 
-        composable("languagesSetup") {
+
+        // =====================================================
+        // LANGUAGE SETUP
+        // =====================================================
+
+        composable(
+            "languagesSetup"
+        ) {
 
             LanguagesScreen(
-                onBackClick = null,
+
+                onBackClick =
+                    null,
 
                 onLanguageSelected = {
 
                     navController.navigate(
                         "onboardingScreen"
                     ) {
+
                         popUpTo(
                             "languagesSetup"
                         ) {
-                            inclusive = true
+
+                            inclusive =
+                                true
                         }
                     }
                 }
             )
         }
 
-        composable("onboardingScreen") {
+
+        // =====================================================
+        // ONBOARDING
+        // =====================================================
+
+        composable(
+            "onboardingScreen"
+        ) {
 
             OnboardingScreen(
-                navController = navController
+                navController =
+                    navController
             )
         }
 
-        composable("premium") {
+
+        // =====================================================
+        // PREMIUM
+        // =====================================================
+
+        composable(
+            "premium"
+        ) {
 
             PremiumScreen(
-                navController = navController
+                navController =
+                    navController
             )
         }
 
+
         // =====================================================
-        // FIRST TIME CREATE PASSWORD
+        // CREATE PASSWORD
         // =====================================================
 
-        composable("create") {
+        composable(
+            "create"
+        ) {
 
             PinCreateScreen(
-                onNext = { type, value ->
+
+                onNext = {
+                        type,
+                        value ->
 
                     navController.navigate(
+
                         "confirm/${
                             Uri.encode(type)
                         }/${
@@ -121,58 +195,92 @@ fun NavGraph(
             )
         }
 
+
         // =====================================================
-        // FIRST TIME CONFIRM PASSWORD
+        // CONFIRM PASSWORD
         // =====================================================
 
         composable(
-            route = "confirm/{type}/{value}",
 
-            arguments = listOf(
+            route =
+                "confirm/{type}/{value}",
 
-                navArgument("type") {
-                    type = NavType.StringType
-                },
+            arguments =
+                listOf(
 
-                navArgument("value") {
-                    type = NavType.StringType
-                }
-            )
-        ) { backStackEntry ->
+                    navArgument(
+                        "type"
+                    ) {
+
+                        type =
+                            NavType.StringType
+                    },
+
+                    navArgument(
+                        "value"
+                    ) {
+
+                        type =
+                            NavType.StringType
+                    }
+                )
+        ) {
 
             val type =
-                backStackEntry
-                    .arguments
-                    ?.getString("type")
+                it.arguments
+                    ?.getString(
+                        "type"
+                    )
                     ?: "pin"
+
 
             val value =
                 Uri.decode(
-                    backStackEntry
-                        .arguments
-                        ?.getString("value")
+
+                    it.arguments
+                        ?.getString(
+                            "value"
+                        )
                         ?: ""
                 )
 
+
             PinConfirmScreen(
-                navController = navController,
-                context = context,
-                type = type,
-                value = value,
-                isReset = false
+
+                navController =
+                    navController,
+
+                context =
+                    context,
+
+                type =
+                    type,
+
+                value =
+                    value,
+
+                isReset =
+                    false
             )
         }
+
 
         // =====================================================
         // RESET PASSWORD CREATE
         // =====================================================
 
-        composable("resetCreate") {
+        composable(
+            "resetCreate"
+        ) {
 
             PinCreateScreen(
-                onNext = { type, value ->
+
+                onNext = {
+                        type,
+                        value ->
 
                     navController.navigate(
+
                         "resetConfirm/${
                             Uri.encode(type)
                         }/${
@@ -183,105 +291,238 @@ fun NavGraph(
             )
         }
 
+
         // =====================================================
         // RESET PASSWORD CONFIRM
         // =====================================================
 
         composable(
-            route = "resetConfirm/{type}/{value}",
 
-            arguments = listOf(
+            route =
+                "resetConfirm/{type}/{value}",
 
-                navArgument("type") {
-                    type = NavType.StringType
-                },
+            arguments =
+                listOf(
 
-                navArgument("value") {
-                    type = NavType.StringType
-                }
-            )
-        ) { backStackEntry ->
+                    navArgument(
+                        "type"
+                    ) {
+
+                        type =
+                            NavType.StringType
+                    },
+
+                    navArgument(
+                        "value"
+                    ) {
+
+                        type =
+                            NavType.StringType
+                    }
+                )
+        ) {
 
             val type =
-                backStackEntry
-                    .arguments
-                    ?.getString("type")
+                it.arguments
+                    ?.getString(
+                        "type"
+                    )
                     ?: "pin"
+
 
             val value =
                 Uri.decode(
-                    backStackEntry
-                        .arguments
-                        ?.getString("value")
+
+                    it.arguments
+                        ?.getString(
+                            "value"
+                        )
                         ?: ""
                 )
 
+
             PinConfirmScreen(
-                navController = navController,
-                context = context,
-                type = type,
-                value = value,
-                isReset = true
+
+                navController =
+                    navController,
+
+                context =
+                    context,
+
+                type =
+                    type,
+
+                value =
+                    value,
+
+                isReset =
+                    true
             )
         }
 
-        composable("home") {
+
+        // =====================================================
+        // HOME
+        // =====================================================
+
+        composable(
+            "home"
+        ) {
 
             HomeScreen(
-                navController = navController
+                navController =
+                    navController
             )
         }
 
-        composable("appList") {
 
-            val openSettings =
+        // =====================================================
+        // MAIN APP
+        // =====================================================
+
+        composable(
+            "appList"
+        ) {
+
+            val currentEntry =
                 navController
                     .currentBackStackEntry
+
+
+            val openSettings =
+                currentEntry
                     ?.savedStateHandle
-                    ?.get<Boolean>("openSettings")
+                    ?.get<Boolean>(
+                        "openSettings"
+                    )
                     ?: false
 
+
             MainScreen(
-                context = context,
+
+                context =
+                    context,
+
+                // =================================================
+                // SETTINGS -> INTRUDER
+                // =================================================
 
                 onIntruderClick = {
-                    navController.navigate("intruder")
+
+                    // MainScreen ke savedStateHandle mein
+                    // mark karo ke wapas Settings par jana hai.
+
+                    currentEntry
+                        ?.savedStateHandle
+                        ?.set(
+                            "returnToSettings",
+                            true
+                        )
+
+
+                    navController.navigate(
+                        "intruder"
+                    )
                 },
+
+
+                // =================================================
+                // SETTINGS -> LANGUAGES
+                // =================================================
 
                 onLanguageClick = {
-                    navController.navigate("languages")
+
+                    // MainScreen ko bata do ke
+                    // Languages se back hone par
+                    // Settings tab select karna hai.
+
+                    currentEntry
+                        ?.savedStateHandle
+                        ?.set(
+                            "returnToSettings",
+                            true
+                        )
+
+
+                    navController.navigate(
+                        "languages"
+                    )
                 },
 
-                openSettings = openSettings,
 
-                navController = navController
+                // =================================================
+                // SETTINGS -> RESET PASSWORD
+                // =================================================
+
+                onResetPasswordClick = {
+
+                    navController.navigate(
+                        "resetCreate"
+                    )
+                },
+
+
+                openSettings =
+                    openSettings,
+
+                navController =
+                    navController
             )
         }
 
-        composable("languages") {
+
+        // =====================================================
+        // LANGUAGES
+        // =====================================================
+
+        composable(
+            "languages"
+        ) {
 
             LanguagesScreen(
+
                 onBackClick = {
-                    navController.popBackStack()
+
+                    navController
+                        .popBackStack()
                 },
 
-                onLanguageSelected = null
+                onLanguageSelected =
+                    null
             )
         }
 
-        composable("intruder") {
+
+        // =====================================================
+        // INTRUDER
+        // =====================================================
+
+        composable(
+            "intruder"
+        ) {
 
             IntruderScreen(
+
                 onBackClick = {
-                    navController.popBackStack()
+
+                    navController
+                        .popBackStack()
                 }
             )
         }
 
-        composable("exit") {
+
+        // =====================================================
+        // EXIT
+        // =====================================================
+
+        composable(
+            "exit"
+        ) {
 
             ExitScreen(
-                navController = navController
+                navController =
+                    navController
             )
         }
     }

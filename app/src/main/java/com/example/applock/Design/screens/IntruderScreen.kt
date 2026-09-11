@@ -1,7 +1,11 @@
+
 package com.example.applock.Design.screens
 
+import android.Manifest
 import android.content.ContentUris
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
@@ -9,6 +13,11 @@ import android.media.ExifInterface
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
+import android.provider.Settings
+
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -19,6 +28,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
@@ -35,6 +45,7 @@ import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,8 +58,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+
+import androidx.core.content.ContextCompat
+
 import com.example.applock.R
 import com.example.applock.data.DataStoreManager
+
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -56,7 +71,7 @@ import kotlinx.coroutines.withContext
 
 
 // =============================================================
-// INTRUDER IMAGE DATA
+// INTRUDER IMAGE
 // =============================================================
 
 private data class IntruderImage(
@@ -75,21 +90,13 @@ fun IntruderScreen(
     onBackClick: () -> Unit = {}
 ) {
 
-    val context =
-        LocalContext.current
+    val context = LocalContext.current
 
-    val dataStore =
-        remember {
-            DataStoreManager(context)
-        }
+    val dataStore = remember {
+        DataStoreManager(context)
+    }
 
-    val scope =
-        rememberCoroutineScope()
-
-
-    // =========================================================
-    // COLORS
-    // =========================================================
+    val scope = rememberCoroutineScope()
 
     val blueColor =
         Color(0xFF0396FF)
@@ -106,19 +113,143 @@ fun IntruderScreen(
         mutableStateOf(false)
     }
 
-
-    var observationTime by remember {
-        mutableStateOf(10)
+    var observationAttempts by remember {
+        mutableStateOf(3)
     }
 
+    var selectedObservationAttempts by remember {
+        mutableStateOf("3 Attempts")
+    }
 
-    var showTimeDialog by remember {
+    var showAttemptsDialog by remember {
+        mutableStateOf(false)
+    }
+
+    var showPermissionSettingsDialog by remember {
         mutableStateOf(false)
     }
 
 
-    var selectedObservationTime by remember {
-        mutableStateOf("5 Seconds")
+    // =========================================================
+    // CAMERA PERMISSION
+    // =========================================================
+
+    val cameraPermissionLauncher =
+        rememberLauncherForActivityResult(
+            contract =
+                ActivityResultContracts.RequestPermission()
+        ) { granted ->
+
+            if (granted) {
+
+                intruderEnabled = true
+
+                scope.launch {
+
+                    dataStore.saveIntruderEnabled(
+                        true
+                    )
+                }
+
+            } else {
+
+                intruderEnabled = false
+
+                scope.launch {
+
+                    dataStore.saveIntruderEnabled(
+                        false
+                    )
+                }
+
+                showPermissionSettingsDialog =
+                    true
+            }
+        }
+
+
+    // =========================================================
+    // OPEN APP SETTINGS
+    // =========================================================
+
+    fun openAppSettings() {
+
+        try {
+
+            val intent =
+                Intent(
+                    Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                    Uri.parse(
+                        "package:${context.packageName}"
+                    )
+                )
+
+            context.startActivity(
+                intent
+            )
+
+        } catch (e: Exception) {
+
+            e.printStackTrace()
+        }
+    }
+
+
+    // =========================================================
+    // CAMERA PERMISSION REQUEST
+    // =========================================================
+
+    fun requestCameraPermission() {
+
+        val permissionGranted =
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.CAMERA
+            ) ==
+                    PackageManager.PERMISSION_GRANTED
+
+        if (permissionGranted) {
+
+            intruderEnabled = true
+
+            scope.launch {
+
+                dataStore.saveIntruderEnabled(
+                    true
+                )
+            }
+
+            return
+        }
+
+        cameraPermissionLauncher.launch(
+            Manifest.permission.CAMERA
+        )
+    }
+
+
+    // =========================================================
+    // LOAD SAVED SETTINGS
+    // =========================================================
+
+    LaunchedEffect(Unit) {
+
+        intruderEnabled =
+            dataStore
+                .getIntruderEnabled()
+                .first()
+
+
+        observationAttempts =
+            dataStore
+                .getIntruderObservationTime()
+                .first()
+
+
+        selectedObservationAttempts =
+            observationAttemptsToText(
+                observationAttempts
+            )
     }
 
 
@@ -134,13 +265,12 @@ fun IntruderScreen(
 
 
     // =========================================================
-    // SELECTION MODE
+    // SELECTION
     // =========================================================
 
     var selectionMode by remember {
         mutableStateOf(false)
     }
-
 
     var selectedImages by remember {
         mutableStateOf<Set<Uri>>(
@@ -159,37 +289,10 @@ fun IntruderScreen(
 
 
     // =========================================================
-    // LOAD SAVED SETTINGS
+    // LOAD IMAGES
     // =========================================================
 
     LaunchedEffect(Unit) {
-
-        /*
-         * IMPORTANT:
-         *
-         * Intruder switch is controlled only by the value
-         * saved when the user manually changes the switch.
-         *
-         * DataStore default is false.
-         */
-
-        intruderEnabled =
-            dataStore
-                .getIntruderEnabled()
-                .first()
-
-
-        observationTime =
-            dataStore
-                .getIntruderObservationTime()
-                .first()
-
-
-        selectedObservationTime =
-            observationTimeToText(
-                observationTime
-            )
-
 
         intruderImages =
             loadIntruderImages(
@@ -236,18 +339,13 @@ fun IntruderScreen(
                         null
                     )
 
-                } catch (
-                    e: Exception
-                ) {
+                } catch (e: Exception) {
 
                     e.printStackTrace()
                 }
             }
 
-
-            previewImage =
-                null
-
+            previewImage = null
 
             intruderImages =
                 loadIntruderImages(
@@ -288,9 +386,7 @@ fun IntruderScreen(
                             null
                         )
 
-                    } catch (
-                        e: Exception
-                    ) {
+                    } catch (e: Exception) {
 
                         e.printStackTrace()
                     }
@@ -301,10 +397,8 @@ fun IntruderScreen(
             selectedImages =
                 emptySet()
 
-
             selectionMode =
                 false
-
 
             intruderImages =
                 loadIntruderImages(
@@ -315,7 +409,7 @@ fun IntruderScreen(
 
 
     // =========================================================
-    // PREVIEW SCREEN
+    // PREVIEW
     // =========================================================
 
     if (
@@ -329,8 +423,7 @@ fun IntruderScreen(
 
             onBackClick = {
 
-                previewImage =
-                    null
+                previewImage = null
 
                 reloadImages()
             },
@@ -352,7 +445,6 @@ fun IntruderScreen(
     // =========================================================
 
     Box(
-
         modifier =
             Modifier
                 .fillMaxSize()
@@ -362,7 +454,6 @@ fun IntruderScreen(
     ) {
 
         Column(
-
             modifier =
                 Modifier.fillMaxSize()
         ) {
@@ -373,7 +464,6 @@ fun IntruderScreen(
             // =================================================
 
             Row(
-
                 modifier =
                     Modifier
                         .fillMaxWidth()
@@ -387,13 +477,7 @@ fun IntruderScreen(
                     Alignment.CenterVertically
             ) {
 
-
-                // =================================================
-                // BACK / CLOSE
-                // =================================================
-
                 IconButton(
-
                     onClick = {
 
                         if (
@@ -418,7 +502,6 @@ fun IntruderScreen(
                     ) {
 
                         Icon(
-
                             imageVector =
                                 Icons.Default.Close,
 
@@ -429,13 +512,14 @@ fun IntruderScreen(
                                 Color(0xFF333333),
 
                             modifier =
-                                Modifier.size(21.dp)
+                                Modifier.size(
+                                    21.dp
+                                )
                         )
 
                     } else {
 
                         Image(
-
                             painter =
                                 painterResource(
                                     id =
@@ -446,18 +530,15 @@ fun IntruderScreen(
                                 "Back",
 
                             modifier =
-                                Modifier.size(30.dp)
+                                Modifier.size(
+                                    30.dp
+                                )
                         )
                     }
                 }
 
 
-                // =================================================
-                // TITLE
-                // =================================================
-
                 Text(
-
                     text =
                         if (
                             selectionMode
@@ -477,13 +558,11 @@ fun IntruderScreen(
                         22.sp,
 
                     modifier =
-                        Modifier.weight(1f)
+                        Modifier.weight(
+                            1f
+                        )
                 )
 
-
-                // =================================================
-                // SETTINGS / ALL
-                // =================================================
 
                 if (
                     selectionMode
@@ -496,7 +575,6 @@ fun IntruderScreen(
 
 
                     Row(
-
                         modifier =
                             Modifier
                                 .clickable {
@@ -526,7 +604,6 @@ fun IntruderScreen(
                     ) {
 
                         Text(
-
                             text =
                                 "All",
 
@@ -540,17 +617,19 @@ fun IntruderScreen(
 
                         Spacer(
                             modifier =
-                                Modifier.width(3.dp)
+                                Modifier.width(
+                                    3.dp
+                                )
                         )
 
 
                         Box(
-
                             modifier =
                                 Modifier
-                                    .size(10.dp)
+                                    .size(
+                                        10.dp
+                                    )
                                     .background(
-
                                         if (
                                             allSelected
                                         ) {
@@ -574,7 +653,6 @@ fun IntruderScreen(
                             ) {
 
                                 Icon(
-
                                     imageVector =
                                         Icons.Default.Check,
 
@@ -585,7 +663,9 @@ fun IntruderScreen(
                                         Color.White,
 
                                     modifier =
-                                        Modifier.size(8.dp)
+                                        Modifier.size(
+                                            8.dp
+                                        )
                                 )
                             }
                         }
@@ -593,33 +673,37 @@ fun IntruderScreen(
 
                 } else {
 
-                    IconButton(
+                    // =================================================
+                    // SET OBSERVATION ATTEMPTS
+                    // =================================================
 
+                    IconButton(
                         onClick = {
 
-                            selectedObservationTime =
-                                observationTimeToText(
-                                    observationTime
+                            selectedObservationAttempts =
+                                observationAttemptsToText(
+                                    observationAttempts
                                 )
 
-                            showTimeDialog =
+                            showAttemptsDialog =
                                 true
                         }
                     ) {
 
                         Icon(
-
                             imageVector =
                                 Icons.Default.Settings,
 
                             contentDescription =
-                                "Intruder settings",
+                                "Set observation attempts",
 
                             tint =
                                 Color(0xFFBDBDBD),
 
                             modifier =
-                                Modifier.size(23.dp)
+                                Modifier.size(
+                                    23.dp
+                                )
                         )
                     }
                 }
@@ -627,11 +711,10 @@ fun IntruderScreen(
 
 
             // =================================================
-            // INTRUDER CAMERA CARD
+            // INTRUDER CARD
             // =================================================
 
             Card(
-
                 modifier =
                     Modifier
                         .fillMaxWidth()
@@ -641,7 +724,9 @@ fun IntruderScreen(
                         ),
 
                 shape =
-                    RoundedCornerShape(12.dp),
+                    RoundedCornerShape(
+                        12.dp
+                    ),
 
                 colors =
                     CardDefaults.cardColors(
@@ -657,7 +742,6 @@ fun IntruderScreen(
             ) {
 
                 Row(
-
                     modifier =
                         Modifier
                             .fillMaxWidth()
@@ -672,13 +756,7 @@ fun IntruderScreen(
                         Alignment.CenterVertically
                 ) {
 
-
-                    // =================================================
-                    // CAMERA ICON
-                    // =================================================
-
                     Image(
-
                         painter =
                             painterResource(
                                 id =
@@ -689,28 +767,28 @@ fun IntruderScreen(
                             "Intruder Camera",
 
                         modifier =
-                            Modifier.size(30.dp)
+                            Modifier.size(
+                                30.dp
+                            )
                     )
 
 
                     Spacer(
                         modifier =
-                            Modifier.width(14.dp)
+                            Modifier.width(
+                                14.dp
+                            )
                     )
 
 
-                    // =================================================
-                    // TEXT
-                    // =================================================
-
                     Column(
-
                         modifier =
-                            Modifier.weight(1f)
+                            Modifier.weight(
+                                1f
+                            )
                     ) {
 
                         Text(
-
                             text =
                                 "Intruder Camera",
 
@@ -724,15 +802,15 @@ fun IntruderScreen(
 
                         Spacer(
                             modifier =
-                                Modifier.height(3.dp)
+                                Modifier.height(
+                                    3.dp
+                                )
                         )
 
 
                         Text(
-
                             text =
-                                "Capture photos of anyone who enters\n" +
-                                        "the wrong password",
+                                "Capture photos after wrong password attempts",
 
                             color =
                                 Color(0xFF666666),
@@ -757,22 +835,48 @@ fun IntruderScreen(
 
                         onCheckedChange = { enabled ->
 
-                            /*
-                             * IMPORTANT:
-                             *
-                             * Only the user's switch action changes
-                             * the Intruder Camera state.
-                             */
+                            if (enabled) {
 
-                            intruderEnabled =
-                                enabled
+                                val permissionGranted =
+                                    ContextCompat.checkSelfPermission(
+                                        context,
+                                        Manifest.permission.CAMERA
+                                    ) ==
+                                            PackageManager.PERMISSION_GRANTED
 
-                            scope.launch {
 
-                                dataStore
-                                    .saveIntruderEnabled(
-                                        enabled
-                                    )
+                                if (
+                                    permissionGranted
+                                ) {
+
+                                    intruderEnabled =
+                                        true
+
+                                    scope.launch {
+
+                                        dataStore
+                                            .saveIntruderEnabled(
+                                                true
+                                            )
+                                    }
+
+                                } else {
+
+                                    requestCameraPermission()
+                                }
+
+                            } else {
+
+                                intruderEnabled =
+                                    false
+
+                                scope.launch {
+
+                                    dataStore
+                                        .saveIntruderEnabled(
+                                            false
+                                        )
+                                }
                             }
                         },
 
@@ -782,7 +886,9 @@ fun IntruderScreen(
                                     width = 42.dp,
                                     height = 24.dp
                                 )
-                                .scale(0.56f),
+                                .scale(
+                                    0.56f
+                                ),
 
                         colors =
                             SwitchDefaults.colors(
@@ -810,8 +916,48 @@ fun IntruderScreen(
             }
 
 
+            Spacer(
+                modifier =
+                    Modifier.height(
+                        10.dp
+                    )
+            )
+
+
             // =================================================
-            // IMAGES OR EMPTY AREA
+            // ATTEMPTS SUMMARY
+            // =================================================
+
+            Text(
+                text =
+                    if (
+                        observationAttempts == 0
+                    ) {
+
+                        "Photo capture: Never"
+
+                    } else {
+
+                        "Photo capture after $observationAttempts wrong attempts"
+                    },
+
+                color =
+                    Color(0xFF777777),
+
+                fontSize =
+                    12.sp,
+
+                modifier =
+                    Modifier.padding(
+                        start = 18.dp,
+                        top = 2.dp,
+                        bottom = 4.dp
+                    )
+            )
+
+
+            // =================================================
+            // IMAGES
             // =================================================
 
             if (
@@ -819,18 +965,18 @@ fun IntruderScreen(
             ) {
 
                 Box(
-
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .weight(1f),
+                            .weight(
+                                1f
+                            ),
 
                     contentAlignment =
                         Alignment.Center
                 ) {
 
                     Column(
-
                         horizontalAlignment =
                             Alignment.CenterHorizontally,
 
@@ -839,7 +985,6 @@ fun IntruderScreen(
                     ) {
 
                         Icon(
-
                             painter =
                                 painterResource(
                                     id =
@@ -853,18 +998,21 @@ fun IntruderScreen(
                                 Color(0xFFBDBDBD),
 
                             modifier =
-                                Modifier.size(120.dp)
+                                Modifier.size(
+                                    120.dp
+                                )
                         )
 
 
                         Spacer(
                             modifier =
-                                Modifier.height(14.dp)
+                                Modifier.height(
+                                    14.dp
+                                )
                         )
 
 
                         Text(
-
                             text =
                                 "No Intruder Found",
 
@@ -880,15 +1028,15 @@ fun IntruderScreen(
             } else {
 
                 Column(
-
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .weight(1f)
+                            .weight(
+                                1f
+                            )
                 ) {
 
                     Text(
-
                         text =
                             "Today",
 
@@ -910,12 +1058,16 @@ fun IntruderScreen(
                     LazyVerticalGrid(
 
                         columns =
-                            GridCells.Fixed(3),
+                            GridCells.Fixed(
+                                3
+                            ),
 
                         modifier =
                             Modifier
                                 .fillMaxWidth()
-                                .weight(1f)
+                                .weight(
+                                    1f
+                                )
                                 .padding(
                                     start = 8.dp,
                                     end = 8.dp
@@ -948,7 +1100,6 @@ fun IntruderScreen(
 
                         ) { image ->
 
-
                             IntruderImageItem(
 
                                 image =
@@ -970,10 +1121,9 @@ fun IntruderScreen(
 
                                         selectedImages =
                                             if (
-                                                selectedImages
-                                                    .contains(
-                                                        image.uri
-                                                    )
+                                                selectedImages.contains(
+                                                    image.uri
+                                                )
                                             ) {
 
                                                 selectedImages -
@@ -1016,7 +1166,7 @@ fun IntruderScreen(
 
 
         // =========================================================
-        // DELETE BUTTON
+        // DELETE
         // =========================================================
 
         if (
@@ -1026,10 +1176,8 @@ fun IntruderScreen(
 
             Button(
 
-                onClick = {
-
-                    deleteSelectedImages()
-                },
+                onClick =
+                    ::deleteSelectedImages,
 
                 modifier =
                     Modifier
@@ -1042,14 +1190,17 @@ fun IntruderScreen(
                             end = 16.dp,
                             bottom = 20.dp
                         )
-                        .height(47.dp),
+                        .height(
+                            47.dp
+                        ),
 
                 shape =
-                    RoundedCornerShape(7.dp),
+                    RoundedCornerShape(
+                        7.dp
+                    ),
 
                 colors =
                     ButtonDefaults.buttonColors(
-
                         containerColor =
                             blueColor,
 
@@ -1059,7 +1210,6 @@ fun IntruderScreen(
             ) {
 
                 Text(
-
                     text =
                         "Delete",
 
@@ -1072,23 +1222,25 @@ fun IntruderScreen(
 
 
     // =========================================================
-    // OBSERVATION TIME DIALOG
+    // SET OBSERVATION ATTEMPTS DIALOG
     // =========================================================
 
     if (
-        showTimeDialog
+        showAttemptsDialog
     ) {
 
         AlertDialog(
 
             onDismissRequest = {
 
-                showTimeDialog =
+                showAttemptsDialog =
                     false
             },
 
             shape =
-                RoundedCornerShape(10.dp),
+                RoundedCornerShape(
+                    10.dp
+                ),
 
             containerColor =
                 Color.White,
@@ -1101,9 +1253,8 @@ fun IntruderScreen(
                 ) {
 
                     Text(
-
                         text =
-                            "Set Observation Time",
+                            "Set Observation Attempts",
 
                         color =
                             Color(0xFF333333),
@@ -1113,16 +1264,26 @@ fun IntruderScreen(
                     )
 
 
-                    Text(
+                    Spacer(
+                        modifier =
+                            Modifier.height(
+                                2.dp
+                            )
+                    )
 
+
+                    Text(
                         text =
-                            "Number of times failed to unblocked",
+                            "Take an intruder photo after wrong password attempts",
 
                         color =
                             Color(0xFF999999),
 
                         fontSize =
-                            10.sp
+                            10.sp,
+
+                        lineHeight =
+                            14.sp
                     )
                 }
             },
@@ -1134,67 +1295,83 @@ fun IntruderScreen(
                         Modifier.fillMaxWidth()
                 ) {
 
-                    ObservationTimeOption(
-                        text = "Never",
+                    ObservationAttemptsOption(
+                        text =
+                            "Never",
+
                         selected =
-                            selectedObservationTime ==
+                            selectedObservationAttempts ==
                                     "Never",
+
                         blueColor =
                             blueColor,
+
                         onClick = {
-                            selectedObservationTime =
+
+                            selectedObservationAttempts =
                                 "Never"
                         }
                     )
 
 
-                    ObservationTimeOption(
-                        text = "5 Seconds",
+                    ObservationAttemptsOption(
+                        text =
+                            "3 Attempts",
+
                         selected =
-                            selectedObservationTime ==
-                                    "5 Seconds",
+                            selectedObservationAttempts ==
+                                    "3 Attempts",
+
                         blueColor =
                             blueColor,
+
                         onClick = {
-                            selectedObservationTime =
-                                "5 Seconds"
+
+                            selectedObservationAttempts =
+                                "3 Attempts"
                         }
                     )
 
 
-                    ObservationTimeOption(
-                        text = "15 Seconds",
+                    ObservationAttemptsOption(
+                        text =
+                            "5 Attempts",
+
                         selected =
-                            selectedObservationTime ==
-                                    "15 Seconds",
+                            selectedObservationAttempts ==
+                                    "5 Attempts",
+
                         blueColor =
                             blueColor,
+
                         onClick = {
-                            selectedObservationTime =
-                                "15 Seconds"
+
+                            selectedObservationAttempts =
+                                "5 Attempts"
                         }
                     )
 
 
-                    ObservationTimeOption(
-                        text = "30 Seconds",
+                    ObservationAttemptsOption(
+                        text =
+                            "10 Attempts",
+
                         selected =
-                            selectedObservationTime ==
-                                    "30 Seconds",
+                            selectedObservationAttempts ==
+                                    "10 Attempts",
+
                         blueColor =
                             blueColor,
+
                         onClick = {
-                            selectedObservationTime =
-                                "30 Seconds"
+
+                            selectedObservationAttempts =
+                                "10 Attempts"
                         }
                     )
                 }
             },
 
-
-            // =====================================================
-            // CANCEL
-            // =====================================================
 
             dismissButton = {
 
@@ -1202,7 +1379,12 @@ fun IntruderScreen(
 
                     onClick = {
 
-                        showTimeDialog =
+                        selectedObservationAttempts =
+                            observationAttemptsToText(
+                                observationAttempts
+                            )
+
+                        showAttemptsDialog =
                             false
                     },
 
@@ -1218,7 +1400,6 @@ fun IntruderScreen(
                 ) {
 
                     Text(
-
                         text =
                             "Cancel",
 
@@ -1229,27 +1410,23 @@ fun IntruderScreen(
             },
 
 
-            // =====================================================
-            // CONFIRM
-            // =====================================================
-
             confirmButton = {
 
                 Button(
 
                     onClick = {
 
-                        val timeInSeconds =
-                            observationTimeFromText(
-                                selectedObservationTime
+                        val attempts =
+                            observationAttemptsFromText(
+                                selectedObservationAttempts
                             )
 
 
-                        observationTime =
-                            timeInSeconds
+                        observationAttempts =
+                            attempts
 
 
-                        showTimeDialog =
+                        showAttemptsDialog =
                             false
 
 
@@ -1257,7 +1434,7 @@ fun IntruderScreen(
 
                             dataStore
                                 .saveIntruderObservationTime(
-                                    timeInSeconds
+                                    attempts
                                 )
                         }
                     },
@@ -1274,7 +1451,6 @@ fun IntruderScreen(
                 ) {
 
                     Text(
-
                         text =
                             "Confirm",
 
@@ -1285,14 +1461,130 @@ fun IntruderScreen(
             }
         )
     }
+
+
+    // =========================================================
+    // CAMERA PERMISSION DIALOG
+    // =========================================================
+
+    if (
+        showPermissionSettingsDialog
+    ) {
+
+        AlertDialog(
+
+            onDismissRequest = {
+
+                showPermissionSettingsDialog =
+                    false
+            },
+
+            shape =
+                RoundedCornerShape(
+                    12.dp
+                ),
+
+            containerColor =
+                Color.White,
+
+            title = {
+
+                Text(
+                    text =
+                        "Camera Permission",
+
+                    color =
+                        Color(0xFF333333),
+
+                    fontSize =
+                        18.sp
+                )
+            },
+
+            text = {
+
+                Text(
+                    text =
+                        "Camera permission was denied. Please allow Camera permission from App Settings to use Intruder Camera.",
+
+                    color =
+                        Color(0xFF666666),
+
+                    fontSize =
+                        13.sp,
+
+                    lineHeight =
+                        19.sp
+                )
+            },
+
+            dismissButton = {
+
+                Button(
+
+                    onClick = {
+
+                        showPermissionSettingsDialog =
+                            false
+                    },
+
+                    colors =
+                        ButtonDefaults.buttonColors(
+
+                            containerColor =
+                                Color.Transparent,
+
+                            contentColor =
+                                Color(0xFF999999)
+                        )
+                ) {
+
+                    Text(
+                        text =
+                            "Cancel"
+                    )
+                }
+            },
+
+            confirmButton = {
+
+                Button(
+
+                    onClick = {
+
+                        showPermissionSettingsDialog =
+                            false
+
+                        openAppSettings()
+                    },
+
+                    colors =
+                        ButtonDefaults.buttonColors(
+
+                            containerColor =
+                                Color.Transparent,
+
+                            contentColor =
+                                blueColor
+                        )
+                ) {
+
+                    Text(
+                        text =
+                            "Settings"
+                    )
+                }
+            }
+        )
+    }
 }
 
 
 // =============================================================
-// CONVERT INT -> UI TEXT
+// ATTEMPTS INT -> TEXT
 // =============================================================
 
-private fun observationTimeToText(
+private fun observationAttemptsToText(
     value: Int
 ): String {
 
@@ -1301,26 +1593,26 @@ private fun observationTimeToText(
         0 ->
             "Never"
 
+        3 ->
+            "3 Attempts"
+
         5 ->
-            "5 Seconds"
+            "5 Attempts"
 
-        15 ->
-            "15 Seconds"
-
-        30 ->
-            "30 Seconds"
+        10 ->
+            "10 Attempts"
 
         else ->
-            "5 Seconds"
+            "3 Attempts"
     }
 }
 
 
 // =============================================================
-// CONVERT UI TEXT -> INT
+// ATTEMPTS TEXT -> INT
 // =============================================================
 
-private fun observationTimeFromText(
+private fun observationAttemptsFromText(
     value: String
 ): Int {
 
@@ -1329,51 +1621,47 @@ private fun observationTimeFromText(
         "Never" ->
             0
 
-        "5 Seconds" ->
+        "3 Attempts" ->
+            3
+
+        "5 Attempts" ->
             5
 
-        "15 Seconds" ->
-            15
-
-        "30 Seconds" ->
-            30
+        "10 Attempts" ->
+            10
 
         else ->
-            5
+            3
     }
 }
 
 
 // =============================================================
-// INTRUDER IMAGE ITEM
+// IMAGE ITEM
 // =============================================================
 
 @Composable
 private fun IntruderImageItem(
-
     image: IntruderImage,
-
     selected: Boolean,
-
     selectionMode: Boolean,
-
     onClick: () -> Unit,
-
     onLongClick: () -> Unit
-
 ) {
 
     Box(
-
         modifier =
             Modifier
                 .fillMaxWidth()
-                .aspectRatio(1f)
+                .aspectRatio(
+                    1f
+                )
                 .clip(
-                    RoundedCornerShape(12.dp)
+                    RoundedCornerShape(
+                        12.dp
+                    )
                 )
                 .combinedClickable(
-
                     onClick =
                         onClick,
 
@@ -1393,7 +1681,6 @@ private fun IntruderImageItem(
         ) {
 
             Box(
-
                 modifier =
                     Modifier
                         .align(
@@ -1402,7 +1689,9 @@ private fun IntruderImageItem(
                         .padding(
                             5.dp
                         )
-                        .size(14.dp)
+                        .size(
+                            14.dp
+                        )
                         .background(
 
                             if (
@@ -1414,7 +1703,8 @@ private fun IntruderImageItem(
                             } else {
 
                                 Color.White.copy(
-                                    alpha = 0.75f
+                                    alpha =
+                                        0.75f
                                 )
                             },
 
@@ -1430,7 +1720,6 @@ private fun IntruderImageItem(
                 ) {
 
                     Icon(
-
                         imageVector =
                             Icons.Default.Check,
 
@@ -1441,7 +1730,9 @@ private fun IntruderImageItem(
                             Color.White,
 
                         modifier =
-                            Modifier.size(10.dp)
+                            Modifier.size(
+                                10.dp
+                            )
                     )
                 }
             }
@@ -1451,7 +1742,7 @@ private fun IntruderImageItem(
 
 
 // =============================================================
-// LOAD BITMAP + FIX EXIF ROTATION
+// LOAD ROTATED BITMAP
 // =============================================================
 
 private suspend fun loadCorrectlyRotatedBitmap(
@@ -1465,48 +1756,47 @@ private suspend fun loadCorrectlyRotatedBitmap(
 
         try {
 
-            // =================================================
-            // FIRST: DECODE BITMAP
-            // =================================================
-
             val bitmap =
                 context.contentResolver
-                    .openInputStream(uri)
+                    .openInputStream(
+                        uri
+                    )
                     ?.use { input ->
 
                         BitmapFactory
-                            .decodeStream(input)
+                            .decodeStream(
+                                input
+                            )
                     }
                     ?: return@withContext null
 
 
-            // =================================================
-            // SECOND: READ EXIF ORIENTATION
-            // =================================================
-
             val orientation =
                 context.contentResolver
-                    .openInputStream(uri)
+                    .openInputStream(
+                        uri
+                    )
                     ?.use { input ->
 
-                        ExifInterface(input)
-                            .getAttributeInt(
-                                ExifInterface.TAG_ORIENTATION,
-                                ExifInterface.ORIENTATION_NORMAL
-                            )
+                        ExifInterface(
+                            input
+                        ).getAttributeInt(
+
+                            ExifInterface.TAG_ORIENTATION,
+
+                            ExifInterface.ORIENTATION_NORMAL
+                        )
                     }
                     ?: ExifInterface.ORIENTATION_NORMAL
 
-
-            // =================================================
-            // CREATE ROTATION MATRIX
-            // =================================================
 
             val matrix =
                 Matrix()
 
 
-            when (orientation) {
+            when (
+                orientation
+            ) {
 
                 ExifInterface.ORIENTATION_FLIP_HORIZONTAL -> {
 
@@ -1574,17 +1864,8 @@ private suspend fun loadCorrectlyRotatedBitmap(
                         270f
                     )
                 }
-
-
-                ExifInterface.ORIENTATION_NORMAL -> {
-                    // No rotation required
-                }
             }
 
-
-            // =================================================
-            // IF NO ROTATION
-            // =================================================
 
             if (
                 matrix.isIdentity
@@ -1594,24 +1875,13 @@ private suspend fun loadCorrectlyRotatedBitmap(
             }
 
 
-            // =================================================
-            // APPLY ROTATION
-            // =================================================
-
             Bitmap.createBitmap(
-
                 bitmap,
-
                 0,
-
                 0,
-
                 bitmap.width,
-
                 bitmap.height,
-
                 matrix,
-
                 true
             )
 
@@ -1639,12 +1909,8 @@ private fun IntruderThumbnail(
     val context =
         LocalContext.current
 
-
     var bitmap by remember(uri) {
-
-        mutableStateOf<Bitmap?>(
-            null
-        )
+        mutableStateOf<Bitmap?>(null)
     }
 
 
@@ -1663,7 +1929,6 @@ private fun IntruderThumbnail(
     ) {
 
         Image(
-
             bitmap =
                 bitmap!!
                     .asImageBitmap(),
@@ -1681,7 +1946,6 @@ private fun IntruderThumbnail(
     } else {
 
         Box(
-
             modifier =
                 Modifier
                     .fillMaxSize()
@@ -1694,7 +1958,6 @@ private fun IntruderThumbnail(
         ) {
 
             Text(
-
                 text =
                     "Loading...",
 
@@ -1710,29 +1973,21 @@ private fun IntruderThumbnail(
 
 
 // =============================================================
-// FULL IMAGE PREVIEW SCREEN
+// PREVIEW
 // =============================================================
 
 @Composable
 private fun IntruderImagePreviewScreen(
-
     image: IntruderImage,
-
     onBackClick: () -> Unit,
-
     onDelete: () -> Unit
-
 ) {
 
     val context =
         LocalContext.current
 
-
     var bitmap by remember(image.uri) {
-
-        mutableStateOf<Bitmap?>(
-            null
-        )
+        mutableStateOf<Bitmap?>(null)
     }
 
 
@@ -1749,7 +2004,6 @@ private fun IntruderImagePreviewScreen(
 
 
     Box(
-
         modifier =
             Modifier
                 .fillMaxSize()
@@ -1759,22 +2013,17 @@ private fun IntruderImagePreviewScreen(
     ) {
 
         Column(
-
             modifier =
                 Modifier.fillMaxSize()
         ) {
 
-
-            // =================================================
-            // TOP BAR
-            // =================================================
-
             Row(
-
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .height(64.dp)
+                        .height(
+                            64.dp
+                        )
                         .padding(
                             start = 6.dp,
                             end = 6.dp
@@ -1785,13 +2034,11 @@ private fun IntruderImagePreviewScreen(
             ) {
 
                 IconButton(
-
                     onClick =
                         onBackClick
                 ) {
 
                     Image(
-
                         painter =
                             painterResource(
                                 id =
@@ -1802,13 +2049,14 @@ private fun IntruderImagePreviewScreen(
                             "Back",
 
                         modifier =
-                            Modifier.size(30.dp)
+                            Modifier.size(
+                                30.dp
+                            )
                     )
                 }
 
 
                 Text(
-
                     text =
                         image.name,
 
@@ -1819,7 +2067,9 @@ private fun IntruderImagePreviewScreen(
                         16.sp,
 
                     modifier =
-                        Modifier.weight(1f),
+                        Modifier.weight(
+                            1f
+                        ),
 
                     maxLines =
                         1
@@ -1827,7 +2077,6 @@ private fun IntruderImagePreviewScreen(
 
 
                 Icon(
-
                     imageVector =
                         Icons.Default.Settings,
 
@@ -1842,21 +2091,20 @@ private fun IntruderImagePreviewScreen(
                             .padding(
                                 end = 6.dp
                             )
-                            .size(23.dp)
+                            .size(
+                                23.dp
+                            )
                 )
             }
 
 
-            // =================================================
-            // IMAGE
-            // =================================================
-
             Box(
-
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .weight(1f)
+                        .weight(
+                            1f
+                        )
                         .padding(
                             start = 6.dp,
                             end = 6.dp,
@@ -1881,7 +2129,6 @@ private fun IntruderImagePreviewScreen(
                 ) {
 
                     Image(
-
                         bitmap =
                             bitmap!!
                                 .asImageBitmap(),
@@ -1899,12 +2146,7 @@ private fun IntruderImagePreviewScreen(
             }
 
 
-            // =================================================
-            // DELETE BUTTON
-            // =================================================
-
             Button(
-
                 onClick =
                     onDelete,
 
@@ -1916,14 +2158,17 @@ private fun IntruderImagePreviewScreen(
                             end = 10.dp,
                             bottom = 54.dp
                         )
-                        .height(46.dp),
+                        .height(
+                            46.dp
+                        ),
 
                 shape =
-                    RoundedCornerShape(7.dp),
+                    RoundedCornerShape(
+                        7.dp
+                    ),
 
                 colors =
                     ButtonDefaults.buttonColors(
-
                         containerColor =
                             Color(0xFF2196F3),
 
@@ -1933,7 +2178,6 @@ private fun IntruderImagePreviewScreen(
             ) {
 
                 Text(
-
                     text =
                         "Delete",
 
@@ -1947,7 +2191,7 @@ private fun IntruderImagePreviewScreen(
 
 
 // =============================================================
-// LOAD INTRUDER IMAGES
+// LOAD IMAGES
 // =============================================================
 
 private suspend fun loadIntruderImages(
@@ -2109,33 +2353,24 @@ private suspend fun loadIntruderImages(
 
 
 // =============================================================
-// OBSERVATION TIME OPTION
+// OBSERVATION ATTEMPT OPTION
 // =============================================================
 
 @Composable
-private fun ObservationTimeOption(
-
+private fun ObservationAttemptsOption(
     text: String,
-
     selected: Boolean,
-
     blueColor: Color,
-
     onClick: () -> Unit
-
 ) {
 
     Row(
-
         modifier =
             Modifier
                 .fillMaxWidth()
                 .clickable {
                     onClick()
-                }
-                .padding(
-                    vertical = 0.dp
-                ),
+                },
 
         verticalAlignment =
             Alignment.CenterVertically
@@ -2151,7 +2386,6 @@ private fun ObservationTimeOption(
 
             colors =
                 RadioButtonDefaults.colors(
-
                     selectedColor =
                         blueColor,
 
@@ -2161,19 +2395,24 @@ private fun ObservationTimeOption(
 
             modifier =
                 Modifier
-                    .size(40.dp)
-                    .scale(0.75f)
+                    .size(
+                        40.dp
+                    )
+                    .scale(
+                        0.75f
+                    )
         )
 
 
         Spacer(
             modifier =
-                Modifier.width(4.dp)
+                Modifier.width(
+                    4.dp
+                )
         )
 
 
         Text(
-
             text =
                 text,
 
@@ -2185,3 +2424,4 @@ private fun ObservationTimeOption(
         )
     }
 }
+

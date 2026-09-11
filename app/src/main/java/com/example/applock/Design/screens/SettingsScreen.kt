@@ -1,21 +1,30 @@
 package com.example.applock.Design.screens
 
 import android.app.Activity
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.verticalScroll
+
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -23,9 +32,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
@@ -34,16 +43,24 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
+
 import com.example.applock.R
 import com.example.applock.data.DataStoreManager
+
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+
 
 private data class SettingsItemData(
     val key: String,
@@ -51,6 +68,7 @@ private data class SettingsItemData(
     val iconRes: Int,
     val descriptionRes: Int?
 )
+
 
 @Composable
 fun SettingsScreen(
@@ -67,6 +85,7 @@ fun SettingsScreen(
 
     val scope = rememberCoroutineScope()
 
+
     var hideRecentJob by remember {
         mutableStateOf<Job?>(null)
     }
@@ -74,6 +93,7 @@ fun SettingsScreen(
     var appProtectionEnabled by remember {
         mutableStateOf(false)
     }
+
 
     val settingsItems = listOf(
 
@@ -134,13 +154,16 @@ fun SettingsScreen(
         )
     )
 
+
     var expandedItem by remember {
         mutableStateOf<String?>(null)
     }
 
+
     var hideFromRecents by remember {
         mutableStateOf(false)
     }
+
 
     var showRelockDialog by remember {
         mutableStateOf(false)
@@ -154,6 +177,7 @@ fun SettingsScreen(
         mutableStateOf("relock_after_quitting")
     }
 
+
     var showDelayDialog by remember {
         mutableStateOf(false)
     }
@@ -165,6 +189,24 @@ fun SettingsScreen(
     var tempDelayOption by remember {
         mutableStateOf("never")
     }
+
+
+    var showSecurityQuestionDialog by remember {
+        mutableStateOf(false)
+    }
+
+    var securityQuestion by remember {
+        mutableStateOf("")
+    }
+
+    var securityAnswer by remember {
+        mutableStateOf("")
+    }
+
+    var securityDropdownExpanded by remember {
+        mutableStateOf(false)
+    }
+
 
     LaunchedEffect(Unit) {
 
@@ -195,12 +237,16 @@ fun SettingsScreen(
             delayOption
     }
 
+
     val scrollState = rememberScrollState()
+
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF7F7F7))
+            .background(
+                Color(0xFFF7F7F7)
+            )
     ) {
 
         Column(
@@ -208,24 +254,33 @@ fun SettingsScreen(
         ) {
 
             Text(
-                text = stringResource(R.string.settings),
+                text = stringResource(
+                    R.string.settings
+                ),
+
                 modifier = Modifier.padding(
                     start = 54.dp,
                     top = 22.dp
                 ),
+
                 color = Color(0xFF333333),
+
                 fontSize = 22.sp
             )
+
 
             Spacer(
                 modifier = Modifier.height(22.dp)
             )
 
+
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
-                    .verticalScroll(scrollState)
+                    .verticalScroll(
+                        scrollState
+                    )
                     .padding(
                         start = 14.dp,
                         end = 14.dp,
@@ -235,84 +290,154 @@ fun SettingsScreen(
 
                 AppProtectionCard(
                     enabled = appProtectionEnabled,
+
                     onEnabledChange = { enabled ->
 
-                        appProtectionEnabled = enabled
+                        appProtectionEnabled =
+                            enabled
 
                         scope.launch {
-                            dataStore.saveAppProtectionEnabled(enabled)
+
+                            dataStore
+                                .saveAppProtectionEnabled(
+                                    enabled
+                                )
                         }
                     }
                 )
+
 
                 Spacer(
                     modifier = Modifier.height(12.dp)
                 )
 
+
                 settingsItems.forEach { item ->
 
                     val title =
-                        stringResource(item.titleRes)
+                        stringResource(
+                            item.titleRes
+                        )
 
                     val description =
                         item.descriptionRes?.let {
                             stringResource(it)
                         } ?: ""
 
+
                     SettingsItem(
-                        itemKey = item.key,
-                        title = title,
-                        iconRes = item.iconRes,
-                        description = description,
-                        expanded = expandedItem == item.key,
-                        hideFromRecents = hideFromRecents,
+
+                        itemKey =
+                            item.key,
+
+                        title =
+                            title,
+
+                        iconRes =
+                            item.iconRes,
+
+                        description =
+                            description,
+
+                        expanded =
+                            expandedItem == item.key,
+
+                        hideFromRecents =
+                            hideFromRecents,
 
                         onHideFromRecentsChange = { enabled ->
 
-                            hideFromRecents = enabled
+                            hideFromRecents =
+                                enabled
 
                             hideRecentJob?.cancel()
-                            hideRecentJob = null
+
+                            hideRecentJob =
+                                null
+
 
                             scope.launch {
-                                dataStore.saveHideFromRecents(enabled)
+
+                                dataStore
+                                    .saveHideFromRecents(
+                                        enabled
+                                    )
                             }
+
 
                             if (enabled) {
 
                                 hideRecentJob =
                                     scope.launch {
 
-                                        delay(10_000L)
+                                        delay(
+                                            10_000L
+                                        )
 
-                                        (context as? Activity)
-                                            ?.finishAndRemoveTask()
+                                        (
+                                                context as? Activity
+                                                )?.finishAndRemoveTask()
 
-                                        hideRecentJob = null
+                                        hideRecentJob =
+                                            null
                                     }
                             }
                         },
+
 
                         onRelockClick = {
 
                             tempRelockOption =
                                 relockOption
 
-                            showRelockDialog = true
+                            showRelockDialog =
+                                true
                         },
+
 
                         onDelayClick = {
 
                             tempDelayOption =
                                 delayOption
 
-                            showDelayDialog = true
+                            showDelayDialog =
+                                true
                         },
 
-                        delayOption = delayOption,
-                        relockOption = relockOption,
 
-                        onArrowClick = {
+                        delayOption =
+                            delayOption,
+
+                        relockOption =
+                            relockOption,
+
+
+                        onSecurityQuestionClick = {
+
+                            scope.launch {
+
+                                securityQuestion =
+                                    dataStore
+                                        .getSecurityQuestion()
+                                        .first()
+                                        .orEmpty()
+
+                                securityAnswer =
+                                    dataStore
+                                        .getSecurityAnswer()
+                                        .first()
+                                        .orEmpty()
+
+                                securityDropdownExpanded =
+                                    false
+
+                                showSecurityQuestionDialog =
+                                    true
+                            }
+                        },
+
+
+                        onCardClick = {
 
                             when (item.key) {
 
@@ -320,46 +445,72 @@ fun SettingsScreen(
                                     onLanguageClick()
                                 }
 
+                                "lock_setting" -> {
+
+                                    expandedItem =
+                                        if (
+                                            expandedItem ==
+                                            "lock_setting"
+                                        ) {
+                                            null
+                                        } else {
+                                            "lock_setting"
+                                        }
+                                }
+
                                 "intruder" -> {
                                     onIntruderClick()
                                 }
 
-                                "lock_setting",
                                 "hide_settings" -> {
 
                                     expandedItem =
-                                        if (expandedItem == item.key) {
+                                        if (
+                                            expandedItem ==
+                                            "hide_settings"
+                                        ) {
                                             null
                                         } else {
-                                            item.key
+                                            "hide_settings"
                                         }
                                 }
 
-                                "rate_us" -> {}
+                                "rate_us" -> {
+                                }
 
-                                "share" -> {}
+                                "share" -> {
+                                }
 
-                                "about" -> {}
+                                "about" -> {
+                                }
 
-                                "privacy_policy" -> {}
+                                "privacy_policy" -> {
+                                }
                             }
                         },
+
 
                         onResetPasswordClick =
                             onResetPasswordClick
                     )
 
+
                     Spacer(
-                        modifier = Modifier.height(12.dp)
+                        modifier = Modifier.height(
+                            12.dp
+                        )
                     )
                 }
             }
         }
 
+
         if (showRelockDialog) {
 
             RelockOptionDialog(
-                selectedOption = tempRelockOption,
+
+                selectedOption =
+                    tempRelockOption,
 
                 onOptionSelected = {
                     tempRelockOption = it
@@ -370,7 +521,8 @@ fun SettingsScreen(
                     tempRelockOption =
                         relockOption
 
-                    showRelockDialog = false
+                    showRelockDialog =
+                        false
                 },
 
                 onConfirm = {
@@ -378,21 +530,27 @@ fun SettingsScreen(
                     relockOption =
                         tempRelockOption
 
-                    showRelockDialog = false
+                    showRelockDialog =
+                        false
 
                     scope.launch {
-                        dataStore.saveRelockOption(
-                            tempRelockOption
-                        )
+
+                        dataStore
+                            .saveRelockOption(
+                                tempRelockOption
+                            )
                     }
                 }
             )
         }
 
+
         if (showDelayDialog) {
 
             DelayToRelockDialog(
-                selectedOption = tempDelayOption,
+
+                selectedOption =
+                    tempDelayOption,
 
                 onOptionSelected = {
                     tempDelayOption = it
@@ -403,7 +561,8 @@ fun SettingsScreen(
                     tempDelayOption =
                         delayOption
 
-                    showDelayDialog = false
+                    showDelayDialog =
+                        false
                 },
 
                 onConfirm = {
@@ -411,18 +570,107 @@ fun SettingsScreen(
                     delayOption =
                         tempDelayOption
 
-                    showDelayDialog = false
+                    showDelayDialog =
+                        false
 
                     scope.launch {
-                        dataStore.saveRelockDelay(
-                            tempDelayOption
-                        )
+
+                        dataStore
+                            .saveRelockDelay(
+                                tempDelayOption
+                            )
+                    }
+                }
+            )
+        }
+
+
+        if (showSecurityQuestionDialog) {
+
+            SecurityQuestionSettingsDialog(
+
+                selectedQuestion =
+                    securityQuestion,
+
+                answer =
+                    securityAnswer,
+
+                dropdownExpanded =
+                    securityDropdownExpanded,
+
+                onDropdownClick = {
+
+                    securityDropdownExpanded =
+                        !securityDropdownExpanded
+                },
+
+                onQuestionSelected = {
+
+                    securityQuestion =
+                        it
+
+                    securityDropdownExpanded =
+                        false
+                },
+
+                onAnswerChanged = {
+
+                    securityAnswer =
+                        it
+                },
+
+                onCancel = {
+
+                    securityDropdownExpanded =
+                        false
+
+                    showSecurityQuestionDialog =
+                        false
+                },
+
+                onSave = {
+
+                    val question =
+                        securityQuestion.trim()
+
+                    val answer =
+                        securityAnswer.trim()
+
+
+                    if (
+                        question.isNotEmpty() &&
+                        answer.isNotEmpty()
+                    ) {
+
+                        scope.launch {
+
+                            dataStore
+                                .saveSecurityQuestion(
+                                    question
+                                )
+
+                            dataStore
+                                .saveSecurityAnswer(
+                                    answer
+                                )
+
+                            securityDropdownExpanded =
+                                false
+
+                            showSecurityQuestionDialog =
+                                false
+                        }
                     }
                 }
             )
         }
     }
 }
+
+
+// =============================================================
+// APP PROTECTION CARD
+// =============================================================
 
 @Composable
 private fun AppProtectionCard(
@@ -431,243 +679,400 @@ private fun AppProtectionCard(
 ) {
 
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .shadow(
-                elevation = 5.dp,
-                shape = RoundedCornerShape(12.dp),
-                clip = false,
-                ambientColor = Color.Black.copy(alpha = 0.10f),
-                spotColor = Color.Black.copy(alpha = 0.10f)
+
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .shadow(
+                    elevation = 5.dp,
+                    shape =
+                        RoundedCornerShape(
+                            12.dp
+                        ),
+                    clip = false,
+                    ambientColor =
+                        Color.Black.copy(
+                            alpha = 0.10f
+                        ),
+                    spotColor =
+                        Color.Black.copy(
+                            alpha = 0.10f
+                        )
+                )
+                .clip(
+                    RoundedCornerShape(
+                        12.dp
+                    )
+                ),
+
+        shape =
+            RoundedCornerShape(
+                12.dp
+            ),
+
+        colors =
+            CardDefaults.cardColors(
+                containerColor =
+                    Color.White
+            ),
+
+        elevation =
+            CardDefaults.cardElevation(
+                defaultElevation = 2.dp,
+                pressedElevation = 1.dp
             )
-            .clip(RoundedCornerShape(12.dp)),
-
-        shape = RoundedCornerShape(12.dp),
-
-        colors = CardDefaults.cardColors(
-            containerColor = Color.White
-        ),
-
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 2.dp,
-            pressedElevation = 1.dp
-        )
     ) {
 
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(70.dp)
-                .padding(
-                    start = 8.dp,
-                    end = 10.dp
-                ),
 
-            verticalAlignment = Alignment.CenterVertically
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(70.dp)
+                    .padding(
+                        start = 8.dp,
+                        end = 10.dp
+                    ),
+
+            verticalAlignment =
+                Alignment.CenterVertically
         ) {
 
             Image(
-                painter = painterResource(
-                    id = R.drawable.enable
-                ),
+
+                painter =
+                    painterResource(
+                        id =
+                            R.drawable.enable
+                    ),
 
                 contentDescription =
                     stringResource(
                         R.string.enable_app_protection
                     ),
 
-                modifier = Modifier.size(38.dp),
+                modifier =
+                    Modifier.size(
+                        38.dp
+                    ),
 
-                contentScale = ContentScale.Fit
+                contentScale =
+                    ContentScale.Fit
             )
+
 
             Spacer(
-                modifier = Modifier.width(18.dp)
+                modifier =
+                    Modifier.width(
+                        18.dp
+                    )
             )
 
+
             Column(
-                modifier = Modifier.weight(1f)
+                modifier =
+                    Modifier.weight(
+                        1f
+                    )
             ) {
 
                 Text(
-                    text = stringResource(R.string.applock),
-                    color = Color(0xFF333333),
-                    fontSize = 15.sp
+
+                    text =
+                        stringResource(
+                            R.string.applock
+                        ),
+
+                    color =
+                        Color(0xFF333333),
+
+                    fontSize =
+                        15.sp
                 )
+
 
                 Spacer(
-                    modifier = Modifier.height(2.dp)
+                    modifier =
+                        Modifier.height(
+                            2.dp
+                        )
                 )
 
+
                 Text(
-                    text = stringResource(
-                        R.string.enable_app_protection
-                    ),
-                    color = Color(0xFF666666),
-                    fontSize = 11.sp
+
+                    text =
+                        stringResource(
+                            R.string.enable_app_protection
+                        ),
+
+                    color =
+                        Color(0xFF666666),
+
+                    fontSize =
+                        11.sp
                 )
             }
 
+
             Switch(
-                checked = enabled,
 
-                onCheckedChange = {
-                    onEnabledChange(it)
-                },
+                checked =
+                    enabled,
 
-                modifier = Modifier
-                    .size(
-                        width = 42.dp,
-                        height = 24.dp
+                onCheckedChange =
+                    onEnabledChange,
+
+                modifier =
+                    Modifier
+                        .size(
+                            width = 42.dp,
+                            height = 24.dp
+                        )
+                        .scale(
+                            0.56f
+                        ),
+
+                colors =
+                    SwitchDefaults.colors(
+
+                        checkedThumbColor =
+                            Color(0xFF0396FF),
+
+                        checkedTrackColor =
+                            Color(0xFF8DCCF7),
+
+                        uncheckedThumbColor =
+                            Color(0xFFAAAAAA),
+
+                        uncheckedTrackColor =
+                            Color(0xFFE3E3E3),
+
+                        uncheckedBorderColor =
+                            Color.Transparent,
+
+                        checkedBorderColor =
+                            Color.Transparent
                     )
-                    .scale(0.56f),
-
-                colors = SwitchDefaults.colors(
-                    checkedThumbColor = Color(0xFF0396FF),
-                    checkedTrackColor = Color(0xFF8DCCF7),
-                    uncheckedThumbColor = Color(0xFFAAAAAA),
-                    uncheckedTrackColor = Color(0xFFE3E3E3),
-                    uncheckedBorderColor = Color.Transparent,
-                    checkedBorderColor = Color.Transparent
-                )
             )
         }
     }
 }
 
+
+// =============================================================
+// SETTINGS ITEM
+// =============================================================
+
 @Composable
 private fun SettingsItem(
+
     itemKey: String,
+
     title: String,
+
     iconRes: Int,
+
     description: String,
+
     expanded: Boolean,
+
     hideFromRecents: Boolean,
-    onHideFromRecentsChange: (Boolean) -> Unit,
-    onRelockClick: () -> Unit,
-    onDelayClick: () -> Unit,
-    delayOption: String,
-    relockOption: String,
-    onArrowClick: () -> Unit,
-    onResetPasswordClick: () -> Unit
+
+    onHideFromRecentsChange:
+        (Boolean) -> Unit,
+
+    onRelockClick:
+        () -> Unit,
+
+    onDelayClick:
+        () -> Unit,
+
+    delayOption:
+    String,
+
+    relockOption:
+    String,
+
+    onSecurityQuestionClick:
+        () -> Unit,
+
+    onCardClick:
+        () -> Unit,
+
+    onResetPasswordClick:
+        () -> Unit
 ) {
 
+    val expandable =
+        itemKey == "lock_setting" ||
+                itemKey == "hide_settings"
+
+
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .shadow(
-                elevation = 5.dp,
-                shape = RoundedCornerShape(12.dp),
-                clip = false,
-                ambientColor = Color.Black.copy(alpha = 0.10f),
-                spotColor = Color.Black.copy(alpha = 0.10f)
+
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .shadow(
+                    elevation = 5.dp,
+                    shape =
+                        RoundedCornerShape(
+                            12.dp
+                        ),
+                    clip = false,
+                    ambientColor =
+                        Color.Black.copy(
+                            alpha = 0.10f
+                        ),
+                    spotColor =
+                        Color.Black.copy(
+                            alpha = 0.10f
+                        )
+                )
+                .clip(
+                    RoundedCornerShape(
+                        12.dp
+                    )
+                )
+                .clickable(
+
+                    indication =
+                        null,
+
+                    interactionSource =
+                        remember {
+                            MutableInteractionSource()
+                        }
+
+                ) {
+
+                    onCardClick()
+                },
+
+        shape =
+            RoundedCornerShape(
+                12.dp
+            ),
+
+        colors =
+            CardDefaults.cardColors(
+                containerColor =
+                    Color.White
+            ),
+
+        elevation =
+            CardDefaults.cardElevation(
+                defaultElevation = 2.dp,
+                pressedElevation = 1.dp
             )
-            .clip(RoundedCornerShape(12.dp)),
-
-        shape = RoundedCornerShape(12.dp),
-
-        colors = CardDefaults.cardColors(
-            containerColor = Color.White
-        ),
-
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 2.dp,
-            pressedElevation = 1.dp
-        )
     ) {
 
         Column(
-            modifier = Modifier.fillMaxWidth()
+            modifier =
+                Modifier.fillMaxWidth()
         ) {
 
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp)
-                    .padding(
-                        start = 8.dp,
-                        end = 10.dp
-                    ),
+
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(52.dp)
+                        .padding(
+                            start = 8.dp,
+                            end = 10.dp
+                        ),
 
                 verticalAlignment =
                     Alignment.CenterVertically
             ) {
 
                 Image(
-                    painter = painterResource(id = iconRes),
-                    contentDescription = title,
-                    modifier = Modifier.size(38.dp),
-                    contentScale = ContentScale.FillBounds
+
+                    painter =
+                        painterResource(
+                            id =
+                                iconRes
+                        ),
+
+                    contentDescription =
+                        title,
+
+                    modifier =
+                        Modifier.size(
+                            38.dp
+                        ),
+
+                    contentScale =
+                        ContentScale.FillBounds
                 )
+
 
                 Spacer(
-                    modifier = Modifier.width(18.dp)
+                    modifier =
+                        Modifier.width(
+                            18.dp
+                        )
                 )
+
 
                 Text(
-                    text = title,
-                    modifier = Modifier.weight(1f),
-                    color = Color(0xFF333333),
-                    fontSize = 15.sp
+
+                    text =
+                        title,
+
+                    modifier =
+                        Modifier.weight(
+                            1f
+                        ),
+
+                    color =
+                        Color(0xFF333333),
+
+                    fontSize =
+                        15.sp
                 )
 
-                Box(
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clickable {
-                            onArrowClick()
-                        },
 
-                    contentAlignment =
-                        Alignment.Center
-                ) {
+                Image(
 
-                    val expandable =
-                        itemKey == "lock_setting" ||
-                                itemKey == "hide_settings"
+                    painter =
+                        painterResource(
 
-                    Image(
-                        painter = painterResource(
                             id =
                                 if (expandable) {
+
                                     if (expanded) {
                                         R.drawable.uparrow
                                     } else {
                                         R.drawable.downicon
                                     }
+
                                 } else {
+
                                     R.drawable.sidearrow
                                 }
                         ),
 
-                        contentDescription =
+                    contentDescription =
+                        null,
+
+                    modifier =
+                        Modifier.size(
+
                             if (expandable) {
-                                if (expanded) {
-                                    stringResource(R.string.collapse)
-                                } else {
-                                    stringResource(R.string.expand)
-                                }
+                                12.dp
                             } else {
-                                stringResource(
-                                    R.string.open_item,
-                                    title
-                                )
-                            },
+                                14.dp
+                            }
+                        ),
 
-                        modifier =
-                            Modifier.size(
-                                if (expandable) {
-                                    12.dp
-                                } else {
-                                    14.dp
-                                }
-                            ),
-
-                        contentScale =
-                            ContentScale.Fit
-                    )
-                }
+                    contentScale =
+                        ContentScale.Fit
+                )
             }
+
 
             if (
                 expanded &&
@@ -675,14 +1080,27 @@ private fun SettingsItem(
             ) {
 
                 LockSettingExpandedContent(
-                    onRelockClick = onRelockClick,
-                    onDelayClick = onDelayClick,
-                    delayOption = delayOption,
-                    relockOption = relockOption,
+
+                    onRelockClick =
+                        onRelockClick,
+
+                    onDelayClick =
+                        onDelayClick,
+
+                    delayOption =
+                        delayOption,
+
+                    relockOption =
+                        relockOption,
+
                     onResetPasswordClick =
-                        onResetPasswordClick
+                        onResetPasswordClick,
+
+                    onSecurityQuestionClick =
+                        onSecurityQuestionClick
                 )
             }
+
 
             if (
                 expanded &&
@@ -690,6 +1108,7 @@ private fun SettingsItem(
             ) {
 
                 HideSettingsExpandedContent(
+
                     hideFromRecents =
                         hideFromRecents,
 
@@ -697,48 +1116,28 @@ private fun SettingsItem(
                         onHideFromRecentsChange
                 )
             }
-
-            if (
-                expanded &&
-                itemKey != "intruder" &&
-                itemKey != "lock_setting" &&
-                itemKey != "hide_settings" &&
-                itemKey != "languages" &&
-                itemKey != "rate_us" &&
-                itemKey != "share" &&
-                itemKey != "about" &&
-                itemKey != "privacy_policy"
-            ) {
-
-                Text(
-                    text = description,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(
-                            start = 64.dp,
-                            end = 20.dp,
-                            bottom = 14.dp
-                        ),
-                    color = Color(0xFF666666),
-                    fontSize = 13.sp
-                )
-            }
         }
     }
 }
 
+
+// =============================================================
+// HIDE SETTINGS
+// =============================================================
+
 @Composable
 private fun HideSettingsExpandedContent(
+
     hideFromRecents: Boolean,
-    onHideFromRecentsChange: (Boolean) -> Unit
+
+    onHideFromRecentsChange:
+        (Boolean) -> Unit
 ) {
 
-    Column(
-        modifier = Modifier.fillMaxWidth()
-    ) {
+    Row(
 
-        Row(
-            modifier = Modifier
+        modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(
                     start = 12.dp,
@@ -747,75 +1146,133 @@ private fun HideSettingsExpandedContent(
                     bottom = 8.dp
                 ),
 
-            verticalAlignment =
-                Alignment.CenterVertically
-        ) {
+        verticalAlignment =
+            Alignment.CenterVertically
+    ) {
 
-            Image(
-                painter = painterResource(
-                    id = R.drawable.eyehide
+        Image(
+
+            painter =
+                painterResource(
+                    id =
+                        R.drawable.eyehide
                 ),
 
-                contentDescription =
-                    stringResource(
-                        R.string.hide_from_recent_screen
-                    ),
+            contentDescription =
+                stringResource(
+                    R.string.hide_from_recent_screen
+                ),
 
-                modifier = Modifier.size(22.dp),
+            modifier =
+                Modifier.size(
+                    22.dp
+                ),
 
-                contentScale =
-                    ContentScale.Fit
-            )
+            contentScale =
+                ContentScale.Fit
+        )
 
-            Spacer(
-                modifier = Modifier.width(13.dp)
-            )
 
-            Text(
-                text = stringResource(
+        Spacer(
+            modifier =
+                Modifier.width(
+                    13.dp
+                )
+        )
+
+
+        Text(
+
+            text =
+                stringResource(
                     R.string.apps_hide_from_recent_screen
                 ),
-                color = Color(0xFF444444),
-                fontSize = 14.sp,
-                modifier = Modifier.weight(1f)
-            )
 
-            Switch(
-                checked = hideFromRecents,
+            color =
+                Color(0xFF444444),
 
-                onCheckedChange =
-                    onHideFromRecentsChange,
+            fontSize =
+                14.sp,
 
-                modifier = Modifier
+            modifier =
+                Modifier.weight(
+                    1f
+                )
+        )
+
+
+        Switch(
+
+            checked =
+                hideFromRecents,
+
+            onCheckedChange =
+                onHideFromRecentsChange,
+
+            modifier =
+                Modifier
                     .size(
                         width = 42.dp,
                         height = 24.dp
                     )
-                    .scale(0.56f),
+                    .scale(
+                        0.56f
+                    ),
 
-                colors = SwitchDefaults.colors(
-                    checkedThumbColor = Color.White,
-                    checkedTrackColor = Color(0xFF9C27B0),
-                    uncheckedThumbColor = Color(0xFFAAAAAA),
-                    uncheckedTrackColor = Color(0xFFE3E3E3),
-                    uncheckedBorderColor = Color.Transparent,
-                    checkedBorderColor = Color.Transparent
+            colors =
+                SwitchDefaults.colors(
+
+                    checkedThumbColor =
+                        Color.White,
+
+                    checkedTrackColor =
+                        Color(0xFF9C27B0),
+
+                    uncheckedThumbColor =
+                        Color(0xFFAAAAAA),
+
+                    uncheckedTrackColor =
+                        Color(0xFFE3E3E3),
+
+                    uncheckedBorderColor =
+                        Color.Transparent,
+
+                    checkedBorderColor =
+                        Color.Transparent
                 )
-            )
-        }
+        )
     }
 }
 
+
+// =============================================================
+// LOCK SETTINGS
+// =============================================================
+
 @Composable
 private fun LockSettingExpandedContent(
-    onRelockClick: () -> Unit,
-    onDelayClick: () -> Unit,
-    delayOption: String,
-    relockOption: String,
-    onResetPasswordClick: () -> Unit
+
+    onRelockClick:
+        () -> Unit,
+
+    onDelayClick:
+        () -> Unit,
+
+    delayOption:
+    String,
+
+    relockOption:
+    String,
+
+    onResetPasswordClick:
+        () -> Unit,
+
+    onSecurityQuestionClick:
+        () -> Unit
 ) {
 
-    val context = LocalContext.current
+    val context =
+        LocalContext.current
 
     val dataStore =
         remember {
@@ -824,6 +1281,7 @@ private fun LockSettingExpandedContent(
 
     val scope =
         rememberCoroutineScope()
+
 
     var fingerprintEnabled by remember {
         mutableStateOf(false)
@@ -836,6 +1294,7 @@ private fun LockSettingExpandedContent(
     var hideTrackEnabled by remember {
         mutableStateOf(false)
     }
+
 
     LaunchedEffect(Unit) {
 
@@ -855,124 +1314,931 @@ private fun LockSettingExpandedContent(
                 .first()
     }
 
+
     Column(
-        modifier = Modifier.fillMaxWidth()
+        modifier =
+            Modifier.fillMaxWidth()
     ) {
 
         Text(
-            text = stringResource(R.string.password),
-            color = Color(0xFF888888),
-            fontSize = 16.sp,
-            modifier = Modifier.padding(
-                start = 10.dp,
-                top = 6.dp,
-                bottom = 6.dp
-            )
+
+            text =
+                stringResource(
+                    R.string.password
+                ),
+
+            color =
+                Color(0xFF888888),
+
+            fontSize =
+                16.sp,
+
+            modifier =
+                Modifier.padding(
+                    start = 10.dp,
+                    top = 6.dp,
+                    bottom = 6.dp
+                )
         )
 
+
         LockSettingRow(
-            iconRes = R.drawable.redlock,
-            title = stringResource(R.string.reset_password),
-            subtitle = stringResource(R.string.pattern),
-            onClick = onResetPasswordClick
+
+            iconRes =
+                R.drawable.redlock,
+
+            title =
+                stringResource(
+                    R.string.reset_password
+                ),
+
+            subtitle =
+                stringResource(
+                    R.string.pattern
+                ),
+
+            onClick =
+                onResetPasswordClick
         )
+
 
         SettingDivider()
 
+
         LockSettingRow(
-            iconRes = R.drawable.security,
-            title = stringResource(R.string.security_settings),
-            subtitle = stringResource(R.string.set_security_email),
-            onClick = {}
+
+            iconRes =
+                R.drawable.security,
+
+            title =
+                stringResource(
+                    R.string.security_settings
+                ),
+
+            subtitle =
+                stringResource(
+                    R.string.set_security_email
+                ),
+
+            onClick =
+                onSecurityQuestionClick
         )
 
+
         SettingDivider()
+
 
         LockSettingSwitchRow(
-            iconRes = R.drawable.fingerprint,
-            title = stringResource(R.string.fingerprint_lock),
-            subtitle = stringResource(
-                R.string.use_fingerprint_to_unlock
-            ),
-            checked = fingerprintEnabled,
+
+            iconRes =
+                R.drawable.fingerprint,
+
+            title =
+                stringResource(
+                    R.string.fingerprint_lock
+                ),
+
+            subtitle =
+                stringResource(
+                    R.string.use_fingerprint_to_unlock
+                ),
+
+            checked =
+                fingerprintEnabled,
+
             onCheckedChange = {
 
-                fingerprintEnabled = it
+                fingerprintEnabled =
+                    it
 
                 scope.launch {
-                    dataStore.saveFingerprintEnabled(it)
+
+                    dataStore
+                        .saveFingerprintEnabled(
+                            it
+                        )
                 }
             }
         )
+
 
         Text(
-            text = stringResource(R.string.unlock),
-            color = Color(0xFF888888),
-            fontSize = 16.sp,
-            modifier = Modifier.padding(
-                start = 10.dp,
-                top = 8.dp,
-                bottom = 6.dp
-            )
+
+            text =
+                stringResource(
+                    R.string.unlock
+                ),
+
+            color =
+                Color(0xFF888888),
+
+            fontSize =
+                16.sp,
+
+            modifier =
+                Modifier.padding(
+                    start = 10.dp,
+                    top = 8.dp,
+                    bottom = 6.dp
+                )
         )
 
+
         LockSettingSwitchRow(
-            iconRes = R.drawable.vibration,
-            title = stringResource(R.string.vibration),
-            subtitle = null,
-            checked = vibrationEnabled,
+
+            iconRes =
+                R.drawable.vibration,
+
+            title =
+                stringResource(
+                    R.string.vibration
+                ),
+
+            subtitle =
+                null,
+
+            checked =
+                vibrationEnabled,
+
             onCheckedChange = {
 
-                vibrationEnabled = it
+                vibrationEnabled =
+                    it
 
                 scope.launch {
-                    dataStore.saveVibrationEnabled(it)
+
+                    dataStore
+                        .saveVibrationEnabled(
+                            it
+                        )
                 }
             }
         )
 
+
         SettingDivider()
 
+
         LockSettingSwitchRow(
-            iconRes = R.drawable.track,
-            title = stringResource(R.string.hide_track),
-            subtitle = stringResource(
-                R.string.hide_track_description
-            ),
-            checked = hideTrackEnabled,
+
+            iconRes =
+                R.drawable.track,
+
+            title =
+                stringResource(
+                    R.string.hide_track
+                ),
+
+            subtitle =
+                stringResource(
+                    R.string.hide_track_description
+                ),
+
+            checked =
+                hideTrackEnabled,
+
             onCheckedChange = {
 
-                hideTrackEnabled = it
+                hideTrackEnabled =
+                    it
 
                 scope.launch {
-                    dataStore.saveHideTrackEnabled(it)
+
+                    dataStore
+                        .saveHideTrackEnabled(
+                            it
+                        )
                 }
             }
         )
 
-        SettingDivider()
-
-        LockSettingRow(
-            iconRes = R.drawable.relock,
-            title = stringResource(R.string.relock_option),
-            subtitle = getRelockText(relockOption),
-            onClick = onRelockClick
-        )
 
         SettingDivider()
 
+
         LockSettingRow(
-            iconRes = R.drawable.delay,
-            title = stringResource(R.string.delay_to_relock),
-            subtitle = getDelayText(delayOption),
-            onClick = onDelayClick
+
+            iconRes =
+                R.drawable.relock,
+
+            title =
+                stringResource(
+                    R.string.relock_option
+                ),
+
+            subtitle =
+                getRelockText(
+                    relockOption
+                ),
+
+            onClick =
+                onRelockClick
         )
+
+
+        SettingDivider()
+
+
+        LockSettingRow(
+
+            iconRes =
+                R.drawable.delay,
+
+            title =
+                stringResource(
+                    R.string.delay_to_relock
+                ),
+
+            subtitle =
+                getDelayText(
+                    delayOption
+                ),
+
+            onClick =
+                onDelayClick
+        )
+
 
         Spacer(
-            modifier = Modifier.height(8.dp)
+            modifier =
+                Modifier.height(
+                    8.dp
+                )
         )
     }
 }
+
+
+// =============================================================
+// SECURITY QUESTION DIALOG
+// =============================================================
+
+@Composable
+private fun SecurityQuestionSettingsDialog(
+
+    selectedQuestion:
+    String,
+
+    answer:
+    String,
+
+    dropdownExpanded:
+    Boolean,
+
+    onDropdownClick:
+        () -> Unit,
+
+    onQuestionSelected:
+        (String) -> Unit,
+
+    onAnswerChanged:
+        (String) -> Unit,
+
+    onCancel:
+        () -> Unit,
+
+    onSave:
+        () -> Unit
+) {
+
+    val questions =
+        listOf(
+
+            stringResource(
+                R.string.security_question_name
+            ),
+
+            stringResource(
+                R.string.security_question_father
+            ),
+
+            stringResource(
+                R.string.security_question_pet
+            ),
+
+            stringResource(
+                R.string.security_question_job
+            )
+        )
+
+
+    Dialog(
+
+        onDismissRequest =
+            onCancel,
+
+        properties =
+            DialogProperties(
+
+                dismissOnBackPress =
+                    true,
+
+                dismissOnClickOutside =
+                    true,
+
+                usePlatformDefaultWidth =
+                    false
+            )
+    ) {
+
+        Box(
+
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .background(
+                        Color.Transparent
+                    ),
+
+            contentAlignment =
+                Alignment.Center
+        ) {
+
+            Column(
+
+                modifier =
+                    Modifier
+                        .fillMaxWidth(
+                            0.90f
+                        )
+                        .wrapContentHeight()
+                        .background(
+                            Color.White,
+                            RoundedCornerShape(
+                                26.dp
+                            )
+                        )
+                        .padding(
+                            start = 25.dp,
+                            end = 25.dp,
+                            top = 30.dp,
+                            bottom = 30.dp
+                        )
+            ) {
+
+                Text(
+
+                    text =
+                        stringResource(
+                            R.string.security_questions
+                        ),
+
+                    color =
+                        Color(0xFF333333),
+
+                    fontSize =
+                        19.sp,
+
+                    modifier =
+                        Modifier.fillMaxWidth(),
+
+                    textAlign =
+                        TextAlign.Center
+                )
+
+
+                Spacer(
+                    modifier =
+                        Modifier.height(
+                            8.dp
+                        )
+                )
+
+
+                Text(
+
+                    text =
+                        stringResource(
+                            R.string.security_question_description
+                        ),
+
+                    color =
+                        Color(0xFFBDBDBD),
+
+                    fontSize =
+                        11.sp,
+
+                    lineHeight =
+                        18.sp,
+
+                    modifier =
+                        Modifier.fillMaxWidth(),
+
+                    textAlign =
+                        TextAlign.Center
+                )
+
+
+                Spacer(
+                    modifier =
+                        Modifier.height(
+                            28.dp
+                        )
+                )
+
+
+                Text(
+
+                    text =
+                        stringResource(
+                            R.string.select_security_questions
+                        ),
+
+                    color =
+                        Color(0xFF333333),
+
+                    fontSize =
+                        14.sp
+                )
+
+
+                Spacer(
+                    modifier =
+                        Modifier.height(
+                            8.dp
+                        )
+                )
+
+
+                Box(
+
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(
+                                40.dp
+                            )
+                ) {
+
+                    Row(
+
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .height(
+                                    40.dp
+                                )
+                                .background(
+                                    Color(0xFFF8F8F8),
+                                    RoundedCornerShape(
+                                        15.dp
+                                    )
+                                )
+                                .clickable(
+
+                                    indication =
+                                        null,
+
+                                    interactionSource =
+                                        remember {
+                                            MutableInteractionSource()
+                                        }
+
+                                ) {
+
+                                    onDropdownClick()
+                                }
+                                .padding(
+                                    start = 18.dp,
+                                    end = 14.dp
+                                ),
+
+                        verticalAlignment =
+                            Alignment.CenterVertically
+                    ) {
+
+                        Text(
+
+                            text =
+                                if (
+                                    selectedQuestion
+                                        .isEmpty()
+                                ) {
+
+                                    stringResource(
+                                        R.string.select_security_question
+                                    )
+
+                                } else {
+
+                                    selectedQuestion
+                                },
+
+                            color =
+                                if (
+                                    selectedQuestion
+                                        .isEmpty()
+                                ) {
+
+                                    Color(0xFFBDBDBD)
+
+                                } else {
+
+                                    Color(0xFF333333)
+                                },
+
+                            fontSize =
+                                14.sp,
+
+                            maxLines =
+                                1,
+
+                            modifier =
+                                Modifier.weight(
+                                    1f
+                                )
+                        )
+
+
+                        Icon(
+
+                            imageVector =
+                                Icons.Outlined.KeyboardArrowDown,
+
+                            contentDescription =
+                                null,
+
+                            tint =
+                                Color(0xFF8F8F8F),
+
+                            modifier =
+                                Modifier.size(
+                                    22.dp
+                                )
+                        )
+                    }
+
+
+                    if (
+                        dropdownExpanded
+                    ) {
+
+                        Popup(
+
+                            alignment =
+                                Alignment.TopEnd,
+
+                            onDismissRequest = {
+
+                                onDropdownClick()
+                            },
+
+                            properties =
+                                PopupProperties(
+                                    focusable =
+                                        true
+                                )
+                        ) {
+
+                            Column(
+
+                                modifier =
+                                    Modifier
+                                        .width(
+                                            210.dp
+                                        )
+                                        .background(
+                                            Color.White,
+                                            RoundedCornerShape(
+                                                15.dp
+                                            )
+                                        )
+                                        .border(
+                                            width =
+                                                1.dp,
+
+                                            color =
+                                                Color(
+                                                    0xFFE5E5E5
+                                                ),
+
+                                            shape =
+                                                RoundedCornerShape(
+                                                    15.dp
+                                                )
+                                        )
+                            ) {
+
+                                questions.forEachIndexed {
+                                        index,
+                                        question ->
+
+                                    Text(
+
+                                        text =
+                                            question,
+
+                                        color =
+                                            Color(
+                                                0xFF333333
+                                            ),
+
+                                        fontSize =
+                                            13.sp,
+
+                                        maxLines =
+                                            1,
+
+                                        modifier =
+                                            Modifier
+                                                .fillMaxWidth()
+                                                .clickable(
+
+                                                    indication =
+                                                        null,
+
+                                                    interactionSource =
+                                                        remember {
+                                                            MutableInteractionSource()
+                                                        }
+
+                                                ) {
+
+                                                    onQuestionSelected(
+                                                        question
+                                                    )
+                                                }
+                                                .padding(
+                                                    horizontal =
+                                                        18.dp,
+
+                                                    vertical =
+                                                        14.dp
+                                                )
+                                    )
+
+
+                                    if (
+                                        index <
+                                        questions.lastIndex
+                                    ) {
+
+                                        Box(
+
+                                            modifier =
+                                                Modifier
+                                                    .fillMaxWidth()
+                                                    .height(
+                                                        1.dp
+                                                    )
+                                                    .background(
+                                                        Color(
+                                                            0xFFF0F0F0
+                                                        )
+                                                    )
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+
+                Spacer(
+                    modifier =
+                        Modifier.height(
+                            23.dp
+                        )
+                )
+
+
+                Text(
+
+                    text =
+                        stringResource(
+                            R.string.enter_security_answer
+                        ),
+
+                    color =
+                        Color(0xFF333333),
+
+                    fontSize =
+                        14.sp
+                )
+
+
+                Spacer(
+                    modifier =
+                        Modifier.height(
+                            8.dp
+                        )
+                )
+
+
+                BasicTextField(
+
+                    value =
+                        answer,
+
+                    onValueChange =
+                        onAnswerChanged,
+
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(
+                                40.dp
+                            )
+                            .background(
+                                Color(0xFFF8F8F8),
+                                RoundedCornerShape(
+                                    15.dp
+                                )
+                            )
+                            .padding(
+                                horizontal =
+                                    15.dp
+                            ),
+
+                    singleLine =
+                        true,
+
+                    textStyle =
+                        TextStyle(
+
+                            color =
+                                Color(0xFF333333),
+
+                            fontSize =
+                                12.sp,
+
+                            lineHeight =
+                                16.sp
+                        ),
+
+                    decorationBox =
+                        { innerTextField ->
+
+                            Box(
+
+                                modifier =
+                                    Modifier.fillMaxSize(),
+
+                                contentAlignment =
+                                    Alignment.CenterStart
+                            ) {
+
+                                if (
+                                    answer.isEmpty()
+                                ) {
+
+                                    Text(
+
+                                        text =
+                                            stringResource(
+                                                R.string.enter_your_answer
+                                            ),
+
+                                        color =
+                                            Color(
+                                                0xFFBDBDBD
+                                            ),
+
+                                        fontSize =
+                                            12.sp,
+
+                                        maxLines =
+                                            1
+                                    )
+                                }
+
+
+                                innerTextField()
+                            }
+                        }
+                )
+
+
+                Spacer(
+                    modifier =
+                        Modifier.height(
+                            30.dp
+                        )
+                )
+
+
+                Row(
+
+                    modifier =
+                        Modifier.fillMaxWidth(),
+
+                    horizontalArrangement =
+                        Arrangement.End,
+
+                    verticalAlignment =
+                        Alignment.CenterVertically
+                ) {
+
+                    Text(
+
+                        text =
+                            stringResource(
+                                R.string.cancel
+                            ),
+
+                        color =
+                            Color(0xFF818181),
+
+                        fontSize =
+                            16.sp,
+
+                        modifier =
+                            Modifier
+                                .clickable(
+
+                                    indication =
+                                        null,
+
+                                    interactionSource =
+                                        remember {
+                                            MutableInteractionSource()
+                                        }
+
+                                ) {
+
+                                    onCancel()
+                                }
+                                .padding(
+                                    horizontal =
+                                        20.dp,
+
+                                    vertical =
+                                        10.dp
+                                )
+                    )
+
+
+                    Spacer(
+                        modifier =
+                            Modifier.width(
+                                20.dp
+                            )
+                    )
+
+
+                    val saveEnabled =
+                        selectedQuestion
+                            .isNotEmpty() &&
+                                answer
+                                    .trim()
+                                    .isNotEmpty()
+
+
+                    Text(
+
+                        text =
+                            stringResource(
+                                R.string.save
+                            ),
+
+                        color =
+                            if (saveEnabled) {
+                                Color(0xFF2196F3)
+                            } else {
+                                Color(0xFF90CAF9)
+                            },
+
+                        fontSize =
+                            16.sp,
+
+                        modifier =
+                            Modifier
+                                .clickable(
+
+                                    enabled =
+                                        saveEnabled,
+
+                                    indication =
+                                        null,
+
+                                    interactionSource =
+                                        remember {
+                                            MutableInteractionSource()
+                                        }
+
+                                ) {
+
+                                    onSave()
+                                }
+                                .padding(
+                                    horizontal =
+                                        20.dp,
+
+                                    vertical =
+                                        10.dp
+                                )
+                    )
+                }
+            }
+        }
+    }
+}
+
+
+// =============================================================
+// RELOCK TEXT
+// =============================================================
 
 @Composable
 private fun getRelockText(
@@ -982,21 +2248,29 @@ private fun getRelockText(
     return when (relockOption) {
 
         "relock_after_screen_off" ->
+
             stringResource(
                 R.string.relock_after_screen_off
             )
 
         "relock_after_quitting" ->
+
             stringResource(
                 R.string.relock_after_quitting
             )
 
         else ->
+
             stringResource(
                 R.string.relock_after_quitting
             )
     }
 }
+
+
+// =============================================================
+// DELAY TEXT
+// =============================================================
 
 @Composable
 private fun getDelayText(
@@ -1006,173 +2280,318 @@ private fun getDelayText(
     return when (key) {
 
         "never" ->
-            stringResource(R.string.never)
+
+            stringResource(
+                R.string.never
+            )
 
         "five_seconds" ->
-            stringResource(R.string.five_seconds)
+
+            stringResource(
+                R.string.five_seconds
+            )
 
         "fifteen_seconds" ->
-            stringResource(R.string.fifteen_seconds)
+
+            stringResource(
+                R.string.fifteen_seconds
+            )
 
         "thirty_seconds" ->
-            stringResource(R.string.thirty_seconds)
+
+            stringResource(
+                R.string.thirty_seconds
+            )
 
         "one_minute" ->
-            stringResource(R.string.one_minute)
+
+            stringResource(
+                R.string.one_minute
+            )
 
         "two_minutes" ->
-            stringResource(R.string.two_minutes)
+
+            stringResource(
+                R.string.two_minutes
+            )
 
         "five_minutes" ->
-            stringResource(R.string.five_minutes)
+
+            stringResource(
+                R.string.five_minutes
+            )
 
         else ->
-            stringResource(R.string.never)
+
+            stringResource(
+                R.string.never
+            )
     }
 }
 
+
+// =============================================================
+// RELOCK OPTION DIALOG
+// =============================================================
+
 @Composable
 private fun RelockOptionDialog(
-    selectedOption: String,
-    onOptionSelected: (String) -> Unit,
-    onCancel: () -> Unit,
-    onConfirm: () -> Unit
+
+    selectedOption:
+    String,
+
+    onOptionSelected:
+        (String) -> Unit,
+
+    onCancel:
+        () -> Unit,
+
+    onConfirm:
+        () -> Unit
 ) {
 
     Dialog(
-        onDismissRequest = onCancel,
-        properties = DialogProperties(
-            usePlatformDefaultWidth = false
-        )
+
+        onDismissRequest =
+            onCancel,
+
+        properties =
+            DialogProperties(
+                usePlatformDefaultWidth =
+                    false
+            )
     ) {
 
         Box(
-            modifier = Modifier
-                .width(291.dp)
-                .height(178.dp)
-                .background(
-                    Color.White,
-                    RoundedCornerShape(12.dp)
-                )
+
+            modifier =
+                Modifier
+                    .width(
+                        291.dp
+                    )
+                    .height(
+                        178.dp
+                    )
+                    .background(
+                        Color.White,
+                        RoundedCornerShape(
+                            12.dp
+                        )
+                    )
         ) {
 
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(
-                        start = 16.dp,
-                        end = 16.dp,
-                        top = 16.dp,
-                        bottom = 8.dp
-                    )
+
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(
+                            start = 16.dp,
+                            end = 16.dp,
+                            top = 16.dp,
+                            bottom = 8.dp
+                        )
             ) {
 
                 Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(22.dp),
-                    contentAlignment = Alignment.Center
+
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(
+                                22.dp
+                            ),
+
+                    contentAlignment =
+                        Alignment.Center
                 ) {
 
                     Text(
-                        text = stringResource(R.string.relock),
-                        color = Color(0xFF333333),
-                        fontSize = 14.sp
+
+                        text =
+                            stringResource(
+                                R.string.relock
+                            ),
+
+                        color =
+                            Color(0xFF333333),
+
+                        fontSize =
+                            14.sp
                     )
                 }
 
+
                 Spacer(
-                    modifier = Modifier.height(7.dp)
+                    modifier =
+                        Modifier.height(
+                            7.dp
+                        )
                 )
 
+
                 RelockOptionRow(
-                    text = stringResource(
-                        R.string.relock_after_quitting_option
-                    ),
+
+                    text =
+                        stringResource(
+                            R.string.relock_after_quitting_option
+                        ),
+
                     selected =
                         selectedOption ==
                                 "relock_after_quitting",
+
                     onClick = {
+
                         onOptionSelected(
                             "relock_after_quitting"
                         )
                     }
                 )
 
+
                 RelockOptionRow(
-                    text = stringResource(
-                        R.string.relock_after_screen_off
-                    ),
+
+                    text =
+                        stringResource(
+                            R.string.relock_after_screen_off
+                        ),
+
                     selected =
                         selectedOption ==
                                 "relock_after_screen_off",
+
                     onClick = {
+
                         onOptionSelected(
                             "relock_after_screen_off"
                         )
                     }
                 )
 
+
                 Spacer(
-                    modifier = Modifier.weight(1f)
+                    modifier =
+                        Modifier.weight(
+                            1f
+                        )
                 )
 
+
                 DialogButtons(
-                    onCancel = onCancel,
-                    onConfirm = onConfirm
+
+                    onCancel =
+                        onCancel,
+
+                    onConfirm =
+                        onConfirm
                 )
             }
         }
     }
 }
 
+
+// =============================================================
+// RELOCK OPTION ROW
+// =============================================================
+
 @Composable
 private fun RelockOptionRow(
-    text: String,
-    selected: Boolean,
-    onClick: () -> Unit
+
+    text:
+    String,
+
+    selected:
+    Boolean,
+
+    onClick:
+        () -> Unit
 ) {
 
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(38.dp)
-            .clickable {
-                onClick()
-            },
+
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .height(
+                    38.dp
+                )
+                .clickable {
+
+                    onClick()
+                },
 
         verticalAlignment =
             Alignment.CenterVertically
     ) {
 
         RadioButton(
-            selected = selected,
-            onClick = onClick,
-            modifier = Modifier.size(28.dp),
-            colors = RadioButtonDefaults.colors(
-                selectedColor = Color(0xFF0396FF),
-                unselectedColor = Color(0xFFBDBDBD)
-            )
+
+            selected =
+                selected,
+
+            onClick =
+                onClick,
+
+            modifier =
+                Modifier.size(
+                    28.dp
+                ),
+
+            colors =
+                RadioButtonDefaults.colors(
+
+                    selectedColor =
+                        Color(0xFF0396FF),
+
+                    unselectedColor =
+                        Color(0xFFBDBDBD)
+                )
         )
+
 
         Spacer(
-            modifier = Modifier.width(5.dp)
+            modifier =
+                Modifier.width(
+                    5.dp
+                )
         )
 
+
         Text(
-            text = text,
-            color = Color(0xFF444444),
-            fontSize = 13.sp
+
+            text =
+                text,
+
+            color =
+                Color(0xFF444444),
+
+            fontSize =
+                13.sp
         )
     }
 }
 
+
+// =============================================================
+// DELAY DIALOG
+// =============================================================
+
 @Composable
 private fun DelayToRelockDialog(
-    selectedOption: String,
-    onOptionSelected: (String) -> Unit,
-    onCancel: () -> Unit,
-    onConfirm: () -> Unit
+
+    selectedOption:
+    String,
+
+    onOptionSelected:
+        (String) -> Unit,
+
+    onCancel:
+        () -> Unit,
+
+    onConfirm:
+        () -> Unit
 ) {
 
     val delayOptions =
@@ -1186,330 +2605,627 @@ private fun DelayToRelockDialog(
             "five_minutes"
         )
 
+
     Dialog(
-        onDismissRequest = onCancel,
-        properties = DialogProperties(
-            usePlatformDefaultWidth = false
-        )
+
+        onDismissRequest =
+            onCancel,
+
+        properties =
+            DialogProperties(
+                usePlatformDefaultWidth =
+                    false
+            )
     ) {
 
         Box(
-            modifier = Modifier
-                .width(291.dp)
-                .height(360.dp)
-                .background(
-                    Color.White,
-                    RoundedCornerShape(12.dp)
-                )
+
+            modifier =
+                Modifier
+                    .width(
+                        291.dp
+                    )
+                    .height(
+                        360.dp
+                    )
+                    .background(
+                        Color.White,
+                        RoundedCornerShape(
+                            12.dp
+                        )
+                    )
         ) {
 
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(
-                        start = 16.dp,
-                        end = 16.dp,
-                        top = 16.dp,
-                        bottom = 8.dp
-                    )
+
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(
+                            start = 16.dp,
+                            end = 16.dp,
+                            top = 16.dp,
+                            bottom = 8.dp
+                        )
             ) {
 
                 Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(22.dp),
-                    contentAlignment = Alignment.Center
+
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(
+                                22.dp
+                            ),
+
+                    contentAlignment =
+                        Alignment.Center
                 ) {
 
                     Text(
-                        text = stringResource(
-                            R.string.delay_to_relock
-                        ),
-                        color = Color(0xFF333333),
-                        fontSize = 14.sp
+
+                        text =
+                            stringResource(
+                                R.string.delay_to_relock
+                            ),
+
+                        color =
+                            Color(0xFF333333),
+
+                        fontSize =
+                            14.sp
                     )
                 }
 
+
                 Spacer(
-                    modifier = Modifier.height(7.dp)
+                    modifier =
+                        Modifier.height(
+                            7.dp
+                        )
                 )
+
 
                 delayOptions.forEach { option ->
 
                     DelayOptionRow(
-                        text = getDelayText(option),
+
+                        text =
+                            getDelayText(
+                                option
+                            ),
+
                         selected =
-                            selectedOption == option,
+                            selectedOption ==
+                                    option,
+
                         onClick = {
-                            onOptionSelected(option)
+
+                            onOptionSelected(
+                                option
+                            )
                         }
                     )
                 }
 
+
                 Spacer(
-                    modifier = Modifier.weight(1f)
+                    modifier =
+                        Modifier.weight(
+                            1f
+                        )
                 )
 
+
                 DialogButtons(
-                    onCancel = onCancel,
-                    onConfirm = onConfirm
+
+                    onCancel =
+                        onCancel,
+
+                    onConfirm =
+                        onConfirm
                 )
             }
         }
     }
 }
 
+
+// =============================================================
+// DELAY OPTION ROW
+// =============================================================
+
 @Composable
 private fun DelayOptionRow(
-    text: String,
-    selected: Boolean,
-    onClick: () -> Unit
+
+    text:
+    String,
+
+    selected:
+    Boolean,
+
+    onClick:
+        () -> Unit
 ) {
 
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(38.dp)
-            .clickable {
-                onClick()
-            },
+
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .height(
+                    38.dp
+                )
+                .clickable {
+
+                    onClick()
+                },
 
         verticalAlignment =
             Alignment.CenterVertically
     ) {
 
         RadioButton(
-            selected = selected,
-            onClick = onClick,
-            modifier = Modifier.size(28.dp),
-            colors = RadioButtonDefaults.colors(
-                selectedColor = Color(0xFF0396FF),
-                unselectedColor = Color(0xFFBDBDBD)
-            )
+
+            selected =
+                selected,
+
+            onClick =
+                onClick,
+
+            modifier =
+                Modifier.size(
+                    28.dp
+                ),
+
+            colors =
+                RadioButtonDefaults.colors(
+
+                    selectedColor =
+                        Color(0xFF0396FF),
+
+                    unselectedColor =
+                        Color(0xFFBDBDBD)
+                )
         )
+
 
         Spacer(
-            modifier = Modifier.width(5.dp)
+            modifier =
+                Modifier.width(
+                    5.dp
+                )
         )
 
+
         Text(
-            text = text,
-            color = Color(0xFF444444),
-            fontSize = 13.sp
+
+            text =
+                text,
+
+            color =
+                Color(0xFF444444),
+
+            fontSize =
+                13.sp
         )
     }
 }
+
+
+// =============================================================
+// DIALOG BUTTONS
+// =============================================================
 
 @Composable
 private fun DialogButtons(
-    onCancel: () -> Unit,
-    onConfirm: () -> Unit
+
+    onCancel:
+        () -> Unit,
+
+    onConfirm:
+        () -> Unit
 ) {
 
     Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.End,
-        verticalAlignment = Alignment.CenterVertically
+
+        modifier =
+            Modifier.fillMaxWidth(),
+
+        horizontalArrangement =
+            Arrangement.End,
+
+        verticalAlignment =
+            Alignment.CenterVertically
     ) {
 
         Text(
-            text = stringResource(R.string.cancel),
-            color = Color(0xFF818181),
-            fontSize = 14.sp,
-            modifier = Modifier
-                .clickable {
-                    onCancel()
-                }
-                .padding(
-                    horizontal = 10.dp,
-                    vertical = 6.dp
-                )
+
+            text =
+                stringResource(
+                    R.string.cancel
+                ),
+
+            color =
+                Color(0xFF818181),
+
+            fontSize =
+                14.sp,
+
+            modifier =
+                Modifier
+                    .clickable {
+
+                        onCancel()
+                    }
+                    .padding(
+                        horizontal =
+                            10.dp,
+
+                        vertical =
+                            6.dp
+                    )
         )
+
 
         Spacer(
-            modifier = Modifier.width(4.dp)
+            modifier =
+                Modifier.width(
+                    4.dp
+                )
         )
 
+
         Text(
-            text = stringResource(R.string.confirm),
-            color = Color(0xFF0396FF),
-            fontSize = 14.sp,
-            modifier = Modifier
-                .clickable {
-                    onConfirm()
-                }
-                .padding(
-                    horizontal = 10.dp,
-                    vertical = 6.dp
-                )
+
+            text =
+                stringResource(
+                    R.string.confirm
+                ),
+
+            color =
+                Color(0xFF0396FF),
+
+            fontSize =
+                14.sp,
+
+            modifier =
+                Modifier
+                    .clickable {
+
+                        onConfirm()
+                    }
+                    .padding(
+                        horizontal =
+                            10.dp,
+
+                        vertical =
+                            6.dp
+                    )
         )
     }
 }
+
+
+// =============================================================
+// LOCK SETTING ROW
+// =============================================================
 
 @Composable
 private fun LockSettingRow(
-    iconRes: Int,
-    title: String,
-    subtitle: String?,
-    onClick: () -> Unit
+
+    iconRes:
+    Int,
+
+    title:
+    String,
+
+    subtitle:
+    String?,
+
+    onClick:
+        () -> Unit
 ) {
 
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable {
-                onClick()
-            }
-            .padding(
-                start = 10.dp,
-                end = 14.dp,
-                top = 8.dp,
-                bottom = 8.dp
-            ),
+
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clickable {
+
+                    onClick()
+                }
+                .padding(
+                    start = 10.dp,
+                    end = 14.dp,
+                    top = 8.dp,
+                    bottom = 8.dp
+                ),
 
         verticalAlignment =
             Alignment.CenterVertically
     ) {
 
         Box(
-            modifier = Modifier.width(28.dp),
-            contentAlignment = Alignment.Center
+
+            modifier =
+                Modifier.width(
+                    28.dp
+                ),
+
+            contentAlignment =
+                Alignment.Center
         ) {
 
             Image(
-                painter = painterResource(id = iconRes),
-                contentDescription = title,
-                modifier = Modifier.size(19.dp),
-                contentScale = ContentScale.Fit
+
+                painter =
+                    painterResource(
+                        id =
+                            iconRes
+                    ),
+
+                contentDescription =
+                    title,
+
+                modifier =
+                    Modifier.size(
+                        19.dp
+                    ),
+
+                contentScale =
+                    ContentScale.Fit
             )
         }
 
+
         Spacer(
-            modifier = Modifier.width(8.dp)
+            modifier =
+                Modifier.width(
+                    8.dp
+                )
         )
 
+
         Column(
-            modifier = Modifier.weight(1f)
+
+            modifier =
+                Modifier.weight(
+                    1f
+                )
         ) {
 
             Text(
-                text = title,
-                color = Color(0xFF333333),
-                fontSize = 14.sp
+
+                text =
+                    title,
+
+                color =
+                    Color(0xFF333333),
+
+                fontSize =
+                    14.sp
             )
 
-            if (!subtitle.isNullOrEmpty()) {
+
+            if (
+                !subtitle.isNullOrEmpty()
+            ) {
 
                 Spacer(
-                    modifier = Modifier.height(2.dp)
+                    modifier =
+                        Modifier.height(
+                            2.dp
+                        )
                 )
 
+
                 Text(
-                    text = subtitle,
-                    color = Color(0xFF666666),
-                    fontSize = 11.sp
+
+                    text =
+                        subtitle,
+
+                    color =
+                        Color(0xFF666666),
+
+                    fontSize =
+                        11.sp
                 )
             }
         }
     }
 }
+
+
+// =============================================================
+// LOCK SETTING SWITCH ROW
+// =============================================================
 
 @Composable
 private fun LockSettingSwitchRow(
-    iconRes: Int,
-    title: String,
-    subtitle: String?,
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
+
+    iconRes:
+    Int,
+
+    title:
+    String,
+
+    subtitle:
+    String?,
+
+    checked:
+    Boolean,
+
+    onCheckedChange:
+        (Boolean) -> Unit
 ) {
 
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(
-                start = 10.dp,
-                end = 12.dp,
-                top = 7.dp,
-                bottom = 7.dp
-            ),
+
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(
+                    start = 10.dp,
+                    end = 12.dp,
+                    top = 7.dp,
+                    bottom = 7.dp
+                ),
 
         verticalAlignment =
             Alignment.CenterVertically
     ) {
 
         Box(
-            modifier = Modifier.width(28.dp),
-            contentAlignment = Alignment.Center
+
+            modifier =
+                Modifier.width(
+                    28.dp
+                ),
+
+            contentAlignment =
+                Alignment.Center
         ) {
 
             Image(
-                painter = painterResource(id = iconRes),
-                contentDescription = title,
-                modifier = Modifier.size(19.dp),
-                contentScale = ContentScale.Fit
+
+                painter =
+                    painterResource(
+                        id =
+                            iconRes
+                    ),
+
+                contentDescription =
+                    title,
+
+                modifier =
+                    Modifier.size(
+                        19.dp
+                    ),
+
+                contentScale =
+                    ContentScale.Fit
             )
         }
 
+
         Spacer(
-            modifier = Modifier.width(8.dp)
+            modifier =
+                Modifier.width(
+                    8.dp
+                )
         )
 
+
         Column(
-            modifier = Modifier.weight(1f)
+
+            modifier =
+                Modifier.weight(
+                    1f
+                )
         ) {
 
             Text(
-                text = title,
-                color = Color(0xFF333333),
-                fontSize = 14.sp
+
+                text =
+                    title,
+
+                color =
+                    Color(0xFF333333),
+
+                fontSize =
+                    14.sp
             )
 
-            if (!subtitle.isNullOrEmpty()) {
+
+            if (
+                !subtitle.isNullOrEmpty()
+            ) {
 
                 Spacer(
-                    modifier = Modifier.height(2.dp)
+                    modifier =
+                        Modifier.height(
+                            2.dp
+                        )
                 )
 
+
                 Text(
-                    text = subtitle,
-                    color = Color(0xFF666666),
-                    fontSize = 11.sp
+
+                    text =
+                        subtitle,
+
+                    color =
+                        Color(0xFF666666),
+
+                    fontSize =
+                        11.sp
                 )
             }
         }
 
+
         Switch(
-            checked = checked,
 
-            onCheckedChange = {
-                onCheckedChange(it)
-            },
+            checked =
+                checked,
 
-            modifier = Modifier
-                .size(
-                    width = 42.dp,
-                    height = 24.dp
+            onCheckedChange =
+                onCheckedChange,
+
+            modifier =
+                Modifier
+                    .size(
+                        width = 42.dp,
+                        height = 24.dp
+                    )
+                    .scale(
+                        0.56f
+                    ),
+
+            colors =
+                SwitchDefaults.colors(
+
+                    checkedThumbColor =
+                        Color(0xFFF45656),
+
+                    checkedTrackColor =
+                        Color(0xFFFFA3A3),
+
+                    uncheckedThumbColor =
+                        Color(0xFFAAAAAA),
+
+                    uncheckedTrackColor =
+                        Color(0xFFE3E3E3),
+
+                    uncheckedBorderColor =
+                        Color.Transparent,
+
+                    checkedBorderColor =
+                        Color.Transparent
                 )
-                .scale(0.56f),
-
-            colors = SwitchDefaults.colors(
-                checkedThumbColor = Color(0xFFF45656),
-                checkedTrackColor = Color(0xFFFFA3A3),
-                uncheckedThumbColor = Color(0xFFAAAAAA),
-                uncheckedTrackColor = Color(0xFFE3E3E3),
-                uncheckedBorderColor = Color.Transparent,
-                checkedBorderColor = Color.Transparent
-            )
         )
     }
 }
+
+
+// =============================================================
+// DIVIDER
+// =============================================================
 
 @Composable
 private fun SettingDivider() {
 
     Divider(
-        modifier = Modifier.fillMaxWidth(),
-        thickness = 0.6.dp,
-        color = Color(0xFFE8E8E8)
+
+        modifier =
+            Modifier.fillMaxWidth(),
+
+        thickness =
+            0.6.dp,
+
+        color =
+            Color(0xFFE8E8E8)
     )
 }
