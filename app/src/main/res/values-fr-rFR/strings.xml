@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <resources>
+
     <!-- Common -->
     <string name="back">Retour</string>
     <string name="close_selection">Fermer la sélection</string>
     <string name="selected_count">Sélectionnés (%1$d)</string>
-    <string name="all">Tout</string>
-    <string name="all_selected">Tout sélectionné</string>
+    <string name="all">Tous</string>
+    <string name="all_selected">Tous sélectionnés</string>
     <string name="settings">Paramètres</string>
     <string name="delete">Supprimer</string>
     <string name="loading">Chargement...</string>
@@ -16,8 +18,8 @@
 
     <!-- Intruder -->
     <string name="intruder">Intrus</string>
-    <string name="intruder_settings">Paramètres de l\'intrus</string>
-    <string name="intruder_camera">Caméra anti-intrus</string>
+    <string name="intruder_settings">Paramètres de l’intrus</string>
+    <string name="intruder_camera">Caméra de l’intrus</string>
     <string name="capture_wrong_password">Prendre des photos de toute personne qui saisit\nle mauvais mot de passe</string>
     <string name="no_intruder_found">Aucun intrus trouvé</string>
     <string name="today">Aujourd’hui</string>
@@ -25,13 +27,13 @@
     <string name="intruder_photo_preview">Aperçu de la photo de l’intrus</string>
 
     <!-- Observation Time -->
-    <string name="set_observation_time">Définir le temps d’observation</string>
-    <string name="failed_to_unblock">Nombre de tentatives de déverrouillage échouées</string>
+    <string name="set_observation_time">Définir les tentatives d’observation</string>
+    <string name="failed_to_unblock">Nombre d’échecs de déverrouillage</string>
     <string name="immediately">Immédiatement</string>
     <string name="never">Jamais</string>
-    <string name="five_seconds">5 secondes</string>
-    <string name="fifteen_seconds">15 secondes</string>
-    <string name="thirty_seconds">30 secondes</string>
+    <string name="five_seconds">3 tentatives</string>
+    <string name="fifteen_seconds">5 tentatives</string>
+    <string name="thirty_seconds">10 tentatives</string>
     <string name="cancel">Annuler</string>
     <string name="confirm">Confirmer</string>
 
@@ -44,9 +46,9 @@
     <string name="show_over_other_apps">Afficher par-dessus les autres applications</string>
     <string name="allow_lock_screen">Autoriser l’écran de verrouillage à s’afficher par-dessus\nles autres applications</string>
     <string name="detect_launched_app">Détecter l’application lancée</string>
-    <string name="detect_launched_description">Autoriser la détection de l’application\nlancée en accordant l’accès à...</string>
+    <string name="detect_launched_description">Autoriser la détection de l’application qui est\nlancée en accordant l’accès à...</string>
     <string name="auto_start">Démarrage automatique</string>
-    <string name="keep_applock_running">Toujours garder AppLock Pro en fonctionnement</string>
+    <string name="keep_applock_running">Garder AppLock Pro toujours actif</string>
     <string name="allow">Autoriser</string>
     <string name="permissions_work_properly">Les autorisations sont nécessaires pour que l’application fonctionne\ncorrectement et efficacement</string>
 
@@ -67,8 +69,8 @@
     <!-- Hide / Unhide -->
     <string name="hide_video">Masquer la vidéo</string>
     <string name="hide_image">Masquer l’image</string>
-    <string name="hide_videos_question">Voulez-vous vraiment masquer ces vidéos ?</string>
-    <string name="hide_images_question">Voulez-vous vraiment masquer ces images ?</string>
+    <string name="hide_videos_question">Êtes-vous sûr de vouloir masquer ces vidéos ?</string>
+    <string name="hide_images_question">Êtes-vous sûr de vouloir masquer ces images ?</string>
     <string name="unhide_video">Afficher la vidéo</string>
     <string name="unhide_image">Afficher l’image</string>
     <string name="unhide_video_question">Voulez-vous afficher cette vidéo ?</string>
@@ -82,7 +84,7 @@
     <string name="reset">Réinitialiser</string>
     <string name="continue_text">Continuer</string>
     <string name="create_pattern">Créer un schéma</string>
-    <string name="connect_four_dots">Connectez au moins 4 points</string>
+    <string name="connect_four_dots">Reliez au moins 4 points</string>
 
     <!-- Pin Confirm -->
     <string name="confirm_pattern">Confirmer le schéma</string>
@@ -97,7 +99,7 @@
 
     <!-- Security Questions -->
     <string name="security_questions">Questions de sécurité</string>
-    <string name="security_question_description">Définissez un mot-clé pour récupérer votre code\nd’accès si vous l’oubliez.</string>
+    <string name="security_question_description">Définissez un mot-clé pour récupérer votre code d’accès lorsque vous\nl’oubliez.</string>
     <string name="select_security_questions">Sélectionner les questions de sécurité</string>
     <string name="select_security_question">Sélectionner une question de sécurité</string>
     <string name="enter_security_answer">Saisir la réponse de sécurité</string>
@@ -108,10 +110,10 @@
     <string name="security_question_name">Quel est votre nom ?</string>
     <string name="security_question_father">Quel est le nom de votre père ?</string>
     <string name="security_question_pet">Quel est le nom de votre animal de compagnie ?</string>
-    <string name="security_question_job">Quel est le métier de vos rêves ?</string>
+    <string name="security_question_job">Quel est votre métier de rêve ?</string>
 
     <!-- App List -->
-    <string name="app_lock">Verrouillage d’application</string>
+    <string name="app_lock">Verrouillage des applications</string>
     <string name="unlocked">Déverrouillé</string>
     <string name="locked">Verrouillé</string>
     <string name="search">Rechercher</string>
@@ -121,7 +123,7 @@
 
     <!-- Settings Screen -->
     <string name="language_description">Sélectionner la langue</string>
-    <string name="lock_setting">Paramètre de verrouillage</string>
+    <string name="lock_setting">Paramètres de verrouillage</string>
     <string name="lock_settings_description">Paramètres de verrouillage</string>
     <string name="hide_settings">Paramètres de masquage</string>
     <string name="hide_settings_description">Paramètres de masquage</string>
@@ -141,7 +143,7 @@
     <string name="security_settings">Paramètres de sécurité</string>
     <string name="set_security_email">Définir un e-mail de sécurité</string>
     <string name="fingerprint_lock">Verrouillage par empreinte digitale</string>
-    <string name="use_fingerprint_to_unlock">Utiliser l’empreinte digitale pour déverrouiller les applications</string>
+    <string name="use_fingerprint_to_unlock">utiliser l’empreinte digitale pour déverrouiller les applications</string>
     <string name="unlock">Déverrouiller</string>
     <string name="vibration">Vibration</string>
     <string name="hide_track">Masquer le tracé</string>
@@ -151,52 +153,40 @@
     <string name="delay_to_relock">Délai avant le reverrouillage</string>
     <string name="relock">Reverrouiller</string>
     <string name="relock_after_quitting_option">Reverrouiller après avoir quitté</string>
-    <string name="relock_after_screen_off">Reverrouiller après extinction de l’écran</string>
+    <string name="relock_after_screen_off">Reverrouiller après l’extinction de l’écran</string>
     <string name="one_minute">1 minute</string>
     <string name="two_minutes">2 minutes</string>
     <string name="five_minutes">5 minutes</string>
 
     <!-- Unlock Screen -->
-    <string name="draw_pattern">Dessinez le schéma</string>
-    <string name="enter_passcode">Saisissez le code d’accès</string>
-    <string name="enter_digit_pin">Saisissez le PIN à %1$d chiffres</string>
+    <string name="draw_pattern">Dessiner le schéma</string>
+    <string name="enter_passcode">Saisir le code d’accès</string>
+    <string name="enter_digit_pin">Saisir le PIN à %1$d chiffres</string>
     <string name="pattern_not_match">Le schéma ne correspond pas</string>
 
+    <!-- Onboarding Screen -->
+    <string name="onboarding_secure_your_apps">Sécurisez vos applications</string>
+    <string name="onboarding_quick_secure_access">Accès rapide et sécurisé</string>
+    <string name="onboarding_privacy_protected">Votre vie privée, protégée</string>
 
-        <!-- Onboarding Screen -->
-
-        <string name="onboarding_secure_your_apps">Sécurisez vos applications</string>
-
-        <string name="onboarding_quick_secure_access">
-        Accès rapide et sécurisé
-    </string>
-
-        <string name="onboarding_privacy_protected">
-        Votre vie privée protégée
-    </string>
-
-        <string name="onboarding_secure_your_apps_description">
+    <string name="onboarding_secure_your_apps_description">
         Gardez vos applications privées protégées grâce à un code d’accès sécurisé et à une couche supplémentaire de confidentialité
     </string>
 
-        <string name="onboarding_quick_secure_access_description">
+    <string name="onboarding_quick_secure_access_description">
         Déverrouillez instantanément vos applications protégées avec votre code d’accès ou votre empreinte digitale
     </string>
 
-        <string name="onboarding_privacy_protected_description">
-        Choisissez les applications que vous souhaitez verrouiller et protégez vos contenus personnels contre les accès indésirables
+    <string name="onboarding_privacy_protected_description">
+        Choisissez les applications que vous souhaitez verrouiller et protégez votre contenu personnel contre les accès indésirables
     </string>
 
-        <string name="onboarding_next">Suivant</string>
+    <string name="onboarding_next">Suivant</string>
+    <string name="onboarding_get_started">Commencer</string>
 
-        <string name="onboarding_get_started">Commencer</string>
-
-        <string name="onboarding_image_description">
-        Présentation %1$d
-    </string>
+    <string name="onboarding_image_description">Intégration %1$d</string>
 
     <!-- Premium Screen -->
-
     <string name="premium_close">Fermer</string>
     <string name="premium_image_description">Premium</string>
 
@@ -204,13 +194,12 @@
     <string name="premium_all_features"> Toutes les fonctionnalités</string>
     <string name="premium_forever">Pour toujours</string>
 
-    <string name="premium_description">Effectuez un paiement unique et profitez d\'un accès à vie
-sans frais récurrents.</string>
+    <string name="premium_description">Paiement unique. Profitez d’un accès à vie\nsans frais récurrents.</string>
 
     <string name="premium_benefits">Avantages Premium</string>
 
     <string name="premium_hide_unlimited">Masquer un nombre illimité de photos et vidéos</string>
-    <string name="premium_intruder_selfie">Selfie de l\'intrus</string>
+    <string name="premium_intruder_selfie">Selfie de l’intrus</string>
     <string name="premium_no_ads">Sans publicité</string>
     <string name="premium_priority_support">Assistance prioritaire</string>
 
@@ -220,34 +209,35 @@ sans frais récurrents.</string>
     <string name="premium_lifetime_access">Accès à vie</string>
     <string name="premium_one_time_payment">Paiement unique</string>
 
-    <string name="premium_shield_description">bouclier de protection</string>
+    <string name="premium_shield_description">bouclier</string>
 
     <string name="premium_no_subscription">Aucun abonnement. Payez une fois et profitez-en pour toujours.</string>
 
     <string name="premium_unlock_button">Déverrouiller Premium - Achat unique</string>
 
-    <string name="premium_terms_of_use">Conditions d\'utilisation</string>
+    <string name="premium_terms_of_use">Conditions d’utilisation</string>
     <string name="premium_privacy_policy">Politique de confidentialité</string>
 
-
     <!-- Exit Screen -->
-
     <string name="exit_screen_back">Retour</string>
-    <string name="exit_screen_title">Quitter App Lock</string>
+    <string name="exit_screen_title">Quitter AppLock</string>
 
-    <string name="exit_image_description">Quitter App Lock</string>
+    <string name="exit_image_description">Quitter AppLock</string>
 
-    <string name="exit_app_lock_title">Quitter App Lock ?</string>
+    <string name="exit_app_lock_title">Quitter AppLock ?</string>
 
-    <string name="exit_app_lock_description">Vous devrez saisir à nouveau votre code d\'accès
-pour accéder à App Lock.</string>
+    <string name="exit_app_lock_description">Vous devrez saisir votre code d’accès\nà nouveau pour accéder à AppLock.</string>
 
-    <string name="exit_rating_description">Une petite évaluation de votre part compte
-beaucoup pour notre équipe.</string>
+    <string name="exit_rating_description">Une évaluation rapide de votre part compte\nbeaucoup pour notre équipe.</string>
 
     <string name="exit_stay_protected_description">Rester protégé</string>
     <string name="exit_stay_protected">Rester protégé</string>
 
     <string name="exit_anyway_description">Quitter quand même</string>
     <string name="exit_anyway">Quitter quand même</string>
+
+    <string name="applock">AppLock</string>
+    <string name="enable_app_protection">Activer la protection des applications</string>
+
 </resources>
+

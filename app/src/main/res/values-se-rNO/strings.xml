@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <resources>
+
+
     <!-- Common -->
     <string name="back">Tilbake</string>
     <string name="close_selection">Lukk utvalg</string>
@@ -11,27 +14,27 @@
     <string name="loading">Laster inn...</string>
 
     <!-- Bottom Navigation -->
-    <string name="apps_lock">App-lås</string>
+    <string name="apps_lock">Applås</string>
     <string name="vault">Hvelv</string>
 
     <!-- Intruder -->
-    <string name="intruder">Innbruddstyv</string>
-    <string name="intruder_settings">Innstillinger for innbruddstyv</string>
+    <string name="intruder">Innbrudd</string>
+    <string name="intruder_settings">Innbruddsinnstillinger</string>
     <string name="intruder_camera">Innbruddskamera</string>
     <string name="capture_wrong_password">Ta bilder av alle som skriver inn\nfeil passord</string>
-    <string name="no_intruder_found">Ingen innbruddstyv funnet</string>
+    <string name="no_intruder_found">Ingen inntrenger funnet</string>
     <string name="today">I dag</string>
-    <string name="intruder_photo">Bilde av innbruddstyv</string>
-    <string name="intruder_photo_preview">Forhåndsvisning av innbruddsbilde</string>
+    <string name="intruder_photo">Bilde av inntrenger</string>
+    <string name="intruder_photo_preview">Forhåndsvisning av inntrengerbilde</string>
 
     <!-- Observation Time -->
-    <string name="set_observation_time">Angi overvåkingstid</string>
+    <string name="set_observation_time">Angi antall forsøk</string>
     <string name="failed_to_unblock">Antall mislykkede opplåsingsforsøk</string>
     <string name="immediately">Umiddelbart</string>
     <string name="never">Aldri</string>
-    <string name="five_seconds">5 sekunder</string>
-    <string name="fifteen_seconds">15 sekunder</string>
-    <string name="thirty_seconds">30 sekunder</string>
+    <string name="five_seconds">3 forsøk</string>
+    <string name="fifteen_seconds">5 forsøk</string>
+    <string name="thirty_seconds">10 forsøk</string>
     <string name="cancel">Avbryt</string>
     <string name="confirm">Bekreft</string>
 
@@ -46,7 +49,7 @@
     <string name="detect_launched_app">Oppdag åpnet app</string>
     <string name="detect_launched_description">Tillat å oppdage hvilken app som er\nåpnet ved å gi tilgang til...</string>
     <string name="auto_start">Autostart</string>
-    <string name="keep_applock_running">Hold alltid AppLock Pro kjørende</string>
+    <string name="keep_applock_running">Hold AppLock Pro kjørende hele tiden</string>
     <string name="allow">Tillat</string>
     <string name="permissions_work_properly">Tillatelser kreves for at appen skal fungere\nriktig og effektivt</string>
 
@@ -56,8 +59,8 @@
     <string name="add">Legg til</string>
     <string name="add_image">Legg til bilde</string>
     <string name="add_video">Legg til video</string>
-    <string name="click_to_add_image">Klikk på "+" for å legge til bilde</string>
-    <string name="click_to_add_video">Klikk på "+" for å legge til video</string>
+    <string name="click_to_add_image">Trykk på "+" for å legge til bilde</string>
+    <string name="click_to_add_video">Trykk på "+" for å legge til video</string>
     <string name="hidden">Skjult</string>
     <string name="albums">Album</string>
     <string name="select_all">Velg alle</string>
@@ -75,21 +78,21 @@
     <string name="unhide_image_question">Vil du vise dette bildet?</string>
 
     <!-- Pin Create Screen -->
-    <string name="four_digit_pin">4-sifret PIN-kode</string>
-    <string name="six_digit_pin">6-sifret PIN-kode</string>
+    <string name="four_digit_pin">4-sifret PIN</string>
+    <string name="six_digit_pin">6-sifret PIN</string>
     <string name="pattern">Mønster</string>
-    <string name="create_pin">Opprett %1$d-sifret PIN-kode</string>
+    <string name="create_pin">Opprett %1$d-sifret PIN</string>
     <string name="reset">Tilbakestill</string>
     <string name="continue_text">Fortsett</string>
     <string name="create_pattern">Opprett mønster</string>
-    <string name="connect_four_dots">Koble sammen minst 4 prikker</string>
+    <string name="connect_four_dots">Koble sammen minst 4 punkter</string>
 
     <!-- Pin Confirm -->
     <string name="confirm_pattern">Bekreft mønster</string>
     <string name="confirm_passcode">Bekreft passord</string>
     <string name="draw_pattern_again">Tegn mønsteret på nytt</string>
-    <string name="confirm_pin">Bekreft %1$d-sifret PIN-kode</string>
-    <string name="password_not_match">Passordet stemmer ikke. Prøv igjen</string>
+    <string name="confirm_pin">Bekreft %1$d-sifret PIN</string>
+    <string name="password_not_match">Passordene samsvarer ikke. Prøv igjen</string>
     <string name="enter_correct_password">Skriv inn riktig passord</string>
 
     <!-- Permission -->
@@ -97,7 +100,7 @@
 
     <!-- Security Questions -->
     <string name="security_questions">Sikkerhetsspørsmål</string>
-    <string name="security_question_description">Angi et nøkkelord for å gjenopprette passordet\nhvis du glemmer det.</string>
+    <string name="security_question_description">Angi et nøkkelord for å gjenopprette passordet når du\nhar glemt det.</string>
     <string name="select_security_questions">Velg sikkerhetsspørsmål</string>
     <string name="select_security_question">Velg sikkerhetsspørsmål</string>
     <string name="enter_security_answer">Skriv inn sikkerhetssvar</string>
@@ -111,7 +114,7 @@
     <string name="security_question_job">Hva er drømmejobben din?</string>
 
     <!-- App List -->
-    <string name="app_lock">App-lås</string>
+    <string name="app_lock">Applås</string>
     <string name="unlocked">Ulåst</string>
     <string name="locked">Låst</string>
     <string name="search">Søk</string>
@@ -124,13 +127,13 @@
     <string name="lock_setting">Låsinnstilling</string>
     <string name="lock_settings_description">Låsinnstillinger</string>
     <string name="hide_settings">Skjul innstillinger</string>
-    <string name="hide_settings_description">Innstillinger for skjuling</string>
+    <string name="hide_settings_description">Skjul innstillinger</string>
     <string name="rate_us">Vurder oss</string>
     <string name="rate_us_description">Vurder oss</string>
     <string name="share">Del</string>
     <string name="about">Om</string>
     <string name="about_applock">Om AppLock</string>
-    <string name="privacy_policy">Personvernerklæring</string>
+    <string name="privacy_policy">Personvernregler</string>
     <string name="collapse">Skjul</string>
     <string name="expand">Utvid</string>
     <string name="open_item">Åpne %1$s</string>
@@ -140,15 +143,15 @@
     <string name="reset_password">Tilbakestill passord</string>
     <string name="security_settings">Sikkerhetsinnstillinger</string>
     <string name="set_security_email">Angi sikkerhets-e-post</string>
-    <string name="fingerprint_lock">Fingeravtrykklås</string>
+    <string name="fingerprint_lock">Fingeravtrykkslås</string>
     <string name="use_fingerprint_to_unlock">Bruk fingeravtrykk for å låse opp apper</string>
     <string name="unlock">Lås opp</string>
     <string name="vibration">Vibrasjon</string>
     <string name="hide_track">Skjul spor</string>
     <string name="hide_track_description">Skjul sporet når du tegner mønsterpassordet</string>
-    <string name="relock_option">Alternativ for relåsing</string>
+    <string name="relock_option">Alternativ for ny låsing</string>
     <string name="relock_after_quitting">Lås på nytt etter avslutning</string>
-    <string name="delay_to_relock">Forsinkelse før relåsing</string>
+    <string name="delay_to_relock">Forsinkelse før ny låsing</string>
     <string name="relock">Lås på nytt</string>
     <string name="relock_after_quitting_option">Lås på nytt etter avslutning</string>
     <string name="relock_after_screen_off">Lås på nytt etter at skjermen slås av</string>
@@ -159,43 +162,32 @@
     <!-- Unlock Screen -->
     <string name="draw_pattern">Tegn mønster</string>
     <string name="enter_passcode">Skriv inn passord</string>
-    <string name="enter_digit_pin">Skriv inn %1$d-sifret PIN-kode</string>
-    <string name="pattern_not_match">Mønsteret stemmer ikke</string>
+    <string name="enter_digit_pin">Skriv inn %1$d-sifret PIN</string>
+    <string name="pattern_not_match">Mønsteret samsvarer ikke</string>
 
     <!-- Onboarding Screen -->
-
     <string name="onboarding_secure_your_apps">Sikre appene dine</string>
-
-    <string name="onboarding_quick_secure_access">
-        Rask og sikker tilgang
-    </string>
-
-    <string name="onboarding_privacy_protected">
-        Personvernet ditt er beskyttet
-    </string>
+    <string name="onboarding_quick_secure_access">Rask og sikker tilgang</string>
+    <string name="onboarding_privacy_protected">Personvernet ditt er beskyttet</string>
 
     <string name="onboarding_secure_your_apps_description">
-        Hold private apper beskyttet med en sikker kode og et ekstra lag med personvern
+        Beskytt dine private apper med et sikkert passord og et ekstra lag med personvern
     </string>
 
     <string name="onboarding_quick_secure_access_description">
-        Lås opp beskyttede apper umiddelbart med koden eller fingeravtrykket ditt
+        Lås opp beskyttede apper umiddelbart med passordet eller fingeravtrykket ditt
     </string>
 
     <string name="onboarding_privacy_protected_description">
-        Velg appene du vil låse, og hold det personlige innholdet ditt trygt mot uønsket tilgang
+        Velg appene du vil låse, og hold ditt personlige innhold trygt mot uønsket tilgang
     </string>
 
     <string name="onboarding_next">Neste</string>
-
     <string name="onboarding_get_started">Kom i gang</string>
 
-    <string name="onboarding_image_description">
-        Introduksjon %1$d
-    </string>
+    <string name="onboarding_image_description">Introduksjon %1$d</string>
 
     <!-- Premium Screen -->
-
     <string name="premium_close">Lukk</string>
     <string name="premium_image_description">Premium</string>
 
@@ -203,7 +195,7 @@
     <string name="premium_all_features"> Alle funksjoner</string>
     <string name="premium_forever">For alltid</string>
 
-    <string name="premium_description">Betal én gang og nyt livslang tilgang
+    <string name="premium_description">Engangsbetaling. Nyt livstids tilgang
 uten gjentakende kostnader.</string>
 
     <string name="premium_benefits">Premium-fordeler</string>
@@ -216,21 +208,19 @@ uten gjentakende kostnader.</string>
     <string name="premium_best_value">Beste verdi</string>
 
     <string name="premium_one_time_purchase">Engangskjøp</string>
-    <string name="premium_lifetime_access">Livslang tilgang</string>
+    <string name="premium_lifetime_access">Livstids tilgang</string>
     <string name="premium_one_time_payment">Engangsbetaling</string>
 
-    <string name="premium_shield_description">beskyttelsesskjold</string>
+    <string name="premium_shield_description">skjold</string>
 
     <string name="premium_no_subscription">Ingen abonnement. Betal én gang, så er det ditt for alltid.</string>
 
-    <string name="premium_unlock_button">Lås opp Premium - engangskjøp</string>
+    <string name="premium_unlock_button">Lås opp Premium - Engangskjøp</string>
 
     <string name="premium_terms_of_use">Bruksvilkår</string>
-    <string name="premium_privacy_policy">Personvernerklæring</string>
-
+    <string name="premium_privacy_policy">Personvernregler</string>
 
     <!-- Exit Screen -->
-
     <string name="exit_screen_back">Tilbake</string>
     <string name="exit_screen_title">Avslutt App Lock</string>
 
@@ -238,17 +228,18 @@ uten gjentakende kostnader.</string>
 
     <string name="exit_app_lock_title">Avslutte App Lock?</string>
 
-    <string name="exit_app_lock_description">Du må skrive inn passordet ditt på nytt
-for å få tilgang til App Lock.</string>
+    <string name="exit_app_lock_description">Du må skrive inn passordet ditt\npå nytt for å få tilgang til App Lock.</string>
 
-    <string name="exit_rating_description">En rask vurdering fra deg betyr
-mye for teamet vårt.</string>
+    <string name="exit_rating_description">En rask vurdering fra deg betyr\nmye for teamet vårt.</string>
 
-    <string name="exit_stay_protected_description">Hold deg beskyttet</string>
-    <string name="exit_stay_protected">Hold deg beskyttet</string>
+    <string name="exit_stay_protected_description">Forbli beskyttet</string>
+    <string name="exit_stay_protected">Forbli beskyttet</string>
 
     <string name="exit_anyway_description">Avslutt likevel</string>
     <string name="exit_anyway">Avslutt likevel</string>
 
+    <string name="applock">AppLock</string>
+    <string name="enable_app_protection">Aktiver appbeskyttelse</string>
 
 </resources>
+

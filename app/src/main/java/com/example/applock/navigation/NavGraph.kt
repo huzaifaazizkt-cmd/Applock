@@ -30,7 +30,8 @@ import com.example.applock.data.DataStoreManager
 
 @Composable
 fun NavGraph(
-    context: Context
+    context: Context,
+    startDestination: String = "startScreen"
 ) {
 
     val appContext =
@@ -69,7 +70,7 @@ fun NavGraph(
             navController,
 
         startDestination =
-            "startScreen"
+            startDestination
     ) {
 
 
@@ -409,9 +410,6 @@ fun NavGraph(
 
                 onIntruderClick = {
 
-                    // MainScreen ke savedStateHandle mein
-                    // mark karo ke wapas Settings par jana hai.
-
                     currentEntry
                         ?.savedStateHandle
                         ?.set(
@@ -431,10 +429,6 @@ fun NavGraph(
                 // =================================================
 
                 onLanguageClick = {
-
-                    // MainScreen ko bata do ke
-                    // Languages se back hone par
-                    // Settings tab select karna hai.
 
                     currentEntry
                         ?.savedStateHandle

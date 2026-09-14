@@ -1,8 +1,9 @@
 package com.example.applock
 
+import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.compose.setContent
+import androidx.appcompat.app.AppCompatActivity
 import com.example.applock.navigation.NavGraph
 
 class MainActivity : AppCompatActivity() {
@@ -12,8 +13,49 @@ class MainActivity : AppCompatActivity() {
     ) {
         super.onCreate(savedInstanceState)
 
+        val openResetPassword =
+            intent.getBooleanExtra(
+                "openResetPassword",
+                false
+            )
+
         setContent {
-            NavGraph(this)
+
+            NavGraph(
+                context = this,
+                startDestination =
+                    if (openResetPassword) {
+                        "resetCreate"
+                    } else {
+                        "startScreen"
+                    }
+            )
+        }
+    }
+
+    override fun onNewIntent(
+        intent: Intent
+    ) {
+        super.onNewIntent(intent)
+
+        setIntent(intent)
+
+        val openResetPassword =
+            intent.getBooleanExtra(
+                "openResetPassword",
+                false
+            )
+
+        if (openResetPassword) {
+
+            setContent {
+
+                NavGraph(
+                    context = this,
+                    startDestination =
+                        "resetCreate"
+                )
+            }
         }
     }
 }

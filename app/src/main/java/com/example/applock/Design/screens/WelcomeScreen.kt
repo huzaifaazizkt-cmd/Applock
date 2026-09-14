@@ -37,7 +37,7 @@ fun WelcomeScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(
-                Color(0xFFF8FAFF)
+                Color.White.copy(alpha = 0.9f)
             )
     ) {
 
@@ -60,7 +60,7 @@ fun WelcomeScreen(
                 contentDescription = "App Lock",
 
                 modifier =
-                    Modifier.size(300.dp)
+                    Modifier.size(270.dp)
             )
 
             Spacer(

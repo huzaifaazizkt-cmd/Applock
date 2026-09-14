@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <resources>
+
 
     <!-- Common -->
     <string name="back">뒤로</string>
@@ -19,20 +21,20 @@
     <string name="intruder">침입자</string>
     <string name="intruder_settings">침입자 설정</string>
     <string name="intruder_camera">침입자 카메라</string>
-    <string name="capture_wrong_password">잘못된 비밀번호를 입력한 사람의 사진을\n촬영합니다</string>
+    <string name="capture_wrong_password">잘못된 비밀번호를 입력한 사람의\n사진을 촬영합니다</string>
     <string name="no_intruder_found">침입자가 없습니다</string>
     <string name="today">오늘</string>
     <string name="intruder_photo">침입자 사진</string>
     <string name="intruder_photo_preview">침입자 사진 미리보기</string>
 
     <!-- Observation Time -->
-    <string name="set_observation_time">관찰 시간 설정</string>
+    <string name="set_observation_time">시도 횟수 설정</string>
     <string name="failed_to_unblock">잠금 해제 실패 횟수</string>
     <string name="immediately">즉시</string>
-    <string name="never">안 함</string>
-    <string name="five_seconds">5초</string>
-    <string name="fifteen_seconds">15초</string>
-    <string name="thirty_seconds">30초</string>
+    <string name="never">사용 안 함</string>
+    <string name="five_seconds">3회 시도</string>
+    <string name="fifteen_seconds">5회 시도</string>
+    <string name="thirty_seconds">10회 시도</string>
     <string name="cancel">취소</string>
     <string name="confirm">확인</string>
 
@@ -41,13 +43,13 @@
     <string name="select">선택</string>
 
     <!-- Permissions -->
-    <string name="permissions_required">필수 권한</string>
+    <string name="permissions_required">권한 필요</string>
     <string name="show_over_other_apps">다른 앱 위에 표시</string>
     <string name="allow_lock_screen">잠금 화면이 다른 앱 위에 표시되도록\n허용</string>
     <string name="detect_launched_app">실행된 앱 감지</string>
-    <string name="detect_launched_description">실행된 앱을 감지할 수 있도록\n접근 권한을 허용하세요...</string>
+    <string name="detect_launched_description">접근 권한을 허용하여 어떤 앱이\n실행되었는지 감지합니다...</string>
     <string name="auto_start">자동 시작</string>
-    <string name="keep_applock_running">항상 AppLock Pro 실행 유지</string>
+    <string name="keep_applock_running">AppLock Pro 항상 실행</string>
     <string name="allow">허용</string>
     <string name="permissions_work_properly">앱이 정상적이고 효율적으로 작동하려면\n권한이 필요합니다</string>
 
@@ -55,10 +57,10 @@
     <string name="photos">사진</string>
     <string name="videos">동영상</string>
     <string name="add">추가</string>
-    <string name="add_image">이미지 추가</string>
+    <string name="add_image">사진 추가</string>
     <string name="add_video">동영상 추가</string>
-    <string name="click_to_add_image">이미지를 추가하려면 "+"를 클릭하세요</string>
-    <string name="click_to_add_video">동영상을 추가하려면 "+"를 클릭하세요</string>
+    <string name="click_to_add_image">"+"를 눌러 사진 추가</string>
+    <string name="click_to_add_video">"+"를 눌러 동영상 추가</string>
     <string name="hidden">숨김</string>
     <string name="albums">앨범</string>
     <string name="select_all">모두 선택</string>
@@ -67,30 +69,30 @@
 
     <!-- Hide / Unhide -->
     <string name="hide_video">동영상 숨기기</string>
-    <string name="hide_image">이미지 숨기기</string>
+    <string name="hide_image">사진 숨기기</string>
     <string name="hide_videos_question">이 동영상을 숨기시겠습니까?</string>
-    <string name="hide_images_question">이 이미지를 숨기시겠습니까?</string>
+    <string name="hide_images_question">이 사진을 숨기시겠습니까?</string>
     <string name="unhide_video">동영상 숨김 해제</string>
-    <string name="unhide_image">이미지 숨김 해제</string>
+    <string name="unhide_image">사진 숨김 해제</string>
     <string name="unhide_video_question">이 동영상의 숨김을 해제하시겠습니까?</string>
-    <string name="unhide_image_question">이 이미지의 숨김을 해제하시겠습니까?</string>
+    <string name="unhide_image_question">이 사진의 숨김을 해제하시겠습니까?</string>
 
     <!-- Pin Create Screen -->
     <string name="four_digit_pin">4자리 PIN</string>
     <string name="six_digit_pin">6자리 PIN</string>
     <string name="pattern">패턴</string>
     <string name="create_pin">%1$d자리 PIN 만들기</string>
-    <string name="reset">초기화</string>
+    <string name="reset">재설정</string>
     <string name="continue_text">계속</string>
     <string name="create_pattern">패턴 만들기</string>
     <string name="connect_four_dots">최소 4개의 점을 연결하세요</string>
 
     <!-- Pin Confirm -->
     <string name="confirm_pattern">패턴 확인</string>
-    <string name="confirm_passcode">암호 확인</string>
+    <string name="confirm_passcode">비밀번호 확인</string>
     <string name="draw_pattern_again">패턴을 다시 그려주세요</string>
     <string name="confirm_pin">%1$d자리 PIN 확인</string>
-    <string name="password_not_match">비밀번호가 일치하지 않습니다. 다시 시도하세요</string>
+    <string name="password_not_match">비밀번호가 일치하지 않습니다. 다시 시도해 주세요</string>
     <string name="enter_correct_password">올바른 비밀번호를 입력하세요</string>
 
     <!-- Permission -->
@@ -98,7 +100,7 @@
 
     <!-- Security Questions -->
     <string name="security_questions">보안 질문</string>
-    <string name="security_question_description">비밀번호를 잊어버렸을 때 액세스 코드를 복구할 수 있도록\n키워드를 설정하세요.</string>
+    <string name="security_question_description">비밀번호를 잊어버렸을 때 복구할 수 있도록\n키워드를 설정하세요.</string>
     <string name="select_security_questions">보안 질문 선택</string>
     <string name="select_security_question">보안 질문 선택</string>
     <string name="enter_security_answer">보안 답변 입력</string>
@@ -109,7 +111,7 @@
     <string name="security_question_name">이름이 무엇인가요?</string>
     <string name="security_question_father">아버지의 이름은 무엇인가요?</string>
     <string name="security_question_pet">반려동물의 이름은 무엇인가요?</string>
-    <string name="security_question_job">꿈꾸는 직업은 무엇인가요?</string>
+    <string name="security_question_job">꿈의 직업은 무엇인가요?</string>
 
     <!-- App List -->
     <string name="app_lock">앱 잠금</string>
@@ -127,7 +129,7 @@
     <string name="hide_settings">숨김 설정</string>
     <string name="hide_settings_description">숨김 설정</string>
     <string name="rate_us">평가하기</string>
-    <string name="rate_us_description">앱을 평가해주세요</string>
+    <string name="rate_us_description">앱 평가하기</string>
     <string name="share">공유</string>
     <string name="about">정보</string>
     <string name="about_applock">AppLock 정보</string>
@@ -135,8 +137,8 @@
     <string name="collapse">접기</string>
     <string name="expand">펼치기</string>
     <string name="open_item">%1$s 열기</string>
-    <string name="hide_from_recent_screen">최근 앱 화면에서 숨기기</string>
-    <string name="apps_hide_from_recent_screen">최근 앱 화면에서 앱 숨기기</string>
+    <string name="hide_from_recent_screen">최근 화면에서 숨기기</string>
+    <string name="apps_hide_from_recent_screen">최근 화면에서 앱 숨기기</string>
     <string name="password">비밀번호</string>
     <string name="reset_password">비밀번호 재설정</string>
     <string name="security_settings">보안 설정</string>
@@ -145,67 +147,56 @@
     <string name="use_fingerprint_to_unlock">지문을 사용하여 앱 잠금 해제</string>
     <string name="unlock">잠금 해제</string>
     <string name="vibration">진동</string>
-    <string name="hide_track">패턴 선 숨기기</string>
-    <string name="hide_track_description">패턴 비밀번호를 그릴 때 패턴 선 숨기기</string>
+    <string name="hide_track">패턴 경로 숨기기</string>
+    <string name="hide_track_description">패턴 비밀번호를 그릴 때 경로 숨기기</string>
     <string name="relock_option">다시 잠금 옵션</string>
-    <string name="relock_after_quitting">종료 후 다시 잠그기</string>
-    <string name="delay_to_relock">다시 잠그기 전 지연 시간</string>
-    <string name="relock">다시 잠그기</string>
-    <string name="relock_after_quitting_option">종료 후 다시 잠그기</string>
-    <string name="relock_after_screen_off">화면이 꺼진 후 다시 잠그기</string>
+    <string name="relock_after_quitting">종료 후 다시 잠금</string>
+    <string name="delay_to_relock">다시 잠금 지연</string>
+    <string name="relock">다시 잠금</string>
+    <string name="relock_after_quitting_option">종료 후 다시 잠금</string>
+    <string name="relock_after_screen_off">화면이 꺼진 후 다시 잠금</string>
     <string name="one_minute">1분</string>
     <string name="two_minutes">2분</string>
     <string name="five_minutes">5분</string>
 
     <!-- Unlock Screen -->
     <string name="draw_pattern">패턴 그리기</string>
-    <string name="enter_passcode">암호 입력</string>
+    <string name="enter_passcode">비밀번호 입력</string>
     <string name="enter_digit_pin">%1$d자리 PIN 입력</string>
     <string name="pattern_not_match">패턴이 일치하지 않습니다</string>
 
     <!-- Onboarding Screen -->
-
     <string name="onboarding_secure_your_apps">앱을 안전하게 보호하세요</string>
-
-    <string name="onboarding_quick_secure_access">
-        빠르고 안전한 접근
-    </string>
-
-    <string name="onboarding_privacy_protected">
-        소중한 개인정보를 보호하세요
-    </string>
+    <string name="onboarding_quick_secure_access">빠르고 안전한 액세스</string>
+    <string name="onboarding_privacy_protected">개인정보를 안전하게 보호하세요</string>
 
     <string name="onboarding_secure_your_apps_description">
         안전한 비밀번호와 추가적인 개인정보 보호 기능으로 개인 앱을 안전하게 보호하세요
     </string>
 
     <string name="onboarding_quick_secure_access_description">
-        비밀번호 또는 지문으로 보호된 앱을 즉시 잠금 해제하세요
+        비밀번호 또는 지문을 사용하여 보호된 앱의 잠금을 즉시 해제하세요
     </string>
 
     <string name="onboarding_privacy_protected_description">
-        잠글 앱을 선택하고 개인 콘텐츠를 원치 않는 접근으로부터 안전하게 보호하세요
+        잠그고 싶은 앱을 선택하고 개인 콘텐츠를 원치 않는 접근으로부터 안전하게 보호하세요
     </string>
 
     <string name="onboarding_next">다음</string>
-
     <string name="onboarding_get_started">시작하기</string>
 
-    <string name="onboarding_image_description">
-        온보딩 %1$d
-    </string>
+    <string name="onboarding_image_description">온보딩 %1$d</string>
 
     <!-- Premium Screen -->
-
     <string name="premium_close">닫기</string>
     <string name="premium_image_description">프리미엄</string>
 
     <string name="premium_unlock">잠금 해제</string>
     <string name="premium_all_features"> 모든 기능</string>
-    <string name="premium_forever">영구 이용</string>
+    <string name="premium_forever">평생</string>
 
-    <string name="premium_description">한 번만 결제하고 추가 요금 없이
-평생 이용하세요.</string>
+    <string name="premium_description">한 번만 결제하세요. 반복 결제 없이
+평생 이용할 수 있습니다.</string>
 
     <string name="premium_benefits">프리미엄 혜택</string>
 
@@ -214,24 +205,22 @@
     <string name="premium_no_ads">광고 없음</string>
     <string name="premium_priority_support">우선 지원</string>
 
-    <string name="premium_best_value">최고의 혜택</string>
+    <string name="premium_best_value">최고의 가치</string>
 
     <string name="premium_one_time_purchase">일회성 구매</string>
     <string name="premium_lifetime_access">평생 이용</string>
     <string name="premium_one_time_payment">일회성 결제</string>
 
-    <string name="premium_shield_description">보호 방패</string>
+    <string name="premium_shield_description">보호막</string>
 
-    <string name="premium_no_subscription">구독 없음. 한 번 결제하면 영구적으로 이용할 수 있습니다.</string>
+    <string name="premium_no_subscription">구독 없음. 한 번만 결제하면 평생 사용할 수 있습니다.</string>
 
     <string name="premium_unlock_button">프리미엄 잠금 해제 - 일회성 구매</string>
 
-    <string name="premium_terms_of_use">이용 약관</string>
-    <string name="premium_privacy_policy">개인정보 보호정책</string>
-
+    <string name="premium_terms_of_use">이용약관</string>
+    <string name="premium_privacy_policy">개인정보 처리방침</string>
 
     <!-- Exit Screen -->
-
     <string name="exit_screen_back">뒤로</string>
     <string name="exit_screen_title">App Lock 종료</string>
 
@@ -239,16 +228,18 @@
 
     <string name="exit_app_lock_title">App Lock을 종료하시겠습니까?</string>
 
-    <string name="exit_app_lock_description">App Lock에 다시 액세스하려면
-비밀번호를 다시 입력해야 합니다.</string>
+    <string name="exit_app_lock_description">App Lock에 다시 액세스하려면\n비밀번호를 다시 입력해야 합니다.</string>
 
-    <string name="exit_rating_description">간단한 평가 하나가
-저희 팀에 큰 도움이 됩니다.</string>
+    <string name="exit_rating_description">간단한 평가를 남겨주시면\n저희 팀에 큰 도움이 됩니다.</string>
 
-    <string name="exit_stay_protected_description">보호 유지</string>
-    <string name="exit_stay_protected">보호 유지</string>
+    <string name="exit_stay_protected_description">계속 보호하기</string>
+    <string name="exit_stay_protected">계속 보호하기</string>
 
     <string name="exit_anyway_description">그래도 종료</string>
     <string name="exit_anyway">그래도 종료</string>
 
+    <string name="applock">AppLock</string>
+    <string name="enable_app_protection">앱 보호 활성화</string>
+
 </resources>
+

@@ -74,16 +74,7 @@ fun StartScreen(
 
             navigationDone = true
 
-            /*
-             * Agar setup pehle complete ho chuka hai:
-             *
-             * StartScreen
-             *       ↓
-             *    AppList
-             *
-             * Welcome / Language / Onboarding /
-             * Premium / PIN Create nahi aayenge.
-             */
+
             if (appInitialized) {
 
                 navController.navigate("appList") {
@@ -97,13 +88,7 @@ fun StartScreen(
 
             } else {
 
-                /*
-                 * First installation:
-                 *
-                 * StartScreen
-                 *       ↓
-                 * WelcomeScreen
-                 */
+
                 navController.navigate("welcomeScreen") {
 
                     popUpTo("startScreen") {
@@ -121,7 +106,9 @@ fun StartScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(
+                Color.White.copy(alpha = 0.9f)
+            )
     ) {
 
         Column(
