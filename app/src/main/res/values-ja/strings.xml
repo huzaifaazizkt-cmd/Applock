@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <resources>
+
 
 
     <!-- Common -->
@@ -15,7 +15,7 @@
 
     <!-- Bottom Navigation -->
     <string name="apps_lock">アプリロック</string>
-    <string name="vault">保管庫</string>
+    <string name="vault">Vault</string>
 
     <!-- Intruder -->
     <string name="intruder">侵入者</string>
@@ -27,16 +27,24 @@
     <string name="intruder_photo">侵入者の写真</string>
     <string name="intruder_photo_preview">侵入者の写真プレビュー</string>
 
-    <!-- Observation Time -->
-    <string name="set_observation_time">試行回数を設定</string>
+    <!-- Observation Time / Intruder Attempts -->
+    <string name="set_observation_time">監視試行回数を設定</string>
     <string name="failed_to_unblock">ロック解除に失敗した回数</string>
     <string name="immediately">すぐに</string>
+
+    <!-- Common Dialog -->
     <string name="never">しない</string>
-    <string name="five_seconds">3回の試行</string>
-    <string name="fifteen_seconds">5回の試行</string>
-    <string name="thirty_seconds">10回の試行</string>
     <string name="cancel">キャンセル</string>
     <string name="confirm">確認</string>
+
+    <!-- Delay to Re-Lock -->
+    <string name="five_seconds">5秒</string>
+    <string name="ten_seconds">10秒</string>
+    <string name="fifteen_seconds">15秒</string>
+    <string name="thirty_seconds">30秒</string>
+    <string name="one_minute">1分</string>
+    <string name="two_minutes">2分</string>
+    <string name="five_minutes">5分</string>
 
     <!-- Languages -->
     <string name="languages">言語</string>
@@ -47,20 +55,20 @@
     <string name="show_over_other_apps">他のアプリの上に表示</string>
     <string name="allow_lock_screen">ロック画面を他のアプリの上に\n表示することを許可</string>
     <string name="detect_launched_app">起動したアプリを検出</string>
-    <string name="detect_launched_description">アクセスを許可して、どのアプリが\n起動されたかを検出します...</string>
+    <string name="detect_launched_description">どのアプリが起動されたかを検出するために\nアクセスを許可してください...</string>
     <string name="auto_start">自動起動</string>
     <string name="keep_applock_running">AppLock Proを常に実行する</string>
     <string name="allow">許可</string>
-    <string name="permissions_work_properly">アプリを正常かつ効率的に動作させるには\n権限が必要です</string>
+    <string name="permissions_work_properly">アプリケーションを正常かつ効率的に動作させるには\n権限が必要です</string>
 
     <!-- Vault -->
     <string name="photos">写真</string>
     <string name="videos">動画</string>
     <string name="add">追加</string>
-    <string name="add_image">写真を追加</string>
+    <string name="add_image">画像を追加</string>
     <string name="add_video">動画を追加</string>
-    <string name="click_to_add_image">「+」をタップして写真を追加</string>
-    <string name="click_to_add_video">「+」をタップして動画を追加</string>
+    <string name="click_to_add_image">「+」をクリックして画像を追加</string>
+    <string name="click_to_add_video">「+」をクリックして動画を追加</string>
     <string name="hidden">非表示</string>
     <string name="albums">アルバム</string>
     <string name="select_all">すべて選択</string>
@@ -69,13 +77,13 @@
 
     <!-- Hide / Unhide -->
     <string name="hide_video">動画を非表示</string>
-    <string name="hide_image">写真を非表示</string>
+    <string name="hide_image">画像を非表示</string>
     <string name="hide_videos_question">これらの動画を非表示にしますか？</string>
-    <string name="hide_images_question">これらの写真を非表示にしますか？</string>
+    <string name="hide_images_question">これらの画像を非表示にしますか？</string>
     <string name="unhide_video">動画を表示</string>
-    <string name="unhide_image">写真を表示</string>
+    <string name="unhide_image">画像を表示</string>
     <string name="unhide_video_question">この動画を表示しますか？</string>
-    <string name="unhide_image_question">この写真を表示しますか？</string>
+    <string name="unhide_image_question">この画像を表示しますか？</string>
 
     <!-- Pin Create Screen -->
     <string name="four_digit_pin">4桁のPIN</string>
@@ -85,7 +93,7 @@
     <string name="reset">リセット</string>
     <string name="continue_text">続行</string>
     <string name="create_pattern">パターンを作成</string>
-    <string name="connect_four_dots">少なくとも4つの点をつなげてください</string>
+    <string name="connect_four_dots">4つ以上の点をつなげてください</string>
 
     <!-- Pin Confirm -->
     <string name="confirm_pattern">パターンを確認</string>
@@ -99,11 +107,11 @@
     <string name="allowed">許可済み</string>
 
     <!-- Security Questions -->
-    <string name="security_questions">セキュリティの質問</string>
-    <string name="security_question_description">パスコードを忘れたときに復元できるように\nキーワードを設定してください。</string>
-    <string name="select_security_questions">セキュリティの質問を選択</string>
-    <string name="select_security_question">セキュリティの質問を選択</string>
-    <string name="enter_security_answer">セキュリティの回答を入力</string>
+    <string name="security_questions">セキュリティ質問</string>
+    <string name="security_question_description">忘れたパスコードを復元できるように\nキーワードを設定してください。</string>
+    <string name="select_security_questions">セキュリティ質問を選択</string>
+    <string name="select_security_question">セキュリティ質問を選択</string>
+    <string name="enter_security_answer">セキュリティ回答を入力</string>
     <string name="enter_your_answer">回答を入力してください</string>
     <string name="skip">スキップ</string>
     <string name="save">保存</string>
@@ -111,11 +119,11 @@
     <string name="security_question_name">あなたの名前は何ですか？</string>
     <string name="security_question_father">あなたのお父さんの名前は何ですか？</string>
     <string name="security_question_pet">ペットの名前は何ですか？</string>
-    <string name="security_question_job">あなたの夢の仕事は何ですか？</string>
+    <string name="security_question_job">将来就きたい仕事は何ですか？</string>
 
     <!-- App List -->
     <string name="app_lock">アプリロック</string>
-    <string name="unlocked">ロック解除済み</string>
+    <string name="unlocked">ロック解除</string>
     <string name="locked">ロック中</string>
     <string name="search">検索</string>
     <string name="general">一般</string>
@@ -129,16 +137,16 @@
     <string name="hide_settings">非表示設定</string>
     <string name="hide_settings_description">非表示設定</string>
     <string name="rate_us">評価する</string>
-    <string name="rate_us_description">アプリを評価する</string>
+    <string name="rate_us_description">評価する</string>
     <string name="share">共有</string>
-    <string name="about">概要</string>
+    <string name="about">アプリについて</string>
     <string name="about_applock">AppLockについて</string>
     <string name="privacy_policy">プライバシーポリシー</string>
     <string name="collapse">折りたたむ</string>
     <string name="expand">展開</string>
     <string name="open_item">%1$sを開く</string>
     <string name="hide_from_recent_screen">最近の画面から非表示</string>
-    <string name="apps_hide_from_recent_screen">最近の画面からアプリを非表示</string>
+    <string name="apps_hide_from_recent_screen">アプリを最近の画面から非表示</string>
     <string name="password">パスワード</string>
     <string name="reset_password">パスワードをリセット</string>
     <string name="security_settings">セキュリティ設定</string>
@@ -149,15 +157,13 @@
     <string name="vibration">バイブレーション</string>
     <string name="hide_track">軌跡を非表示</string>
     <string name="hide_track_description">パターンパスワードを描くときに軌跡を非表示</string>
+
     <string name="relock_option">再ロックオプション</string>
     <string name="relock_after_quitting">終了後に再ロック</string>
     <string name="delay_to_relock">再ロックまでの遅延</string>
     <string name="relock">再ロック</string>
     <string name="relock_after_quitting_option">終了後に再ロック</string>
     <string name="relock_after_screen_off">画面オフ後に再ロック</string>
-    <string name="one_minute">1分</string>
-    <string name="two_minutes">2分</string>
-    <string name="five_minutes">5分</string>
 
     <!-- Unlock Screen -->
     <string name="draw_pattern">パターンを描く</string>
@@ -166,20 +172,21 @@
     <string name="pattern_not_match">パターンが一致しません</string>
 
     <!-- Onboarding Screen -->
+
     <string name="onboarding_secure_your_apps">アプリを安全に保護</string>
     <string name="onboarding_quick_secure_access">素早く安全にアクセス</string>
     <string name="onboarding_privacy_protected">あなたのプライバシーを保護</string>
 
     <string name="onboarding_secure_your_apps_description">
-        安全なパスコードと追加のプライバシー保護で、プライベートなアプリを守ります
+        安全なパスコードでプライベートなアプリを保護し、プライバシーをさらに強化します
     </string>
 
     <string name="onboarding_quick_secure_access_description">
-        パスコードまたは指紋を使って、保護されたアプリをすぐにロック解除できます
+        パスコードまたは指紋ですぐに保護されたアプリのロックを解除できます
     </string>
 
     <string name="onboarding_privacy_protected_description">
-        ロックしたいアプリを選択し、個人コンテンツを不正なアクセスから守ります
+        ロックしたいアプリを選択して、個人コンテンツを不要なアクセスから安全に守ります
     </string>
 
     <string name="onboarding_next">次へ</string>
@@ -188,49 +195,50 @@
     <string name="onboarding_image_description">オンボーディング %1$d</string>
 
     <!-- Premium Screen -->
+
     <string name="premium_close">閉じる</string>
     <string name="premium_image_description">プレミアム</string>
 
-    <string name="premium_unlock">ロック解除</string>
-    <string name="premium_all_features"> すべての機能</string>
+    <string name="premium_unlock">解除</string>
+    <string name="premium_all_features">すべての機能</string>
     <string name="premium_forever">永久</string>
 
-    <string name="premium_description">一度だけのお支払いで、生涯アクセスをお楽しみいただけます。
-継続的な料金は一切ありません。</string>
+    <string name="premium_description">一度のお支払いで、追加料金なしで\n生涯アクセスをお楽しみいただけます。</string>
 
-    <string name="premium_benefits">プレミアム特典</string>
+    <string name="premium_benefits">プレミアムの特典</string>
 
-    <string name="premium_hide_unlimited">無制限の写真と動画を非表示</string>
+    <string name="premium_hide_unlimited">写真と動画を無制限に非表示</string>
     <string name="premium_intruder_selfie">侵入者セルフィー</string>
     <string name="premium_no_ads">広告なし</string>
     <string name="premium_priority_support">優先サポート</string>
 
     <string name="premium_best_value">お得なプラン</string>
 
-    <string name="premium_one_time_purchase">一度きりの購入</string>
+    <string name="premium_one_time_purchase">一回限りの購入</string>
     <string name="premium_lifetime_access">生涯アクセス</string>
-    <string name="premium_one_time_payment">一度きりの支払い</string>
+    <string name="premium_one_time_payment">一回限りのお支払い</string>
 
     <string name="premium_shield_description">シールド</string>
 
     <string name="premium_no_subscription">サブスクリプションなし。一度支払うだけで永久に利用できます。</string>
 
-    <string name="premium_unlock_button">プレミアムを解除 - 一度きりの購入</string>
+    <string name="premium_unlock_button">プレミアムを解除 - 一回限りの購入</string>
 
     <string name="premium_terms_of_use">利用規約</string>
     <string name="premium_privacy_policy">プライバシーポリシー</string>
 
     <!-- Exit Screen -->
+
     <string name="exit_screen_back">戻る</string>
-    <string name="exit_screen_title">App Lockを終了</string>
+    <string name="exit_screen_title">AppLockを終了</string>
 
-    <string name="exit_image_description">App Lockを終了</string>
+    <string name="exit_image_description">AppLockを終了</string>
 
-    <string name="exit_app_lock_title">App Lockを終了しますか？</string>
+    <string name="exit_app_lock_title">AppLockを終了しますか？</string>
 
-    <string name="exit_app_lock_description">App Lockに再度アクセスするには、\nパスコードをもう一度入力する必要があります。</string>
+    <string name="exit_app_lock_description">AppLockに再びアクセスするには\nパスコードを入力する必要があります。</string>
 
-    <string name="exit_rating_description">簡単な評価をいただけると、\n私たちのチームにとって大きな励みになります。</string>
+    <string name="exit_rating_description">簡単な評価をしていただけると\n私たちのチームにとって大きな励みになります。</string>
 
     <string name="exit_stay_protected_description">保護を続ける</string>
     <string name="exit_stay_protected">保護を続ける</string>
@@ -238,8 +246,9 @@
     <string name="exit_anyway_description">終了する</string>
     <string name="exit_anyway">終了する</string>
 
+    <!-- AppLock Protection -->
+
     <string name="applock">AppLock</string>
     <string name="enable_app_protection">アプリ保護を有効にする</string>
 
 </resources>
-

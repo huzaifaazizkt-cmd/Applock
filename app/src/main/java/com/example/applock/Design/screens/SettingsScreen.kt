@@ -35,6 +35,7 @@ import androidx.compose.runtime.setValue
 
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
@@ -228,10 +229,47 @@ fun SettingsScreen(
         tempRelockOption =
             relockOption
 
-        delayOption =
+
+        val savedDelay =
             dataStore
                 .getRelockDelay()
                 .first()
+
+
+        delayOption =
+            when (savedDelay) {
+
+                "never" ->
+                    "never"
+
+                "five_seconds",
+                "5_seconds" ->
+                    "five_seconds"
+
+                "ten_seconds",
+                "10_seconds" ->
+                    "ten_seconds"
+
+                "thirty_seconds",
+                "30_seconds" ->
+                    "thirty_seconds"
+
+                "one_minute",
+                "1_minute" ->
+                    "one_minute"
+
+                "two_minutes",
+                "2_minutes" ->
+                    "two_minutes"
+
+                "five_minutes",
+                "5_minutes" ->
+                    "five_minutes"
+
+                else ->
+                    "never"
+            }
+
 
         tempDelayOption =
             delayOption
@@ -2291,10 +2329,10 @@ private fun getDelayText(
                 R.string.five_seconds
             )
 
-        "fifteen_seconds" ->
+        "ten_seconds" ->
 
             stringResource(
-                R.string.fifteen_seconds
+                R.string.ten_seconds
             )
 
         "thirty_seconds" ->
@@ -2596,12 +2634,19 @@ private fun DelayToRelockDialog(
 
     val delayOptions =
         listOf(
+
             "never",
+
             "five_seconds",
-            "fifteen_seconds",
+
+            "ten_seconds",
+
             "thirty_seconds",
+
             "one_minute",
+
             "two_minutes",
+
             "five_minutes"
         )
 

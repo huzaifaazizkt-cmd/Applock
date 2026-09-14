@@ -3,6 +3,7 @@
 
     <string name="app_name" translatable="false">App locker</string>
     <string name="lifetime" translatable="false">lifetime</string>
+
     <!-- Common -->
     <string name="back">Back</string>
     <string name="close_selection">Close selection</string>
@@ -27,16 +28,24 @@
     <string name="intruder_photo">Intruder photo</string>
     <string name="intruder_photo_preview">Intruder photo preview</string>
 
-    <!-- Observation Time -->
+    <!-- Observation Time / Intruder Attempts -->
     <string name="set_observation_time">Set Observation Attempts</string>
     <string name="failed_to_unblock">Number of times failed to unblocked</string>
     <string name="immediately">Immediately</string>
+
+    <!-- Common Dialog -->
     <string name="never">Never</string>
-    <string name="five_seconds">3 Attempts</string>
-    <string name="fifteen_seconds">5 Attempts</string>
-    <string name="thirty_seconds">10 Attempts</string>
     <string name="cancel">Cancel</string>
     <string name="confirm">Confirm</string>
+
+    <!-- Delay to Re-Lock -->
+    <string name="five_seconds">5 Seconds</string>
+    <string name="ten_seconds">10 Seconds</string>
+    <string name="fifteen_seconds">15 Seconds</string>
+    <string name="thirty_seconds">30 Seconds</string>
+    <string name="one_minute">1 Minute</string>
+    <string name="two_minutes">2 Minutes</string>
+    <string name="five_minutes">5 Minutes</string>
 
     <!-- Languages -->
     <string name="languages">Languages</string>
@@ -149,15 +158,13 @@
     <string name="vibration">Vibration</string>
     <string name="hide_track">Hide Track</string>
     <string name="hide_track_description">Hide track when you draw pattern password</string>
+
     <string name="relock_option">Re-Lock option</string>
     <string name="relock_after_quitting">Re-lock after Quitting</string>
     <string name="delay_to_relock">Delay to Re-Lock</string>
     <string name="relock">Re-Lock</string>
     <string name="relock_after_quitting_option">Re-Lock After Quitting</string>
     <string name="relock_after_screen_off">Re-Lock after screen off</string>
-    <string name="one_minute">1 Minute</string>
-    <string name="two_minutes">2 Minutes</string>
-    <string name="five_minutes">5 Minutes</string>
 
     <!-- Unlock Screen -->
     <string name="draw_pattern">Draw pattern</string>
@@ -165,30 +172,28 @@
     <string name="enter_digit_pin">Enter %1$d - Digit pin</string>
     <string name="pattern_not_match">Pattern does not match</string>
 
+    <!-- Onboarding Screen -->
 
+    <string name="onboarding_secure_your_apps">Secure Your Apps</string>
+    <string name="onboarding_quick_secure_access">Quick &amp; Secure Access</string>
+    <string name="onboarding_privacy_protected">Your Privacy, Protected</string>
 
-        <!-- Onboarding Screen -->
-
-        <string name="onboarding_secure_your_apps">Secure Your Apps</string>
-        <string name="onboarding_quick_secure_access">Quick &amp; Secure Access</string>
-        <string name="onboarding_privacy_protected">Your Privacy, Protected</string>
-
-        <string name="onboarding_secure_your_apps_description">
+    <string name="onboarding_secure_your_apps_description">
         Keep your private apps protected with a secure passcode and an extra layer of privacy
     </string>
 
-        <string name="onboarding_quick_secure_access_description">
+    <string name="onboarding_quick_secure_access_description">
         Unlock your protected apps instantly with your passcode or fingerprint
     </string>
 
-        <string name="onboarding_privacy_protected_description">
+    <string name="onboarding_privacy_protected_description">
         Choose the apps you want to lock and keep your personal content safe from unwanted access
     </string>
 
-        <string name="onboarding_next">Next</string>
-        <string name="onboarding_get_started">Get Started</string>
+    <string name="onboarding_next">Next</string>
+    <string name="onboarding_get_started">Get Started</string>
 
-        <string name="onboarding_image_description">Onboarding %1$d</string>
+    <string name="onboarding_image_description">Onboarding %1$d</string>
 
     <!-- Premium Screen -->
 
@@ -242,6 +247,8 @@ with no recurring charges.</string>
 
     <string name="exit_anyway_description">Exit Anyway</string>
     <string name="exit_anyway">Exit Anyway</string>
+
+    <!-- AppLock Protection -->
 
     <string name="applock">AppLock</string>
     <string name="enable_app_protection">Enable App Protection</string>

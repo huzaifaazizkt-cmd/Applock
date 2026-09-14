@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <resources>
 
 
@@ -21,23 +20,31 @@
     <!-- Intruder -->
     <string name="intruder">Penyusup</string>
     <string name="intruder_settings">Pengaturan penyusup</string>
-    <string name="intruder_camera">Kamera penyusup</string>
+    <string name="intruder_camera">Kamera Penyusup</string>
     <string name="capture_wrong_password">Ambil foto siapa pun yang memasukkan\nkata sandi yang salah</string>
     <string name="no_intruder_found">Tidak Ada Penyusup</string>
-    <string name="today">Hari ini</string>
+    <string name="today">Hari Ini</string>
     <string name="intruder_photo">Foto penyusup</string>
     <string name="intruder_photo_preview">Pratinjau foto penyusup</string>
 
-    <!-- Observation Time -->
+    <!-- Observation Time / Intruder Attempts -->
     <string name="set_observation_time">Atur Jumlah Percobaan</string>
     <string name="failed_to_unblock">Jumlah kegagalan membuka kunci</string>
     <string name="immediately">Segera</string>
-    <string name="never">Jangan Pernah</string>
-    <string name="five_seconds">3 Percobaan</string>
-    <string name="fifteen_seconds">5 Percobaan</string>
-    <string name="thirty_seconds">10 Percobaan</string>
+
+    <!-- Common Dialog -->
+    <string name="never">Tidak Pernah</string>
     <string name="cancel">Batal</string>
     <string name="confirm">Konfirmasi</string>
+
+    <!-- Delay to Re-Lock -->
+    <string name="five_seconds">5 Detik</string>
+    <string name="ten_seconds">10 Detik</string>
+    <string name="fifteen_seconds">15 Detik</string>
+    <string name="thirty_seconds">30 Detik</string>
+    <string name="one_minute">1 Menit</string>
+    <string name="two_minutes">2 Menit</string>
+    <string name="five_minutes">5 Menit</string>
 
     <!-- Languages -->
     <string name="languages">Bahasa</string>
@@ -48,7 +55,7 @@
     <string name="show_over_other_apps">Tampilkan di Atas Aplikasi Lain</string>
     <string name="allow_lock_screen">Izinkan layar kunci ditampilkan di atas\naplikasi lain</string>
     <string name="detect_launched_app">Deteksi Aplikasi yang Dibuka</string>
-    <string name="detect_launched_description">Izinkan mendeteksi aplikasi yang sedang\ndibuka dengan memberikan akses ke...</string>
+    <string name="detect_launched_description">Izinkan untuk mendeteksi aplikasi mana yang\ndibuka dengan memberikan akses...</string>
     <string name="auto_start">Mulai Otomatis</string>
     <string name="keep_applock_running">Selalu Jalankan AppLock Pro</string>
     <string name="allow">Izinkan</string>
@@ -58,9 +65,9 @@
     <string name="photos">Foto</string>
     <string name="videos">Video</string>
     <string name="add">Tambah</string>
-    <string name="add_image">Tambah Foto</string>
+    <string name="add_image">Tambah Gambar</string>
     <string name="add_video">Tambah Video</string>
-    <string name="click_to_add_image">Klik "+" untuk menambahkan foto</string>
+    <string name="click_to_add_image">Klik "+" untuk menambahkan gambar</string>
     <string name="click_to_add_video">Klik "+" untuk menambahkan video</string>
     <string name="hidden">Tersembunyi</string>
     <string name="albums">Album</string>
@@ -70,13 +77,13 @@
 
     <!-- Hide / Unhide -->
     <string name="hide_video">Sembunyikan Video</string>
-    <string name="hide_image">Sembunyikan Foto</string>
+    <string name="hide_image">Sembunyikan Gambar</string>
     <string name="hide_videos_question">Apakah Anda yakin ingin menyembunyikan video ini?</string>
-    <string name="hide_images_question">Apakah Anda yakin ingin menyembunyikan foto ini?</string>
+    <string name="hide_images_question">Apakah Anda yakin ingin menyembunyikan gambar ini?</string>
     <string name="unhide_video">Tampilkan Video</string>
-    <string name="unhide_image">Tampilkan Foto</string>
+    <string name="unhide_image">Tampilkan Gambar</string>
     <string name="unhide_video_question">Apakah Anda ingin menampilkan video ini?</string>
-    <string name="unhide_image_question">Apakah Anda ingin menampilkan foto ini?</string>
+    <string name="unhide_image_question">Apakah Anda ingin menampilkan gambar ini?</string>
 
     <!-- Pin Create Screen -->
     <string name="four_digit_pin">PIN 4 Digit</string>
@@ -149,16 +156,14 @@
     <string name="unlock">Buka Kunci</string>
     <string name="vibration">Getaran</string>
     <string name="hide_track">Sembunyikan Jejak</string>
-    <string name="hide_track_description">Sembunyikan jejak saat menggambar kata sandi pola</string>
+    <string name="hide_track_description">Sembunyikan jejak saat menggambar pola kata sandi</string>
+
     <string name="relock_option">Opsi Kunci Ulang</string>
-    <string name="relock_after_quitting">Kunci ulang setelah keluar</string>
-    <string name="delay_to_relock">Penundaan Kunci Ulang</string>
+    <string name="relock_after_quitting">Kunci Ulang setelah Keluar</string>
+    <string name="delay_to_relock">Jeda untuk Kunci Ulang</string>
     <string name="relock">Kunci Ulang</string>
     <string name="relock_after_quitting_option">Kunci Ulang Setelah Keluar</string>
-    <string name="relock_after_screen_off">Kunci ulang setelah layar mati</string>
-    <string name="one_minute">1 Menit</string>
-    <string name="two_minutes">2 Menit</string>
-    <string name="five_minutes">5 Menit</string>
+    <string name="relock_after_screen_off">Kunci Ulang setelah layar mati</string>
 
     <!-- Unlock Screen -->
     <string name="draw_pattern">Gambar pola</string>
@@ -167,6 +172,7 @@
     <string name="pattern_not_match">Pola tidak cocok</string>
 
     <!-- Onboarding Screen -->
+
     <string name="onboarding_secure_your_apps">Amankan Aplikasi Anda</string>
     <string name="onboarding_quick_secure_access">Akses Cepat &amp; Aman</string>
     <string name="onboarding_privacy_protected">Privasi Anda Terlindungi</string>
@@ -176,7 +182,7 @@
     </string>
 
     <string name="onboarding_quick_secure_access_description">
-        Buka kunci aplikasi yang dilindungi secara instan dengan kode sandi atau sidik jari Anda
+        Buka aplikasi yang dilindungi secara instan dengan kode sandi atau sidik jari Anda
     </string>
 
     <string name="onboarding_privacy_protected_description">
@@ -189,6 +195,7 @@
     <string name="onboarding_image_description">Onboarding %1$d</string>
 
     <!-- Premium Screen -->
+
     <string name="premium_close">Tutup</string>
     <string name="premium_image_description">Premium</string>
 
@@ -196,8 +203,7 @@
     <string name="premium_all_features"> Semua Fitur</string>
     <string name="premium_forever">Selamanya</string>
 
-    <string name="premium_description">Pembayaran satu kali. Nikmati akses seumur hidup
-tanpa biaya berulang.</string>
+    <string name="premium_description">Pembayaran satu kali. Nikmati akses seumur hidup\ntanpa biaya berulang.</string>
 
     <string name="premium_benefits">Manfaat Premium</string>
 
@@ -214,22 +220,23 @@ tanpa biaya berulang.</string>
 
     <string name="premium_shield_description">perisai</string>
 
-    <string name="premium_no_subscription">Tanpa langganan. Bayar sekali dan menjadi milik Anda selamanya.</string>
+    <string name="premium_no_subscription">Tanpa langganan. Bayar sekali dan gunakan selamanya.</string>
 
-    <string name="premium_unlock_button">Buka Kunci Premium - Pembelian Satu Kali</string>
+    <string name="premium_unlock_button">Buka Premium - Pembelian Satu Kali</string>
 
     <string name="premium_terms_of_use">Ketentuan Penggunaan</string>
     <string name="premium_privacy_policy">Kebijakan Privasi</string>
 
     <!-- Exit Screen -->
+
     <string name="exit_screen_back">Kembali</string>
-    <string name="exit_screen_title">Keluar dari App Lock</string>
+    <string name="exit_screen_title">Keluar dari AppLock</string>
 
-    <string name="exit_image_description">Keluar dari App Lock</string>
+    <string name="exit_image_description">Keluar dari AppLock</string>
 
-    <string name="exit_app_lock_title">Keluar dari App Lock?</string>
+    <string name="exit_app_lock_title">Keluar dari AppLock?</string>
 
-    <string name="exit_app_lock_description">Anda perlu memasukkan kode sandi Anda\nlagi untuk mengakses App Lock.</string>
+    <string name="exit_app_lock_description">Anda perlu memasukkan kode sandi\nlagi untuk mengakses AppLock.</string>
 
     <string name="exit_rating_description">Penilaian singkat dari Anda sangat\nberarti bagi tim kami.</string>
 
@@ -239,8 +246,9 @@ tanpa biaya berulang.</string>
     <string name="exit_anyway_description">Tetap Keluar</string>
     <string name="exit_anyway">Tetap Keluar</string>
 
+    <!-- AppLock Protection -->
+
     <string name="applock">AppLock</string>
     <string name="enable_app_protection">Aktifkan Perlindungan Aplikasi</string>
 
 </resources>
-

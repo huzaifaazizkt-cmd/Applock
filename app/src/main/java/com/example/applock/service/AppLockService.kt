@@ -1,7 +1,5 @@
-
-
-
 package com.example.applock.service
+
 import com.example.applock.service.AppLockServiceHolder
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.AccessibilityServiceInfo
@@ -408,13 +406,6 @@ class AppLockService : AccessibilityService() {
                     .getAppProtectionEnabled()
                     .collectLatest { enabled ->
 
-                        /*
-                         * DataStore now returns Boolean,
-                         * not Boolean?.
-                         *
-                         * Therefore no ?: true is required here.
-                         */
-
                         appProtectionEnabled =
                             enabled
 
@@ -498,11 +489,42 @@ class AppLockService : AccessibilityService() {
                     .collectLatest { delay ->
 
                         relockDelay =
-                            delay
+                            when (delay) {
+
+                                "never" ->
+                                    "never"
+
+                                "five_seconds",
+                                "5_seconds" ->
+                                    "five_seconds"
+
+                                "ten_seconds",
+                                "10_seconds" ->
+                                    "ten_seconds"
+
+                                "thirty_seconds",
+                                "30_seconds" ->
+                                    "thirty_seconds"
+
+                                "one_minute",
+                                "1_minute" ->
+                                    "one_minute"
+
+                                "two_minutes",
+                                "2_minutes" ->
+                                    "two_minutes"
+
+                                "five_minutes",
+                                "5_minutes" ->
+                                    "five_minutes"
+
+                                else ->
+                                    "never"
+                            }
 
                         Log.d(
                             TAG,
-                            "RELOCK DELAY = $delay"
+                            "RELOCK DELAY = $relockDelay"
                         )
                     }
 
@@ -587,27 +609,35 @@ class AppLockService : AccessibilityService() {
 
         return when (relockDelay) {
 
-            "five_seconds",
-            "5_seconds" -> 5_000L
+            "never" ->
+                0L
 
-            "fifteen_seconds",
-            "15_seconds" -> 15_000L
+            "five_seconds",
+            "5_seconds" ->
+                5_000L
+
+            "ten_seconds",
+            "10_seconds" ->
+                10_000L
 
             "thirty_seconds",
-            "30_seconds" -> 30_000L
+            "30_seconds" ->
+                30_000L
 
             "one_minute",
-            "1_minute" -> 60_000L
+            "1_minute" ->
+                60_000L
 
             "two_minutes",
-            "2_minutes" -> 120_000L
+            "2_minutes" ->
+                120_000L
 
             "five_minutes",
-            "5_minutes" -> 300_000L
+            "5_minutes" ->
+                300_000L
 
-            "never" -> 0L
-
-            else -> 0L
+            else ->
+                0L
         }
     }
 
@@ -680,12 +710,10 @@ class AppLockService : AccessibilityService() {
         event: AccessibilityEvent?
     ) {
 
-        // Protection OFF
         if (!appProtectionEnabled) {
             return
         }
 
-        // Service not connected
         if (!serviceConnected) {
             return
         }
@@ -713,10 +741,6 @@ class AppLockService : AccessibilityService() {
                 ?: return
 
 
-        // =====================================================
-        // SYSTEM UI
-        // =====================================================
-
         if (
             packageName ==
             "com.android.systemui"
@@ -724,10 +748,6 @@ class AppLockService : AccessibilityService() {
             return
         }
 
-
-        // =====================================================
-        // LAUNCHER
-        // =====================================================
 
         val isLauncher =
             packageName.contains(
@@ -775,10 +795,6 @@ class AppLockService : AccessibilityService() {
         }
 
 
-        // =====================================================
-        // OUR OWN APP
-        // =====================================================
-
         if (
             packageName ==
             applicationContext.packageName
@@ -787,10 +803,6 @@ class AppLockService : AccessibilityService() {
         }
 
 
-        // =====================================================
-        // LOCK SCREEN OPEN
-        // =====================================================
-
         if (
             AppLockServiceHolder
                 .isLockScreenOpen
@@ -798,10 +810,6 @@ class AppLockService : AccessibilityService() {
             return
         }
 
-
-        // =====================================================
-        // ALREADY UNLOCKED
-        // =====================================================
 
         if (
             AppLockServiceHolder
@@ -816,10 +824,6 @@ class AppLockService : AccessibilityService() {
         }
 
 
-        // =====================================================
-        // ALREADY CHECKING
-        // =====================================================
-
         if (
             checkingPackage ==
             packageName
@@ -831,10 +835,6 @@ class AppLockService : AccessibilityService() {
         checkingPackage =
             packageName
 
-
-        // =====================================================
-        // CHECK LOCKED APPS
-        // =====================================================
 
         serviceScope.launch {
 
@@ -1092,4 +1092,3 @@ class AppLockService : AccessibilityService() {
         super.onDestroy()
     }
 }
-

@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <resources>
-
 
 
     <!-- Common -->
@@ -10,7 +8,7 @@
     <string name="selected_count">Seleccionados (%1$d)</string>
     <string name="all">Todos</string>
     <string name="all_selected">Todos seleccionados</string>
-    <string name="settings">Configuración</string>
+    <string name="settings">Ajustes</string>
     <string name="delete">Eliminar</string>
     <string name="loading">Cargando...</string>
 
@@ -20,7 +18,7 @@
 
     <!-- Intruder -->
     <string name="intruder">Intruso</string>
-    <string name="intruder_settings">Configuración del intruso</string>
+    <string name="intruder_settings">Ajustes de intruso</string>
     <string name="intruder_camera">Cámara de intrusos</string>
     <string name="capture_wrong_password">Captura fotos de cualquiera que introduzca\nla contraseña incorrecta</string>
     <string name="no_intruder_found">No se encontraron intrusos</string>
@@ -28,16 +26,24 @@
     <string name="intruder_photo">Foto del intruso</string>
     <string name="intruder_photo_preview">Vista previa de la foto del intruso</string>
 
-    <!-- Observation Time -->
+    <!-- Observation Time / Intruder Attempts -->
     <string name="set_observation_time">Establecer intentos de observación</string>
-    <string name="failed_to_unblock">Número de intentos fallidos para desbloquear</string>
+    <string name="failed_to_unblock">Número de veces que se ha fallado al desbloquear</string>
     <string name="immediately">Inmediatamente</string>
+
+    <!-- Common Dialog -->
     <string name="never">Nunca</string>
-    <string name="five_seconds">3 intentos</string>
-    <string name="fifteen_seconds">5 intentos</string>
-    <string name="thirty_seconds">10 intentos</string>
     <string name="cancel">Cancelar</string>
     <string name="confirm">Confirmar</string>
+
+    <!-- Delay to Re-Lock -->
+    <string name="five_seconds">5 segundos</string>
+    <string name="ten_seconds">10 segundos</string>
+    <string name="fifteen_seconds">15 segundos</string>
+    <string name="thirty_seconds">30 segundos</string>
+    <string name="one_minute">1 minuto</string>
+    <string name="two_minutes">2 minutos</string>
+    <string name="five_minutes">5 minutos</string>
 
     <!-- Languages -->
     <string name="languages">Idiomas</string>
@@ -47,12 +53,12 @@
     <string name="permissions_required">Permisos necesarios</string>
     <string name="show_over_other_apps">Mostrar sobre otras aplicaciones</string>
     <string name="allow_lock_screen">Permitir que la pantalla de bloqueo se muestre sobre\notras aplicaciones</string>
-    <string name="detect_launched_app">Detectar aplicaciones iniciadas</string>
-    <string name="detect_launched_description">Permitir detectar qué aplicación se\ninicia otorgando acceso a...</string>
+    <string name="detect_launched_app">Detectar aplicación iniciada</string>
+    <string name="detect_launched_description">Permitir detectar qué aplicación se\ninicia concediendo acceso a...</string>
     <string name="auto_start">Inicio automático</string>
     <string name="keep_applock_running">Mantener AppLock Pro siempre activo</string>
     <string name="allow">Permitir</string>
-    <string name="permissions_work_properly">Los permisos son necesarios para que la aplicación funcione\ncorrecta y eficientemente</string>
+    <string name="permissions_work_properly">Los permisos son necesarios para que la aplicación funcione\ncorrectamente y de manera eficiente</string>
 
     <!-- Vault -->
     <string name="photos">Fotos</string>
@@ -60,8 +66,8 @@
     <string name="add">Añadir</string>
     <string name="add_image">Añadir imagen</string>
     <string name="add_video">Añadir vídeo</string>
-    <string name="click_to_add_image">Haz clic en "+" para añadir una imagen</string>
-    <string name="click_to_add_video">Haz clic en "+" para añadir un vídeo</string>
+    <string name="click_to_add_image">Pulsa "+" para añadir una imagen</string>
+    <string name="click_to_add_video">Pulsa "+" para añadir un vídeo</string>
     <string name="hidden">Oculto</string>
     <string name="albums">Álbumes</string>
     <string name="select_all">Seleccionar todo</string>
@@ -71,8 +77,8 @@
     <!-- Hide / Unhide -->
     <string name="hide_video">Ocultar vídeo</string>
     <string name="hide_image">Ocultar imagen</string>
-    <string name="hide_videos_question">¿Estás seguro de que quieres ocultar estos vídeos?</string>
-    <string name="hide_images_question">¿Estás seguro de que quieres ocultar estas imágenes?</string>
+    <string name="hide_videos_question">¿Seguro que quieres ocultar estos vídeos?</string>
+    <string name="hide_images_question">¿Seguro que quieres ocultar estas imágenes?</string>
     <string name="unhide_video">Mostrar vídeo</string>
     <string name="unhide_image">Mostrar imagen</string>
     <string name="unhide_video_question">¿Quieres mostrar este vídeo?</string>
@@ -125,12 +131,12 @@
 
     <!-- Settings Screen -->
     <string name="language_description">Seleccionar idioma</string>
-    <string name="lock_setting">Configuración de bloqueo</string>
-    <string name="lock_settings_description">Configuración de bloqueo</string>
-    <string name="hide_settings">Configuración de ocultación</string>
-    <string name="hide_settings_description">Configuración de ocultación</string>
-    <string name="rate_us">Califícanos</string>
-    <string name="rate_us_description">Califícanos</string>
+    <string name="lock_setting">Ajuste de bloqueo</string>
+    <string name="lock_settings_description">Ajustes de bloqueo</string>
+    <string name="hide_settings">Ajustes de ocultación</string>
+    <string name="hide_settings_description">Ajustes de ocultación</string>
+    <string name="rate_us">Valóranos</string>
+    <string name="rate_us_description">Valóranos</string>
     <string name="share">Compartir</string>
     <string name="about">Acerca de</string>
     <string name="about_applock">Acerca de AppLock</string>
@@ -139,43 +145,48 @@
     <string name="expand">Expandir</string>
     <string name="open_item">Abrir %1$s</string>
     <string name="hide_from_recent_screen">Ocultar de la pantalla de recientes</string>
-    <string name="apps_hide_from_recent_screen">Ocultar aplicaciones de la pantalla de recientes</string>
+    <string name="apps_hide_from_recent_screen">Aplicaciones ocultas de la pantalla de recientes</string>
     <string name="password">Contraseña</string>
     <string name="reset_password">Restablecer contraseña</string>
-    <string name="security_settings">Configuración de seguridad</string>
+    <string name="security_settings">Ajustes de seguridad</string>
     <string name="set_security_email">Establecer correo electrónico de seguridad</string>
-    <string name="fingerprint_lock">Bloqueo con huella dactilar</string>
-    <string name="use_fingerprint_to_unlock">Usar la huella dactilar para desbloquear aplicaciones</string>
+    <string name="fingerprint_lock">Bloqueo con huella digital</string>
+    <string name="use_fingerprint_to_unlock">Usar la huella digital para desbloquear aplicaciones</string>
     <string name="unlock">Desbloquear</string>
     <string name="vibration">Vibración</string>
-    <string name="hide_track">Ocultar trazado</string>
-    <string name="hide_track_description">Ocultar el trazado al dibujar la contraseña de patrón</string>
+    <string name="hide_track">Ocultar trazo</string>
+    <string name="hide_track_description">Ocultar el trazo al dibujar la contraseña de patrón</string>
+
     <string name="relock_option">Opción de volver a bloquear</string>
     <string name="relock_after_quitting">Volver a bloquear después de salir</string>
     <string name="delay_to_relock">Retraso para volver a bloquear</string>
     <string name="relock">Volver a bloquear</string>
     <string name="relock_after_quitting_option">Volver a bloquear después de salir</string>
-    <string name="relock_after_screen_off">Volver a bloquear al apagar la pantalla</string>
-    <string name="one_minute">1 minuto</string>
-    <string name="two_minutes">2 minutos</string>
-    <string name="five_minutes">5 minutos</string>
+    <string name="relock_after_screen_off">Volver a bloquear después de apagar la pantalla</string>
 
     <!-- Unlock Screen -->
-    <string name="draw_pattern">Dibuja el patrón</string>
-    <string name="enter_passcode">Introduce el código de acceso</string>
-    <string name="enter_digit_pin">Introduce el PIN de %1$d dígitos</string>
+    <string name="draw_pattern">Dibujar patrón</string>
+    <string name="enter_passcode">Introducir código de acceso</string>
+    <string name="enter_digit_pin">Introducir PIN de %1$d dígitos</string>
     <string name="pattern_not_match">El patrón no coincide</string>
 
     <!-- Onboarding Screen -->
+
     <string name="onboarding_secure_your_apps">Protege tus aplicaciones</string>
     <string name="onboarding_quick_secure_access">Acceso rápido y seguro</string>
     <string name="onboarding_privacy_protected">Tu privacidad, protegida</string>
 
-    <string name="onboarding_secure_your_apps_description">Mantén tus aplicaciones privadas protegidas con un código de acceso seguro y una capa adicional de privacidad</string>
+    <string name="onboarding_secure_your_apps_description">
+        Mantén tus aplicaciones privadas protegidas con un código de acceso seguro y una capa adicional de privacidad
+    </string>
 
-    <string name="onboarding_quick_secure_access_description">Desbloquea tus aplicaciones protegidas al instante con tu código de acceso o huella dactilar</string>
+    <string name="onboarding_quick_secure_access_description">
+        Desbloquea al instante tus aplicaciones protegidas con tu código de acceso o huella digital
+    </string>
 
-    <string name="onboarding_privacy_protected_description">Elige las aplicaciones que quieres bloquear y mantén tu contenido personal a salvo de accesos no deseados</string>
+    <string name="onboarding_privacy_protected_description">
+        Elige las aplicaciones que quieres bloquear y mantén tu contenido personal a salvo de accesos no deseados
+    </string>
 
     <string name="onboarding_next">Siguiente</string>
     <string name="onboarding_get_started">Comenzar</string>
@@ -183,6 +194,7 @@
     <string name="onboarding_image_description">Introducción %1$d</string>
 
     <!-- Premium Screen -->
+
     <string name="premium_close">Cerrar</string>
     <string name="premium_image_description">Premium</string>
 
@@ -215,25 +227,27 @@
     <string name="premium_privacy_policy">Política de privacidad</string>
 
     <!-- Exit Screen -->
+
     <string name="exit_screen_back">Atrás</string>
-    <string name="exit_screen_title">Salir de App Lock</string>
+    <string name="exit_screen_title">Salir de AppLock</string>
 
-    <string name="exit_image_description">Salir de App Lock</string>
+    <string name="exit_image_description">Salir de AppLock</string>
 
-    <string name="exit_app_lock_title">¿Salir de App Lock?</string>
+    <string name="exit_app_lock_title">¿Salir de AppLock?</string>
 
-    <string name="exit_app_lock_description">Deberás introducir tu código de acceso\nnuevamente para acceder a App Lock.</string>
+    <string name="exit_app_lock_description">Tendrás que introducir tu código de acceso\nde nuevo para acceder a AppLock.</string>
 
-    <string name="exit_rating_description">Una valoración rápida de tu parte significa\nmucho para nuestro equipo.</string>
+    <string name="exit_rating_description">Una valoración rápida por tu parte significa\nmucho para nuestro equipo.</string>
 
-    <string name="exit_stay_protected_description">Mantener protegido</string>
-    <string name="exit_stay_protected">Mantener protegido</string>
+    <string name="exit_stay_protected_description">Mantente protegido</string>
+    <string name="exit_stay_protected">Mantener protección</string>
 
     <string name="exit_anyway_description">Salir de todos modos</string>
     <string name="exit_anyway">Salir de todos modos</string>
+
+    <!-- AppLock Protection -->
 
     <string name="applock">AppLock</string>
     <string name="enable_app_protection">Activar protección de aplicaciones</string>
 
 </resources>
-
