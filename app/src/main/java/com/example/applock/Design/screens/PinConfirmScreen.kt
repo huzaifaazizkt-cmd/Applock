@@ -1,4 +1,3 @@
-
 package com.example.applock.Design.screens
 
 import com.example.applock.Design.screens.AppListCache
@@ -746,6 +745,10 @@ fun PinConfirmScreen(
                 Arrangement.Center
         ) {
 
+            // =========================================================
+            // TITLE
+            // =========================================================
+
             Text(
                 text =
                     if (isPattern) {
@@ -777,6 +780,10 @@ fun PinConfirmScreen(
             )
 
 
+            // =========================================================
+            // STEP INDICATOR
+            // =========================================================
+
             Row(
                 verticalAlignment =
                     Alignment.CenterVertically
@@ -789,8 +796,7 @@ fun PinConfirmScreen(
                             .border(
                                 width = 2.dp,
                                 color = Color.White,
-                                shape =
-                                    CircleShape
+                                shape = CircleShape
                             ),
 
                     contentAlignment =
@@ -866,10 +872,14 @@ fun PinConfirmScreen(
             Spacer(
                 modifier =
                     Modifier.height(
-                        40.dp
+                        65.dp
                     )
             )
 
+
+            // =========================================================
+            // PATTERN
+            // =========================================================
 
             if (isPattern) {
 
@@ -887,6 +897,14 @@ fun PinConfirmScreen(
                 )
 
 
+                Spacer(
+                    modifier =
+                        Modifier.height(
+                            18.dp
+                        )
+                )
+
+
                 Box(
                     modifier =
                         Modifier
@@ -900,7 +918,8 @@ fun PinConfirmScreen(
                     if (error.isNotEmpty()) {
 
                         Text(
-                            text = error,
+                            text =
+                                error,
 
                             color =
                                 Color.Red,
@@ -915,10 +934,15 @@ fun PinConfirmScreen(
                 Spacer(
                     modifier =
                         Modifier.height(
-                            20.dp
+                            38.dp
                         )
                 )
 
+
+                // =====================================================
+                // CONFIRM PATTERN GRID
+                // Same 330dp size as PinCreateScreen
+                // =====================================================
 
                 ConfirmPatternGrid(
 
@@ -1013,10 +1037,14 @@ fun PinConfirmScreen(
                 Spacer(
                     modifier =
                         Modifier.height(
-                            35.dp
+                            55.dp
                         )
                 )
 
+
+                // =====================================================
+                // CONTINUE
+                // =====================================================
 
                 Row(
                     modifier =
@@ -1078,10 +1106,14 @@ fun PinConfirmScreen(
 
             } else {
 
+                // =========================================================
+                // PIN
+                // =========================================================
+
                 Text(
                     text =
                         stringResource(
-                            R.string.confirm_passcode,
+                            R.string.confirm_passcode
                         ),
 
                     color =
@@ -1100,6 +1132,11 @@ fun PinConfirmScreen(
                 )
 
 
+                // =====================================================
+                // PIN DOTS
+                // Same spacing as PinCreateScreen
+                // =====================================================
+
                 Row(
                     horizontalArrangement =
                         Arrangement.spacedBy(
@@ -1115,8 +1152,12 @@ fun PinConfirmScreen(
                             modifier =
                                 Modifier
                                     .size(20.dp)
+                                    .border(
+                                        1.5.dp,
+                                        Color.White,
+                                        CircleShape
+                                    )
                                     .background(
-
                                         if (
                                             index <
                                             confirmPin.length
@@ -1126,9 +1167,7 @@ fun PinConfirmScreen(
 
                                         } else {
 
-                                            Color.White.copy(
-                                                alpha = 0.45f
-                                            )
+                                            Color.Transparent
                                         },
 
                                         CircleShape
@@ -1141,45 +1180,15 @@ fun PinConfirmScreen(
                 Spacer(
                     modifier =
                         Modifier.height(
-                            20.dp
+                            82.dp
                         )
                 )
 
 
-                Box(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .height(20.dp),
-
-                    contentAlignment =
-                        Alignment.Center
-                ) {
-
-                    if (error.isNotEmpty()) {
-
-                        Text(
-                            text =
-                                error,
-
-                            // PIN ERROR IS RED
-                            color =
-                                Color.Red,
-
-                            fontSize =
-                                14.sp
-                        )
-                    }
-                }
-
-
-                Spacer(
-                    modifier =
-                        Modifier.height(
-                            30.dp
-                        )
-                )
-
+                // =====================================================
+                // NUMBER PAD
+                // Same position structure as PinCreateScreen
+                // =====================================================
 
                 NumberPad(
 
@@ -1228,6 +1237,10 @@ fun PinConfirmScreen(
                 )
 
 
+                // =====================================================
+                // RESET + CONTINUE
+                // =====================================================
+
                 Row(
                     modifier =
                         Modifier
@@ -1237,8 +1250,69 @@ fun PinConfirmScreen(
                             ),
 
                     horizontalArrangement =
-                        Arrangement.End
+                        Arrangement.spacedBy(
+                            30.dp,
+                            Alignment.End
+                        )
                 ) {
+
+                    // =================================================
+                    // RESET
+                    // =================================================
+
+                    Text(
+                        text =
+                            stringResource(
+                                R.string.reset
+                            ),
+
+                        color =
+                            if (
+                                confirmPin.isEmpty()
+                            ) {
+
+                                Color.White.copy(
+                                    alpha = 0.35f
+                                )
+
+                            } else {
+
+                                Color.White
+                            },
+
+                        fontSize =
+                            20.sp,
+
+                        modifier =
+                            Modifier
+                                .clickable(
+                                    enabled =
+                                        confirmPin.isNotEmpty(),
+
+                                    indication =
+                                        null,
+
+                                    interactionSource =
+                                        remember {
+                                            MutableInteractionSource()
+                                        }
+                                ) {
+
+                                    confirmPin =
+                                        ""
+
+                                    error =
+                                        ""
+                                }
+                                .padding(
+                                    10.dp
+                                )
+                    )
+
+
+                    // =================================================
+                    // CONTINUE
+                    // =================================================
 
                     Text(
                         text =
@@ -1305,6 +1379,10 @@ fun PinConfirmScreen(
         }
 
 
+        // =============================================================
+        // PERMISSION DIALOG
+        // =============================================================
+
         if (showPermissionDialog) {
 
             PermissionRequiredDialog(
@@ -1339,6 +1417,10 @@ fun PinConfirmScreen(
             )
         }
 
+
+        // =============================================================
+        // SECURITY QUESTION DIALOG
+        // =============================================================
 
         if (showSecurityDialog) {
 
@@ -1464,6 +1546,10 @@ fun PinConfirmScreen(
 }
 
 
+// =====================================================================
+// PERMISSION REQUIRED DIALOG
+// =====================================================================
+
 @Composable
 private fun PermissionRequiredDialog(
     overlayAllowed: Boolean,
@@ -1477,6 +1563,7 @@ private fun PermissionRequiredDialog(
 
     Dialog(
         onDismissRequest = {},
+
         properties =
             DialogProperties(
                 dismissOnBackPress = false,
@@ -1489,7 +1576,9 @@ private fun PermissionRequiredDialog(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .background(Color.Transparent),
+                    .background(
+                        Color.Transparent
+                    ),
 
             contentAlignment =
                 Alignment.Center
@@ -1692,6 +1781,9 @@ private fun PermissionRequiredDialog(
 }
 
 
+// =====================================================================
+// PERMISSION ROW
+// =====================================================================
 @Composable
 private fun PermissionRow(
     icon: @Composable () -> Unit,
@@ -1717,11 +1809,14 @@ private fun PermissionRow(
             modifier =
                 Modifier
                     .width(32.dp)
-                    .padding(top = 4.dp),
+                    .padding(
+                        top = 4.dp
+                    ),
 
             contentAlignment =
                 Alignment.Center
         ) {
+
             icon()
         }
 
@@ -1730,51 +1825,28 @@ private fun PermissionRow(
             modifier =
                 Modifier
                     .weight(1f)
-                    .padding(start = 8.dp)
+                    .padding(
+                        start = 8.dp
+                    )
         ) {
 
-            Row(
-                modifier =
-                    Modifier.fillMaxWidth(),
+            Text(
+                text =
+                    title,
 
-                verticalAlignment =
-                    Alignment.CenterVertically
-            ) {
+                color =
+                    Color(0xFF333333),
 
-                Text(
-                    text =
-                        title,
-
-                    color =
-                        Color(0xFF333333),
-
-                    fontSize =
-                        15.sp,
-
-                    modifier =
-                        Modifier.weight(1f)
-                )
-
-
-                Icon(
-                    imageVector =
-                        Icons.Outlined.KeyboardArrowDown,
-
-                    contentDescription =
-                        null,
-
-                    tint =
-                        Color(0xFFB5B5B5),
-
-                    modifier =
-                        Modifier.size(18.dp)
-                )
-            }
+                fontSize =
+                    15.sp
+            )
 
 
             Spacer(
                 modifier =
-                    Modifier.height(7.dp)
+                    Modifier.height(
+                        7.dp
+                    )
             )
 
 
@@ -1797,7 +1869,9 @@ private fun PermissionRow(
         Box(
             modifier =
                 Modifier
-                    .padding(top = 8.dp)
+                    .padding(
+                        top = 8.dp
+                    )
                     .width(72.dp)
                     .height(40.dp)
                     .background(
@@ -1809,7 +1883,9 @@ private fun PermissionRow(
                             },
 
                         shape =
-                            RoundedCornerShape(4.dp)
+                            RoundedCornerShape(
+                                4.dp
+                            )
                     )
                     .clickable(
                         enabled =
@@ -1828,9 +1904,16 @@ private fun PermissionRow(
             Text(
                 text =
                     if (allowed) {
-                        stringResource(R.string.allowed)
+
+                        stringResource(
+                            R.string.allowed
+                        )
+
                     } else {
-                        stringResource(R.string.allow)
+
+                        stringResource(
+                            R.string.allow
+                        )
                     },
 
                 color =
@@ -1847,12 +1930,18 @@ private fun PermissionRow(
 }
 
 
+// =====================================================================
+// PERMISSION DIVIDER
+// =====================================================================
+
 @Composable
 private fun PermissionDivider() {
 
     Spacer(
         modifier =
-            Modifier.height(9.dp)
+            Modifier.height(
+                9.dp
+            )
     )
 
     Box(
@@ -1867,10 +1956,16 @@ private fun PermissionDivider() {
 
     Spacer(
         modifier =
-            Modifier.height(9.dp)
+            Modifier.height(
+                9.dp
+            )
     )
 }
 
+
+// =====================================================================
+// SECURITY QUESTION DIALOG
+// =====================================================================
 
 @Composable
 private fun SecurityQuestionDialog(
@@ -1889,10 +1984,21 @@ private fun SecurityQuestionDialog(
 
     val questions =
         listOf(
-            stringResource(R.string.security_question_name),
-            stringResource(R.string.security_question_father),
-            stringResource(R.string.security_question_pet),
-            stringResource(R.string.security_question_job)
+            stringResource(
+                R.string.security_question_name
+            ),
+
+            stringResource(
+                R.string.security_question_father
+            ),
+
+            stringResource(
+                R.string.security_question_pet
+            ),
+
+            stringResource(
+                R.string.security_question_job
+            )
         )
 
 
@@ -1911,7 +2017,9 @@ private fun SecurityQuestionDialog(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .background(Color.Transparent),
+                    .background(
+                        Color.Transparent
+                    ),
 
             contentAlignment =
                 Alignment.Center
@@ -1956,7 +2064,9 @@ private fun SecurityQuestionDialog(
 
                 Spacer(
                     modifier =
-                        Modifier.height(8.dp)
+                        Modifier.height(
+                            8.dp
+                        )
                 )
 
 
@@ -1985,7 +2095,9 @@ private fun SecurityQuestionDialog(
 
                 Spacer(
                     modifier =
-                        Modifier.height(28.dp)
+                        Modifier.height(
+                            28.dp
+                        )
                 )
 
 
@@ -2005,7 +2117,9 @@ private fun SecurityQuestionDialog(
 
                 Spacer(
                     modifier =
-                        Modifier.height(8.dp)
+                        Modifier.height(
+                            8.dp
+                        )
                 )
 
 
@@ -2211,7 +2325,9 @@ private fun SecurityQuestionDialog(
 
                 Spacer(
                     modifier =
-                        Modifier.height(23.dp)
+                        Modifier.height(
+                            23.dp
+                        )
                 )
 
 
@@ -2231,7 +2347,9 @@ private fun SecurityQuestionDialog(
 
                 Spacer(
                     modifier =
-                        Modifier.height(8.dp)
+                        Modifier.height(
+                            8.dp
+                        )
                 )
 
 
@@ -2309,7 +2427,9 @@ private fun SecurityQuestionDialog(
 
                     Spacer(
                         modifier =
-                            Modifier.height(5.dp)
+                            Modifier.height(
+                                5.dp
+                            )
                     )
 
                     Text(
@@ -2330,7 +2450,9 @@ private fun SecurityQuestionDialog(
 
                 Spacer(
                     modifier =
-                        Modifier.height(30.dp)
+                        Modifier.height(
+                            30.dp
+                        )
                 )
 
 
@@ -2382,7 +2504,9 @@ private fun SecurityQuestionDialog(
 
                         Spacer(
                             modifier =
-                                Modifier.width(20.dp)
+                                Modifier.width(
+                                    20.dp
+                                )
                         )
                     }
 
@@ -2400,8 +2524,11 @@ private fun SecurityQuestionDialog(
 
                         color =
                             if (saveEnabled) {
+
                                 Color(0xFF2196F3)
+
                             } else {
+
                                 Color(0xFF90CAF9)
                             },
 
@@ -2436,6 +2563,10 @@ private fun SecurityQuestionDialog(
     }
 }
 
+
+// =====================================================================
+// ACCESSIBILITY SERVICE CHECK
+// =====================================================================
 
 private fun isAccessibilityServiceEnabled(
     context: Context
@@ -2486,6 +2617,10 @@ private fun isAccessibilityServiceEnabled(
 }
 
 
+// =====================================================================
+// CONFIRM PATTERN GRID
+// =====================================================================
+
 @Composable
 private fun ConfirmPatternGrid(
     selectedDots: List<Int>,
@@ -2511,7 +2646,9 @@ private fun ConfirmPatternGrid(
     Box(
         modifier =
             Modifier
-                .size(300.dp)
+                // Same size as PinCreateScreen
+                .size(330.dp)
+
                 .pointerInput(Unit) {
 
                     var currentDots =
@@ -2651,6 +2788,10 @@ private fun ConfirmPatternGrid(
                 )
 
 
+            // =========================================================
+            // PATTERN LINES
+            // =========================================================
+
             if (selectedDots.size >= 2) {
 
                 for (
@@ -2660,8 +2801,11 @@ private fun ConfirmPatternGrid(
                     drawLine(
                         color =
                             if (isError) {
+
                                 errorColor
+
                             } else {
+
                                 Color.White
                             },
 
@@ -2682,14 +2826,21 @@ private fun ConfirmPatternGrid(
             }
 
 
+            // =========================================================
+            // PATTERN DOTS
+            // =========================================================
+
             positions.forEachIndexed {
                     index,
                     position ->
 
                 val selected =
-                    selectedDots.contains(index)
+                    selectedDots.contains(
+                        index
+                    )
 
 
+                // Outer circle
                 drawCircle(
                     color =
                         dotColor,
@@ -2702,6 +2853,7 @@ private fun ConfirmPatternGrid(
                 )
 
 
+                // Inner background
                 drawCircle(
                     color =
                         backgroundColor,
@@ -2714,6 +2866,7 @@ private fun ConfirmPatternGrid(
                 )
 
 
+                // Center dot
                 drawCircle(
                     color =
                         when {
@@ -2741,6 +2894,11 @@ private fun ConfirmPatternGrid(
 }
 
 
+// =====================================================================
+// CONFIRM GRID POSITIONS
+// Same positions as PinCreateScreen
+// =====================================================================
+
 private fun getConfirmPositions(
     width: Float,
     height: Float
@@ -2754,6 +2912,7 @@ private fun getConfirmPositions(
 
     val x3 =
         width * 0.8333f
+
 
     val y1 =
         height * 0.1667f
@@ -2815,6 +2974,10 @@ private fun getConfirmPositions(
 }
 
 
+// =====================================================================
+// FIND CONFIRM DOT
+// =====================================================================
+
 private fun findConfirmDot(
     touch: Offset,
     width: Float,
@@ -2848,7 +3011,10 @@ private fun findConfirmDot(
             )
 
 
-        if (distance <= 55f) {
+        if (
+            distance <= 55f
+        ) {
+
             return index
         }
     }
@@ -2856,4 +3022,3 @@ private fun findConfirmDot(
 
     return null
 }
-

@@ -225,7 +225,9 @@ fun PremiumScreen(
                         fontSize = 26.sp,
                         fontWeight = FontWeight.Bold
                     )
-
+                    Spacer(
+                        modifier = Modifier.width(8.dp)
+                    )
                     Text(
                         text = stringResource(
                             R.string.premium_all_features

@@ -501,7 +501,7 @@ fun PinCreateScreen(
 
 
                 Spacer(
-                    modifier = Modifier.height(25.dp)
+                    modifier = Modifier.height(18.dp)
                 )
 
 
@@ -517,7 +517,7 @@ fun PinCreateScreen(
 
 
                 Spacer(
-                    modifier = Modifier.height(20.dp)
+                    modifier = Modifier.height(82.dp)
                 )
 
 
@@ -539,7 +539,7 @@ fun PinCreateScreen(
 
 
                 Spacer(
-                    modifier = Modifier.height(40.dp)
+                    modifier = Modifier.height(55.dp)
                 )
 
 
@@ -663,7 +663,7 @@ fun PatternGrid(
 
     Box(
         modifier = Modifier
-            .size(300.dp)
+            .size(330.dp)
             .pointerInput(Unit) {
 
                 var currentDots =

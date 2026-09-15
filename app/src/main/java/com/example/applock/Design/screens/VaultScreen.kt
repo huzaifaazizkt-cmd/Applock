@@ -585,10 +585,11 @@ fun VaultScreen() {
                 text = stringResource(R.string.vault),
                 color = Color.Black,
                 fontSize = 20.sp,
-                modifier = Modifier.padding(
-                    start = 60.dp,
-                    top = 10.dp
-                )
+                modifier =
+                    Modifier.padding(
+                        start = 20.dp,
+                        top = 15.dp
+                    )
             )
 
             // =================================================

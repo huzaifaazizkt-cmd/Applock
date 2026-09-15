@@ -164,6 +164,21 @@ fun UnlockScreen(
             R.string.enter_correct_password
         )
 
+    val securityQuestionNotSetText =
+        stringResource(
+            R.string.security_question_not_set
+        )
+
+    val pleaseEnterYourAnswerText =
+        stringResource(
+            R.string.please_enter_your_answer
+        )
+
+    val incorrectAnswerText =
+        stringResource(
+            R.string.incorrect_answer
+        )
+
     var authType by remember {
         mutableStateOf("pin")
     }
@@ -444,7 +459,7 @@ fun UnlockScreen(
                             context,
 
                         message =
-                            "You have not set a security question"
+                            securityQuestionNotSetText
                     )
 
                     return@launch
@@ -487,7 +502,7 @@ fun UnlockScreen(
         ) {
 
             securityQuestionError =
-                "Please enter your answer"
+                pleaseEnterYourAnswerText
 
             return
         }
@@ -519,7 +534,7 @@ fun UnlockScreen(
                             context,
 
                         message =
-                            "You have not set a security question"
+                            securityQuestionNotSetText
                     )
 
                     return@launch
@@ -554,7 +569,7 @@ fun UnlockScreen(
                         false
 
                     securityQuestionError =
-                        "Incorrect answer"
+                        incorrectAnswerText
                 }
 
             } catch (e: Exception) {
@@ -887,7 +902,9 @@ fun UnlockScreen(
 
                     Text(
                         text =
-                            "Forgot Password?",
+                            stringResource(
+                                R.string.forgot_password
+                            ),
 
                         color =
                             Color.White,
@@ -1077,7 +1094,9 @@ fun UnlockScreen(
 
                     Text(
                         text =
-                            "Forgot Password?",
+                            stringResource(
+                                R.string.forgot_password
+                            ),
 
                         color =
                             Color.White,
@@ -1138,7 +1157,9 @@ fun UnlockScreen(
 
                     Text(
                         text =
-                            "Security Question"
+                            stringResource(
+                                R.string.security_question
+                            )
                     )
                 },
 
@@ -1183,7 +1204,9 @@ fun UnlockScreen(
 
                                 Text(
                                     text =
-                                        "Answer",
+                                        stringResource(
+                                            R.string.answer
+                                        ),
 
                                     color =
                                         Color(0xFF7B7B7B)
@@ -1266,7 +1289,9 @@ fun UnlockScreen(
 
                         Text(
                             text =
-                                "Continue",
+                                stringResource(
+                                    R.string.continue_text
+                                ),
 
                             color =
                                 backgroundColor
@@ -1312,7 +1337,9 @@ fun UnlockScreen(
 
                         Text(
                             text =
-                                "Cancel",
+                                stringResource(
+                                    R.string.cancel
+                                ),
 
                             color =
                                 Color(0xFF7B7B7B)

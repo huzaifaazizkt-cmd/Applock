@@ -296,10 +296,14 @@ fun SettingsScreen(
                     R.string.settings
                 ),
 
-                modifier = Modifier.padding(
-                    start = 54.dp,
-                    top = 22.dp
-                ),
+                modifier =
+
+
+
+                    Modifier.padding(
+                        start = 20.dp,
+                        top = 15.dp
+                    ),
 
                 color = Color(0xFF333333),
 
@@ -813,28 +817,6 @@ private fun AppProtectionCard(
                         1f
                     )
             ) {
-
-                Text(
-
-                    text =
-                        stringResource(
-                            R.string.applock
-                        ),
-
-                    color =
-                        Color(0xFF333333),
-
-                    fontSize =
-                        15.sp
-                )
-
-
-                Spacer(
-                    modifier =
-                        Modifier.height(
-                            2.dp
-                        )
-                )
 
 
                 Text(
