@@ -22,10 +22,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -73,6 +75,15 @@ fun MainScreen(
                 0
             }
         )
+    }
+
+
+    // ====================================================
+    // VAULT PREVIEW STATE
+    // ====================================================
+
+    var isVaultPreviewOpen by remember {
+        mutableStateOf(false)
     }
 
 
@@ -164,9 +175,6 @@ fun MainScreen(
 
             // =================================================
             // RETURN TO SETTINGS
-            //
-            // Language -> Settings
-            // Intruder -> Settings
             // =================================================
 
             returnToSettings -> {
@@ -237,6 +245,12 @@ fun MainScreen(
         }
 
 
+        // Close preview if another tab is selected
+
+        isVaultPreviewOpen =
+            false
+
+
         selectedTab =
             tab
     }
@@ -248,14 +262,25 @@ fun MainScreen(
 
     BackHandler {
 
+        // =================================================
+        // VAULT PREVIEW
+        //
+        // Preview -> Vault
+        // =================================================
+
+        if (isVaultPreviewOpen) {
+
+            isVaultPreviewOpen =
+                false
+
+            return@BackHandler
+        }
+
+
         when {
 
             // =================================================
             // SETTINGS
-            //
-            // AppList -> Settings -> Back = AppList
-            //
-            // Vault -> Settings -> Back = Vault
             // =================================================
 
             selectedTab == 2 -> {
@@ -284,8 +309,6 @@ fun MainScreen(
 
             // =================================================
             // VAULT
-            //
-            // Vault -> Back = AppList
             // =================================================
 
             selectedTab == 1 -> {
@@ -302,8 +325,6 @@ fun MainScreen(
 
             // =================================================
             // APP LIST
-            //
-            // AppList -> Back = Exit
             // =================================================
 
             selectedTab == 0 -> {
@@ -340,8 +361,20 @@ fun MainScreen(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .padding(
-                        bottom = 74.dp
+                    .then(
+
+                        if (
+                            isVaultPreviewOpen
+                        ) {
+
+                            Modifier
+
+                        } else {
+
+                            Modifier.padding(
+                                bottom = 74.dp
+                            )
+                        }
                     )
         ) {
 
@@ -367,7 +400,15 @@ fun MainScreen(
 
                 1 -> {
 
-                    VaultScreen()
+                    VaultScreen(
+
+                        onPreviewStateChange = {
+                                isOpen ->
+
+                            isVaultPreviewOpen =
+                                isOpen
+                        }
+                    )
                 }
 
 
@@ -399,25 +440,32 @@ fun MainScreen(
 
         // ====================================================
         // BOTTOM NAVIGATION
+        //
+        // PREVIEW OPEN HO TO HIDE
         // ====================================================
 
-        AppLockBottomNavigation(
+        if (
+            !isVaultPreviewOpen
+        ) {
 
-            selectedTab =
-                selectedTab,
+            AppLockBottomNavigation(
 
-            onTabSelected = { tab ->
+                selectedTab =
+                    selectedTab,
 
-                selectTab(
-                    tab
-                )
-            },
+                onTabSelected = { tab ->
 
-            modifier =
-                Modifier.align(
-                    Alignment.BottomCenter
-                )
-        )
+                    selectTab(
+                        tab
+                    )
+                },
+
+                modifier =
+                    Modifier.align(
+                        Alignment.BottomCenter
+                    )
+            )
+        }
     }
 }
 

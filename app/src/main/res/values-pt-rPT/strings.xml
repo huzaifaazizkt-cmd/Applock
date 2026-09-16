@@ -81,7 +81,9 @@
     <string name="select_all">Selecionar tudo</string>
     <string name="hide">Ocultar</string>
     <string name="unhide">Mostrar</string>
-
+    <string name="permission_required">Permissão necessária</string>
+    <string name="photo_permission_required">É necessária permissão para acessar suas fotos. Permita a permissão nas configurações do aplicativo.</string>
+    <string name="video_permission_required">É necessária permissão para acessar seus vídeos. Permita a permissão nas configurações do aplicativo.</string>
     <!-- Hide / Unhide -->
     <string name="hide_video">Ocultar vídeo</string>
     <string name="hide_image">Ocultar fotografia</string>

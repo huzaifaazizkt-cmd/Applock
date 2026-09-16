@@ -81,7 +81,9 @@
     <string name="select_all">Tout sélectionner</string>
     <string name="hide">Masquer</string>
     <string name="unhide">Afficher</string>
-
+    <string name="permission_required">Autorisation requise</string>
+    <string name="photo_permission_required">L’autorisation d’accéder aux photos est requise. Veuillez l’autoriser depuis les paramètres de l’application.</string>
+    <string name="video_permission_required">L’autorisation d’accéder aux vidéos est requise. Veuillez l’autoriser depuis les paramètres de l’application.</string>
     <!-- Hide / Unhide -->
     <string name="hide_video">Masquer la vidéo</string>
     <string name="hide_image">Masquer l’image</string>

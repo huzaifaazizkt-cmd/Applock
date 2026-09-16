@@ -1,7 +1,8 @@
-
 package com.example.applock.Design.screens
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -55,128 +56,143 @@ data class LanguageItem(
 @Composable
 fun LanguagesScreen(
     onBackClick: (() -> Unit)? = null,
-    onLanguageSelected: (() -> Unit)? = null
+    onLanguageSelected: (() -> Unit)? = null,
+
+    // true  = Start / Setup
+    // false = Settings
+    isSetup: Boolean = false
 ) {
 
-    val context = LocalContext.current
+    val context =
+        LocalContext.current
 
-    val dataStoreManager = remember {
-        DataStoreManager(context)
-    }
+    val dataStoreManager =
+        remember {
+            DataStoreManager(context)
+        }
 
-    val scope = rememberCoroutineScope()
+    val scope =
+        rememberCoroutineScope()
 
 
     // =========================================================
     // LANGUAGES LIST
     // =========================================================
 
-    val languages = listOf(
+    val languages =
+        listOf(
 
-        LanguageItem(
-            name = "English",
-            flagRes = R.drawable.english,
-            code = "en"
-        ),
+            LanguageItem(
+                name = "English",
+                flagRes = R.drawable.english,
+                code = "en"
+            ),
 
-        LanguageItem(
-            name = "Portagual",
-            flagRes = R.drawable.portagual,
-            code = "pt"
-        ),
+            LanguageItem(
+                name = "Portagual",
+                flagRes = R.drawable.portagual,
+                code = "pt"
+            ),
 
-        LanguageItem(
-            name = "France",
-            flagRes = R.drawable.france1,
-            code = "fr"
-        ),
+            LanguageItem(
+                name = "France",
+                flagRes = R.drawable.france1,
+                code = "fr"
+            ),
 
-        LanguageItem(
-            name = "Spain",
-            flagRes = R.drawable.spain1,
-            code = "es"
-        ),
+            LanguageItem(
+                name = "Spain",
+                flagRes = R.drawable.spain1,
+                code = "es"
+            ),
 
-        LanguageItem(
-            name = "Turkey",
-            flagRes = R.drawable.turkey,
-            code = "tr"
-        ),
+            LanguageItem(
+                name = "Turkey",
+                flagRes = R.drawable.turkey,
+                code = "tr"
+            ),
 
-        LanguageItem(
-            name = "Japan",
-            flagRes = R.drawable.japan,
-            code = "ja"
-        ),
+            LanguageItem(
+                name = "Japan",
+                flagRes = R.drawable.japan,
+                code = "ja"
+            ),
 
-        LanguageItem(
-            name = "Korean",
-            flagRes = R.drawable.korean,
-            code = "ko"
-        ),
+            LanguageItem(
+                name = "Korean",
+                flagRes = R.drawable.korean,
+                code = "ko"
+            ),
 
-        LanguageItem(
-            name = "Indonesia",
-            flagRes = R.drawable.indonesia,
-            code = "id"
-        ),
+            LanguageItem(
+                name = "Indonesia",
+                flagRes = R.drawable.indonesia,
+                code = "id"
+            ),
 
-        LanguageItem(
-            name = "India",
-            flagRes = R.drawable.india,
-            code = "hi"
-        ),
+            LanguageItem(
+                name = "India",
+                flagRes = R.drawable.india,
+                code = "hi"
+            ),
 
-        LanguageItem(
-            name = "Norway",
-            flagRes = R.drawable.norway,
-            code = "se"
-        ),
+            LanguageItem(
+                name = "Norway",
+                flagRes = R.drawable.norway,
+                code = "se"
+            ),
 
-        LanguageItem(
-            name = "Arabic",
-            flagRes = R.drawable.sudia,
-            code = "ar"
+            LanguageItem(
+                name = "Arabic",
+                flagRes = R.drawable.sudia,
+                code = "ar"
+            )
         )
-
-    )
 
 
     // =========================================================
-    // GET SAVED LANGUAGE
+    // SAVED LANGUAGE
     // =========================================================
 
     val savedLanguageCode by
     dataStoreManager
         .getLanguage()
         .collectAsState(
-            initial = "en"
+            initial = null
         )
 
 
-    // =========================================================
-    // SELECTED LANGUAGE
-    // =========================================================
 
     var selectedLanguageCode by
     remember {
 
-        mutableStateOf(
-            savedLanguageCode
-        )
+        mutableStateOf<String?>(null)
     }
 
 
     // =========================================================
-    // UPDATE SELECTED LANGUAGE
+    // INITIAL / SAVED LANGUAGE
     // =========================================================
 
     LaunchedEffect(
-        savedLanguageCode
+        savedLanguageCode,
+        isSetup
     ) {
 
-        selectedLanguageCode =
-            savedLanguageCode
+        if (isSetup) {
+
+
+
+            selectedLanguageCode =
+                null
+
+        } else {
+
+
+
+            selectedLanguageCode =
+                savedLanguageCode
+        }
     }
 
 
@@ -194,17 +210,19 @@ fun LanguagesScreen(
 
     Box(
 
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Color(0xFFF7F7F7)
-            )
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(
+                    Color(0xFFF7F7F7)
+                )
     ) {
 
         Column(
 
-            modifier = Modifier
-                .fillMaxSize()
+            modifier =
+                Modifier
+                    .fillMaxSize()
         ) {
 
 
@@ -214,9 +232,10 @@ fun LanguagesScreen(
 
             Box(
 
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(90.dp)
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(90.dp)
             ) {
 
 
@@ -243,7 +262,7 @@ fun LanguagesScreen(
                             Modifier
                                 .padding(
                                     start = 18.dp,
-                                    top = 39.dp
+                                    top = 34.5.dp
                                 )
                                 .size(25.dp)
                                 .clickable(
@@ -277,7 +296,8 @@ fun LanguagesScreen(
                     modifier =
                         Modifier.align(
                             Alignment.Center
-                        ),
+                        )
+                        ,
 
                     color =
                         Color(0xFF333333),
@@ -297,29 +317,28 @@ fun LanguagesScreen(
 
             Column(
 
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .verticalScroll(
-                        scrollState
-                    )
-                    .padding(
-                        start = 14.dp,
-                        end = 14.dp,
-                        bottom = 20.dp
-                    ),
-
-
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .verticalScroll(
+                            scrollState
+                        )
+                        .padding(
+                            start = 14.dp,
+                            end = 14.dp,
+                            bottom = 20.dp
+                        ),
 
                 verticalArrangement =
                     Arrangement.spacedBy(
-                        13.dp
+                        10.dp
                     )
             ) {
 
 
                 // =================================================
-                // EACH LANGUAGE CARD
+                // EACH LANGUAGE
                 // =================================================
 
                 languages.forEach { language ->
@@ -335,6 +354,10 @@ fun LanguagesScreen(
 
                         onClick = {
 
+                            // -------------------------------------
+                            // USER SELECTED LANGUAGE
+                            // -------------------------------------
+
                             selectedLanguageCode =
                                 language.code
                         }
@@ -346,12 +369,14 @@ fun LanguagesScreen(
             // =================================================
             // SELECT BUTTON
             // =================================================
+
             Button(
+
                 onClick = {
 
-                    // ---------------------------------
+                    // ---------------------------------------------
                     // FIND SELECTED LANGUAGE
-                    // ---------------------------------
+                    // ---------------------------------------------
 
                     val selectedItem =
                         languages.firstOrNull {
@@ -360,31 +385,38 @@ fun LanguagesScreen(
                                     selectedLanguageCode
                         }
 
+
+                    // ---------------------------------------------
+                    // CONTINUE ONLY IF LANGUAGE IS SELECTED
+                    // ---------------------------------------------
+
                     if (selectedItem != null) {
 
                         scope.launch {
 
-                            // ---------------------------------
+                            // -------------------------------------
                             // SAVE LANGUAGE
-                            // ---------------------------------
+                            // -------------------------------------
 
                             dataStoreManager
                                 .saveLanguage(
                                     selectedItem.code
                                 )
 
-                            // ---------------------------------
+
+                            // -------------------------------------
                             // APPLY LANGUAGE
-                            // ---------------------------------
+                            // -------------------------------------
 
                             AppLanguageManager
                                 .setLanguage(
                                     selectedItem.code
                                 )
 
-                            // ---------------------------------
-                            // CONTINUE NAVIGATION
-                            // ---------------------------------
+
+                            // -------------------------------------
+                            // CONTINUE
+                            // -------------------------------------
 
                             onLanguageSelected
                                 ?.invoke()
@@ -392,37 +424,55 @@ fun LanguagesScreen(
                     }
                 },
 
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        start = 14.dp,
-                        end = 14.dp,
-                        bottom = 10.dp
-                    )
-                    .height(51.dp),
+                // ---------------------------------------------
+
+                enabled =
+                    selectedLanguageCode != null,
+
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            start = 14.dp,
+                            end = 14.dp,
+                            bottom = 10.dp
+                        )
+                        .height(51.dp),
 
                 shape =
-                    RoundedCornerShape(14.dp),
+                    RoundedCornerShape(
+                        14.dp
+                    ),
 
                 colors =
                     ButtonDefaults.buttonColors(
+
                         containerColor =
-                            Color(0xFF2196F3)
+                            Color(0xFF2196F3),
+
+                        disabledContainerColor =
+                            Color(0xFFD6D6D6),
+
+                        disabledContentColor =
+                            Color.White
                     )
             ) {
 
                 Text(
+
                     text =
                         stringResource(
                             R.string.select
                         ),
 
-                    fontSize = 17.sp,
+                    fontSize =
+                        17.sp,
 
                     fontWeight =
                         FontWeight.SemiBold,
 
-                    color = Color.White
+                    color =
+                        Color.White
                 )
             }
         }
@@ -445,77 +495,133 @@ private fun LanguageCard(
 
 ) {
 
+    val cardShape =
+        RoundedCornerShape(
+            12.dp
+        )
+
+
     Card(
 
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier =
+            Modifier
+                .fillMaxWidth()
 
+                .shadow(
 
-            .shadow(
+                    elevation =
+                        5.dp,
 
-                elevation = 5.dp,
+                    shape =
+                        cardShape,
 
-                shape =
-                    RoundedCornerShape(
-                        12.dp
-                    ),
+                    clip =
+                        false,
 
-                clip = false,
+                    ambientColor =
+                        Color.Black.copy(
+                            alpha = 0.10f
+                        ),
 
-                ambientColor =
-                    Color.Black.copy(
-                        alpha = 0.10f
-                    ),
-
-                spotColor =
-                    Color.Black.copy(
-                        alpha = 0.10f
-                    )
-            )
-
-            .clip(
-                RoundedCornerShape(
-                    12.dp
+                    spotColor =
+                        Color.Black.copy(
+                            alpha = 0.10f
+                        )
                 )
-            )
 
-            .clickable {
+                .clip(
+                    cardShape
+                )
 
-                onClick()
-            },
+                // ---------------------------------------------
+                // BLUE BORDER WHEN SELECTED
+                // ---------------------------------------------
+
+                .then(
+
+                    if (selected) {
+
+                        Modifier.border(
+
+                            width =
+                                1.5.dp,
+
+                            color =
+                                Color(0xFF0396FF),
+
+                            shape =
+                                cardShape
+                        )
+
+                    } else {
+
+                        Modifier
+                    }
+                )
+
+                .clickable(
+
+                    indication =
+                        null,
+
+                    interactionSource =
+                        remember {
+                            MutableInteractionSource()
+                        }
+
+                ) {
+
+                    onClick()
+                },
+
 
         shape =
-            RoundedCornerShape(
-                12.dp
-            ),
+            cardShape,
 
         colors =
             CardDefaults.cardColors(
+
+                // ---------------------------------------------
+                // LIGHT BLUE WHEN SELECTED
+                // ---------------------------------------------
+
                 containerColor =
-                    Color.White
+                    if (selected) {
+
+                        Color(0xFFF8FCFF)
+
+                    } else {
+
+                        Color.White
+                    }
             ),
 
         elevation =
             CardDefaults.cardElevation(
-                defaultElevation = 2.dp,
 
-                pressedElevation = 1.dp
+                defaultElevation =
+                    2.dp,
+
+                pressedElevation =
+                    1.dp
             )
     ) {
 
-        // =================================================
+
+        // =====================================================
         // LANGUAGE ROW
-        // =================================================
+        // =====================================================
 
         Row(
 
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(58.dp)
-                .padding(
-                    start = 12.dp,
-                    end = 10.dp
-                ),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(58.dp)
+                    .padding(
+                        start = 12.dp,
+                        end = 10.dp
+                    ),
 
             verticalAlignment =
                 Alignment.CenterVertically
@@ -530,7 +636,8 @@ private fun LanguageCard(
 
                 painter =
                     painterResource(
-                        id = language.flagRes
+                        id =
+                            language.flagRes
                     ),
 
                 contentDescription =
@@ -538,8 +645,12 @@ private fun LanguageCard(
 
                 modifier =
                     Modifier.size(
-                        width = 32.dp,
-                        height = 32.dp
+
+                        width =
+                            32.dp,
+
+                        height =
+                            32.dp
                     ),
 
                 contentScale =
@@ -552,8 +663,11 @@ private fun LanguageCard(
             // =================================================
 
             Spacer(
+
                 modifier =
-                    Modifier.width(18.dp)
+                    Modifier.width(
+                        18.dp
+                    )
             )
 
 
@@ -567,7 +681,9 @@ private fun LanguageCard(
                     language.name,
 
                 modifier =
-                    Modifier.weight(1f),
+                    Modifier.weight(
+                        1f
+                    ),
 
                 color =
                     if (selected) {
@@ -607,7 +723,9 @@ private fun LanguageCard(
                     onClick,
 
                 modifier =
-                    Modifier.size(30.dp),
+                    Modifier.size(
+                        30.dp
+                    ),
 
                 colors =
                     RadioButtonDefaults.colors(
@@ -622,4 +740,3 @@ private fun LanguageCard(
         }
     }
 }
-

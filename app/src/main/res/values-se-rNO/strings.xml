@@ -83,7 +83,9 @@
     <string name="select_all">Velg alle</string>
     <string name="hide">Skjul</string>
     <string name="unhide">Vis</string>
-
+    <string name="permission_required">Tillatelse kreves</string>
+    <string name="photo_permission_required">Tilgang til bilder kreves for å få tilgang til bildene dine. Tillat tilgang fra appinnstillingene.</string>
+    <string name="video_permission_required">Tilgang til videoer kreves for å få tilgang til videoene dine. Tillat tilgang fra appinnstillingene.</string>
     <!-- Hide / Unhide -->
     <string name="hide_video">Skjul video</string>
     <string name="hide_image">Skjul bilde</string>

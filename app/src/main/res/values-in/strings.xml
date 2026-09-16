@@ -83,7 +83,9 @@
     <string name="select_all">Pilih Semua</string>
     <string name="hide">Sembunyikan</string>
     <string name="unhide">Tampilkan</string>
-
+    <string name="permission_required">Izin Diperlukan</string>
+    <string name="photo_permission_required">Izin foto diperlukan untuk mengakses foto Anda. Silakan izinkan dari Pengaturan Aplikasi.</string>
+    <string name="video_permission_required">Izin video diperlukan untuk mengakses video Anda. Silakan izinkan dari Pengaturan Aplikasi.</string>
     <!-- Hide / Unhide -->
     <string name="hide_video">Sembunyikan Video</string>
     <string name="hide_image">Sembunyikan Gambar</string>

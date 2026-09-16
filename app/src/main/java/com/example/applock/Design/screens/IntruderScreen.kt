@@ -50,7 +50,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
@@ -64,6 +63,10 @@ import androidx.compose.ui.unit.sp
 
 import androidx.core.content.ContextCompat
 
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
+
 import com.example.applock.R
 import com.example.applock.data.DataStoreManager
 
@@ -73,20 +76,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 
-// =============================================================
-// INTRUDER IMAGE
-// =============================================================
-
 private data class IntruderImage(
     val uri: Uri,
     val name: String,
     val dateAdded: Long
 )
 
-
-// =============================================================
-// INTRUDER SCREEN
-// =============================================================
 
 @Composable
 fun IntruderScreen(
@@ -95,11 +90,15 @@ fun IntruderScreen(
 
     val context = LocalContext.current
 
+    val lifecycleOwner =
+        LocalLifecycleOwner.current
+
     val dataStore = remember {
         DataStoreManager(context)
     }
 
-    val scope = rememberCoroutineScope()
+    val scope =
+        rememberCoroutineScope()
 
     val blueColor =
         Color(0xFF0396FF)
@@ -107,10 +106,6 @@ fun IntruderScreen(
     val backgroundColor =
         Color(0xFFF7F7F7)
 
-
-    // =========================================================
-    // IMAGE CACHE
-    // =========================================================
 
     val thumbnailCache =
         remember {
@@ -122,10 +117,6 @@ fun IntruderScreen(
             mutableStateMapOf<String, Bitmap>()
         }
 
-
-    // =========================================================
-    // STATES
-    // =========================================================
 
     var intruderEnabled by remember {
         mutableStateOf(false)
@@ -147,10 +138,10 @@ fun IntruderScreen(
         mutableStateOf(false)
     }
 
+    var openedAppSettingsForPermission by remember {
+        mutableStateOf(false)
+    }
 
-    // =========================================================
-    // CAMERA PERMISSION
-    // =========================================================
 
     val cameraPermissionLauncher =
         rememberLauncherForActivityResult(
@@ -160,7 +151,8 @@ fun IntruderScreen(
 
             if (granted) {
 
-                intruderEnabled = true
+                intruderEnabled =
+                    true
 
                 scope.launch {
 
@@ -171,7 +163,8 @@ fun IntruderScreen(
 
             } else {
 
-                intruderEnabled = false
+                intruderEnabled =
+                    false
 
                 scope.launch {
 
@@ -180,16 +173,16 @@ fun IntruderScreen(
                     )
                 }
 
-                showPermissionSettingsDialog = true
+                showPermissionSettingsDialog =
+                    true
             }
         }
 
 
-    // =========================================================
-    // OPEN APP SETTINGS
-    // =========================================================
-
     fun openAppSettings() {
+
+        openedAppSettingsForPermission =
+            true
 
         try {
 
@@ -201,7 +194,9 @@ fun IntruderScreen(
                     )
                 )
 
-            context.startActivity(intent)
+            context.startActivity(
+                intent
+            )
 
         } catch (e: Exception) {
 
@@ -209,10 +204,6 @@ fun IntruderScreen(
         }
     }
 
-
-    // =========================================================
-    // CAMERA PERMISSION REQUEST
-    // =========================================================
 
     fun requestCameraPermission() {
 
@@ -225,7 +216,8 @@ fun IntruderScreen(
 
         if (permissionGranted) {
 
-            intruderEnabled = true
+            intruderEnabled =
+                true
 
             scope.launch {
 
@@ -242,10 +234,6 @@ fun IntruderScreen(
         )
     }
 
-
-    // =========================================================
-    // LOAD SAVED SETTINGS
-    // =========================================================
 
     LaunchedEffect(Unit) {
 
@@ -267,9 +255,73 @@ fun IntruderScreen(
     }
 
 
-    // =========================================================
-    // INTRUDER IMAGES
-    // =========================================================
+    /*
+     * IMPORTANT:
+     * App Info / Settings se permission allow karne ke baad
+     * jab user wapas screen par aata hai to ON_RESUME chalega.
+     */
+    DisposableEffect(
+        lifecycleOwner
+    ) {
+
+        val observer =
+            LifecycleEventObserver { _, event ->
+
+                if (
+                    event ==
+                    Lifecycle.Event.ON_RESUME
+                ) {
+
+                    if (
+                        openedAppSettingsForPermission
+                    ) {
+
+                        val permissionGranted =
+                            ContextCompat.checkSelfPermission(
+                                context,
+                                Manifest.permission.CAMERA
+                            ) ==
+                                    PackageManager.PERMISSION_GRANTED
+
+                        if (permissionGranted) {
+
+                            openedAppSettingsForPermission =
+                                false
+
+                            intruderEnabled =
+                                true
+
+                            showPermissionSettingsDialog =
+                                false
+
+                            scope.launch {
+
+                                dataStore
+                                    .saveIntruderEnabled(
+                                        true
+                                    )
+                            }
+                        }
+                    }
+                }
+            }
+
+        lifecycleOwner
+            .lifecycle
+            .addObserver(
+                observer
+            )
+
+        onDispose {
+
+            lifecycleOwner
+                .lifecycle
+                .removeObserver(
+                    observer
+                )
+        }
+    }
+
 
     var intruderImages by remember {
         mutableStateOf<List<IntruderImage>>(
@@ -277,10 +329,6 @@ fun IntruderScreen(
         )
     }
 
-
-    // =========================================================
-    // SELECTION
-    // =========================================================
 
     var selectionMode by remember {
         mutableStateOf(false)
@@ -293,18 +341,10 @@ fun IntruderScreen(
     }
 
 
-    // =========================================================
-    // PREVIEW
-    // =========================================================
-
     var previewImage by remember {
         mutableStateOf<IntruderImage?>(null)
     }
 
-
-    // =========================================================
-    // LOAD IMAGES
-    // =========================================================
 
     LaunchedEffect(Unit) {
 
@@ -314,10 +354,6 @@ fun IntruderScreen(
             )
     }
 
-
-    // =========================================================
-    // RELOAD IMAGES
-    // =========================================================
 
     fun reloadImages() {
 
@@ -330,10 +366,6 @@ fun IntruderScreen(
         }
     }
 
-
-    // =========================================================
-    // DELETE SINGLE IMAGE
-    // =========================================================
 
     fun deleteSingleImage(
         image: IntruderImage
@@ -367,7 +399,8 @@ fun IntruderScreen(
                 image.uri.toString()
             )
 
-            previewImage = null
+            previewImage =
+                null
 
             intruderImages =
                 loadIntruderImages(
@@ -376,10 +409,6 @@ fun IntruderScreen(
         }
     }
 
-
-    // =========================================================
-    // DELETE SELECTED IMAGES
-    // =========================================================
 
     fun deleteSelectedImages() {
 
@@ -439,10 +468,6 @@ fun IntruderScreen(
     }
 
 
-    // =========================================================
-    // PREVIEW
-    // =========================================================
-
     if (previewImage != null) {
 
         IntruderImagePreviewScreen(
@@ -458,7 +483,8 @@ fun IntruderScreen(
 
             onBackClick = {
 
-                previewImage = null
+                previewImage =
+                    null
             },
 
             onDelete = {
@@ -472,10 +498,6 @@ fun IntruderScreen(
         return
     }
 
-
-    // =========================================================
-    // ROOT
-    // =============================================================
 
     Box(
         modifier =
@@ -492,15 +514,13 @@ fun IntruderScreen(
         ) {
 
 
-            // =================================================
-            // TOP BAR
-            // =================================================
-
             Row(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .height(64.dp)
+                        .height(
+                            64.dp
+                        )
                         .padding(
                             start = 6.dp,
                             end = 6.dp
@@ -607,7 +627,6 @@ fun IntruderScreen(
                                 selectedImages.size ==
                                 intruderImages.size
 
-
                     Row(
                         modifier =
                             Modifier
@@ -705,10 +724,6 @@ fun IntruderScreen(
 
                 } else {
 
-                    // =================================================
-                    // SET OBSERVATION ATTEMPTS
-                    // =================================================
-
                     IconButton(
                         onClick = {
 
@@ -744,10 +759,6 @@ fun IntruderScreen(
                 }
             }
 
-
-            // =================================================
-            // INTRUDER CARD
-            // =================================================
 
             Card(
                 modifier =
@@ -865,10 +876,6 @@ fun IntruderScreen(
                     }
 
 
-                    // =================================================
-                    // SWITCH
-                    // =================================================
-
                     Switch(
 
                         checked =
@@ -884,7 +891,6 @@ fun IntruderScreen(
                                         Manifest.permission.CAMERA
                                     ) ==
                                             PackageManager.PERMISSION_GRANTED
-
 
                                 if (permissionGranted) {
 
@@ -963,10 +969,6 @@ fun IntruderScreen(
             )
 
 
-            // =================================================
-            // ATTEMPTS SUMMARY
-            // =================================================
-
             Text(
                 text =
                     stringResource(
@@ -987,10 +989,6 @@ fun IntruderScreen(
                     )
             )
 
-
-            // =================================================
-            // IMAGES
-            // =================================================
 
             if (intruderImages.isEmpty()) {
 
@@ -1200,10 +1198,6 @@ fun IntruderScreen(
         }
 
 
-        // =========================================================
-        // DELETE
-        // =========================================================
-
         if (
             selectionMode &&
             selectedImages.isNotEmpty()
@@ -1258,21 +1252,7 @@ fun IntruderScreen(
     }
 
 
-    // =========================================================
-    // SET OBSERVATION ATTEMPTS DIALOG
-    // =========================================================
-
     if (showAttemptsDialog) {
-
-        /*
-         * IMPORTANT:
-         * These strings are obtained inside the Composable scope.
-         * Then normal onClick lambdas use these variables.
-         * This fixes:
-         *
-         * @Composable invocations can only happen from the
-         * context of a @Composable function
-         */
 
         val neverText =
             stringResource(
@@ -1442,7 +1422,6 @@ fun IntruderScreen(
                 }
             },
 
-
             dismissButton = {
 
                 Button(
@@ -1482,7 +1461,6 @@ fun IntruderScreen(
                 }
             },
 
-
             confirmButton = {
 
                 Button(
@@ -1495,14 +1473,11 @@ fun IntruderScreen(
                                 context
                             )
 
-
                         observationAttempts =
                             attempts
 
-
                         showAttemptsDialog =
                             false
-
 
                         scope.launch {
 
@@ -1538,10 +1513,6 @@ fun IntruderScreen(
         )
     }
 
-
-    // =========================================================
-    // CAMERA PERMISSION DIALOG
-    // =========================================================
 
     if (showPermissionSettingsDialog) {
 
@@ -1662,10 +1633,6 @@ fun IntruderScreen(
 }
 
 
-// =============================================================
-// ATTEMPTS INT -> TEXT
-// =============================================================
-
 private fun observationAttemptsToText(
     value: Int,
     context: Context
@@ -1701,10 +1668,6 @@ private fun observationAttemptsToText(
 }
 
 
-// =============================================================
-// ATTEMPTS TEXT -> INT
-// =============================================================
-
 private fun observationAttemptsFromText(
     value: String,
     context: Context
@@ -1737,10 +1700,6 @@ private fun observationAttemptsFromText(
     }
 }
 
-
-// =============================================================
-// IMAGE ITEM
-// =============================================================
 
 @Composable
 private fun IntruderImageItem(
@@ -1843,10 +1802,6 @@ private fun IntruderImageItem(
 }
 
 
-// =============================================================
-// LOAD ROTATED BITMAP
-// =============================================================
-
 private suspend fun loadCorrectlyRotatedBitmap(
     context: Context,
     uri: Uri
@@ -1906,14 +1861,12 @@ private suspend fun loadCorrectlyRotatedBitmap(
                     )
                 }
 
-
                 ExifInterface.ORIENTATION_ROTATE_180 -> {
 
                     matrix.setRotate(
                         180f
                     )
                 }
-
 
                 ExifInterface.ORIENTATION_FLIP_VERTICAL -> {
 
@@ -1922,7 +1875,6 @@ private suspend fun loadCorrectlyRotatedBitmap(
                         -1f
                     )
                 }
-
 
                 ExifInterface.ORIENTATION_TRANSPOSE -> {
 
@@ -1936,14 +1888,12 @@ private suspend fun loadCorrectlyRotatedBitmap(
                     )
                 }
 
-
                 ExifInterface.ORIENTATION_ROTATE_90 -> {
 
                     matrix.setRotate(
                         90f
                     )
                 }
-
 
                 ExifInterface.ORIENTATION_TRANSVERSE -> {
 
@@ -1956,7 +1906,6 @@ private suspend fun loadCorrectlyRotatedBitmap(
                         1f
                     )
                 }
-
 
                 ExifInterface.ORIENTATION_ROTATE_270 -> {
 
@@ -1992,10 +1941,6 @@ private suspend fun loadCorrectlyRotatedBitmap(
     }
 }
 
-
-// =============================================================
-// LOAD THUMBNAIL
-// =============================================================
 
 private suspend fun loadIntruderThumbnail(
     context: Context,
@@ -2051,10 +1996,6 @@ private suspend fun loadIntruderThumbnail(
 }
 
 
-// =============================================================
-// THUMBNAIL
-// =============================================================
-
 @Composable
 private fun IntruderThumbnail(
     uri: Uri,
@@ -2092,7 +2033,6 @@ private fun IntruderThumbnail(
                     uri
                 )
 
-
             if (loadedBitmap != null) {
 
                 thumbnailCache[
@@ -2128,10 +2068,6 @@ private fun IntruderThumbnail(
     }
 }
 
-
-// =============================================================
-// PREVIEW
-// =============================================================
 
 @Composable
 private fun IntruderImagePreviewScreen(
@@ -2178,7 +2114,6 @@ private fun IntruderImagePreviewScreen(
                     cacheKey
                 ]
 
-
             if (cachedFullImage != null) {
 
                 bitmap =
@@ -2191,7 +2126,6 @@ private fun IntruderImagePreviewScreen(
                         context,
                         image.uri
                     )
-
 
                 if (fullBitmap != null) {
 
@@ -2406,10 +2340,6 @@ private fun IntruderImagePreviewScreen(
 }
 
 
-// =============================================================
-// LOAD IMAGES
-// =============================================================
-
 private suspend fun loadIntruderImages(
     context: Context
 ): List<IntruderImage> {
@@ -2509,7 +2439,9 @@ private suspend fun loadIntruderImages(
                     )
 
 
-                while (cursor.moveToNext()) {
+                while (
+                    cursor.moveToNext()
+                ) {
 
                     val id =
                         cursor.getLong(
@@ -2563,10 +2495,6 @@ private suspend fun loadIntruderImages(
     }
 }
 
-
-// =============================================================
-// OBSERVATION ATTEMPT OPTION
-// =============================================================
 
 @Composable
 private fun ObservationAttemptsOption(

@@ -84,7 +84,9 @@
     <string name="select_all">Select All</string>
     <string name="hide">Hide</string>
     <string name="unhide">Unhide</string>
-
+    <string name="permission_required">Permission Required</string>
+    <string name="photo_permission_required">Photo permission is required to access your photos. Please allow the permission from App Settings.</string>
+    <string name="video_permission_required">Video permission is required to access your videos. Please allow the permission from App Settings.</string>
     <!-- Hide / Unhide -->
     <string name="hide_video">Hide Video</string>
     <string name="hide_image">Hide Image</string>

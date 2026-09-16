@@ -81,7 +81,9 @@
     <string name="select_all">すべて選択</string>
     <string name="hide">非表示にする</string>
     <string name="unhide">表示する</string>
-
+    <string name="permission_required">権限が必要です</string>
+    <string name="photo_permission_required">写真にアクセスするには写真の権限が必要です。アプリの設定から権限を許可してください。</string>
+    <string name="video_permission_required">動画にアクセスするには動画の権限が必要です。アプリの設定から権限を許可してください。</string>
     <!-- Hide / Unhide -->
     <string name="hide_video">動画を非表示</string>
     <string name="hide_image">画像を非表示</string>

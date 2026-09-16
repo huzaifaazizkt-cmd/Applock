@@ -85,7 +85,9 @@
     <string name="select_all">تحديد الكل</string>
     <string name="hide">إخفاء</string>
     <string name="unhide">إظهار</string>
-
+    <string name="permission_required">الإذن مطلوب</string>
+    <string name="photo_permission_required">يلزم السماح بالوصول إلى الصور للوصول إلى صورك. يرجى السماح بالإذن من إعدادات التطبيق.</string>
+    <string name="video_permission_required">يلزم السماح بالوصول إلى الفيديوهات للوصول إلى فيديوهاتك. يرجى السماح بالإذن من إعدادات التطبيق.</string>
     <!-- Hide / Unhide -->
     <string name="hide_video">إخفاء الفيديو</string>
     <string name="hide_image">إخفاء الصورة</string>

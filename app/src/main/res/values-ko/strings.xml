@@ -82,7 +82,9 @@
     <string name="select_all">모두 선택</string>
     <string name="hide">숨기기</string>
     <string name="unhide">숨김 해제</string>
-
+    <string name="permission_required">권한 필요</string>
+    <string name="photo_permission_required">사진에 액세스하려면 사진 권한이 필요합니다. 앱 설정에서 권한을 허용해 주세요.</string>
+    <string name="video_permission_required">동영상에 액세스하려면 동영상 권한이 필요합니다. 앱 설정에서 권한을 허용해 주세요.</string>
     <!-- Hide / Unhide -->
     <string name="hide_video">동영상 숨기기</string>
     <string name="hide_image">이미지 숨기기</string>

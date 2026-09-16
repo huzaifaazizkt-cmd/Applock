@@ -83,7 +83,9 @@
     <string name="select_all">Tümünü Seç</string>
     <string name="hide">Gizle</string>
     <string name="unhide">Gizlemeyi Kaldır</string>
-
+    <string name="permission_required">İzin Gerekli</string>
+    <string name="photo_permission_required">Fotoğraflarınıza erişmek için fotoğraf izni gereklidir. Lütfen uygulama ayarlarından izni verin.</string>
+    <string name="video_permission_required">Videolarınıza erişmek için video izni gereklidir. Lütfen uygulama ayarlarından izni verin.</string>
     <!-- Hide / Unhide -->
     <string name="hide_video">Videoyu Gizle</string>
     <string name="hide_image">Resmi Gizle</string>
