@@ -1,4 +1,3 @@
-
 package com.example.applock.Design.screens
 
 import android.content.Context
@@ -8,6 +7,7 @@ import android.content.pm.PackageManager
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -30,6 +30,7 @@ import androidx.compose.runtime.*
 
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
@@ -420,32 +421,62 @@ fun AppListScreen(
 
 
         // =====================================================
-        // TITLE
+        // TITLE + ICON
         // =====================================================
 
-        Text(
-
-            text =
-                stringResource(
-                    R.string.app_lock
-                ),
-
-            color =
-                Color.Black,
-
-            fontSize =
-                20.sp,
+        Row(
 
             modifier =
-                Modifier.padding(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        start = 20.dp,
+                        top = 15.dp
+                    ),
 
-                    start =
-                        20.dp,
+            verticalAlignment =
+                Alignment.CenterVertically
+        ) {
 
-                    top =
-                        15.dp
-                )
-        )
+            Image(
+
+                painter =
+                    painterResource(
+                        R.drawable.applock
+                    ),
+
+                contentDescription =
+                    null,
+
+                modifier =
+                    Modifier.size(
+                        24.dp
+                    )
+            )
+
+
+            Spacer(
+                modifier =
+                    Modifier.width(
+                        8.dp
+                    )
+            )
+
+
+            Text(
+
+                text =
+                    stringResource(
+                        R.string.app_lock
+                    ),
+
+                color =
+                    Color.Black,
+
+                fontSize =
+                    20.sp
+            )
+        }
 
 
         // =====================================================
@@ -732,10 +763,26 @@ fun AppListScreen(
                     .height(
                         39.dp
                     )
+                    .clip(
+                        RoundedCornerShape(
+                            22.dp
+                        )
+                    )
                     .background(
+                        Color(0xFFF7F7F7)
+                    )
+                    .border(
+
+                        width =
+                            2
+
+
+
+
+                                .dp,
 
                         color =
-                            Color(0xFFF7F7F7),
+                            Color.White,
 
                         shape =
                             RoundedCornerShape(
@@ -1040,7 +1087,6 @@ fun AppListScreen(
 
                     // =============================================
                     // APP CARD
-                    // SAME AS LANGUAGE CARD
                     // =============================================
 
                     val cardShape =
@@ -1284,4 +1330,3 @@ fun AppListScreen(
         }
     }
 }
-

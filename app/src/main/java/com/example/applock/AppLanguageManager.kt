@@ -8,7 +8,9 @@ object AppLanguageManager {
     fun setLanguage(languageCode: String) {
 
         AppCompatDelegate.setApplicationLocales(
-            LocaleListCompat.forLanguageTags(languageCode)
+            LocaleListCompat.forLanguageTags(
+                languageCode
+            )
         )
     }
 }

@@ -1,5 +1,12 @@
 package com.example.applock.Design.screens
 
+import android.content.Context
+import android.graphics.Color as AndroidColor
+import android.graphics.drawable.GradientDrawable
+import android.view.Gravity
+import android.widget.TextView
+import android.widget.Toast
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -9,6 +16,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
+
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
@@ -19,6 +27,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
+
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,9 +41,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+
 import com.example.applock.AppLanguageManager
 import com.example.applock.R
 import com.example.applock.data.DataStoreManager
+
 import kotlinx.coroutines.launch
 
 
@@ -73,6 +84,29 @@ fun LanguagesScreen(
 
     val scope =
         rememberCoroutineScope()
+
+
+    // =========================================================
+    // IMPORTANT SETUP DETECTION
+    // =========================================================
+    //
+    // Setup screen normally has NO back button.
+    //
+    // Therefore:
+    //
+    // isSetup == true
+    // OR
+    // onBackClick == null
+    //
+    // means FIRST SETUP.
+    //
+    // This prevents an old saved language such as English
+    // from being automatically selected.
+    //
+    // =========================================================
+
+    val setupMode =
+        isSetup || onBackClick == null
 
 
     // =========================================================
@@ -162,33 +196,61 @@ fun LanguagesScreen(
         )
 
 
+    // =========================================================
+    // SELECTED LANGUAGE
+    // =========================================================
+    //
+    // FIRST SETUP:
+    // Always NULL.
+    //
+    // SETTINGS:
+    // Saved language will be selected.
+    //
+    // =========================================================
 
     var selectedLanguageCode by
-    remember {
+    remember(setupMode) {
 
-        mutableStateOf<String?>(null)
+        mutableStateOf<String?>(
+            null
+        )
     }
 
 
     // =========================================================
-    // INITIAL / SAVED LANGUAGE
+    // LOAD LANGUAGE
     // =========================================================
 
     LaunchedEffect(
-        savedLanguageCode,
-        isSetup
+        setupMode,
+        savedLanguageCode
     ) {
 
-        if (isSetup) {
+        if (setupMode) {
 
-
+            // =================================================
+            // FIRST SETUP
+            // =================================================
+            //
+            // NEVER select saved language.
+            //
+            // Even if DataStore already contains "en",
+            // nothing will be selected.
+            //
+            // =================================================
 
             selectedLanguageCode =
                 null
 
         } else {
 
-
+            // =================================================
+            // SETTINGS
+            // =================================================
+            //
+            // Show previously saved language.
+            //
+            // =================================================
 
             selectedLanguageCode =
                 savedLanguageCode
@@ -267,7 +329,8 @@ fun LanguagesScreen(
                                 .size(25.dp)
                                 .clickable(
 
-                                    indication = null,
+                                    indication =
+                                        null,
 
                                     interactionSource =
                                         remember {
@@ -296,8 +359,7 @@ fun LanguagesScreen(
                     modifier =
                         Modifier.align(
                             Alignment.Center
-                        )
-                        ,
+                        ),
 
                     color =
                         Color(0xFF333333),
@@ -386,48 +448,63 @@ fun LanguagesScreen(
                         }
 
 
-                    // ---------------------------------------------
-                    // CONTINUE ONLY IF LANGUAGE IS SELECTED
-                    // ---------------------------------------------
+                    // =================================================
+                    // NOTHING SELECTED
+                    // =================================================
 
-                    if (selectedItem != null) {
+                    if (selectedItem == null) {
 
-                        scope.launch {
+                        showLanguageSelectionToast(
+                            context = context
+                        )
 
-                            // -------------------------------------
-                            // SAVE LANGUAGE
-                            // -------------------------------------
-
-                            dataStoreManager
-                                .saveLanguage(
-                                    selectedItem.code
-                                )
+                        return@Button
+                    }
 
 
-                            // -------------------------------------
-                            // APPLY LANGUAGE
-                            // -------------------------------------
+                    // =================================================
+                    // LANGUAGE SELECTED
+                    // =================================================
 
-                            AppLanguageManager
-                                .setLanguage(
-                                    selectedItem.code
-                                )
+                    scope.launch {
+
+                        // -----------------------------------------
+                        // SAVE LANGUAGE
+                        // -----------------------------------------
+
+                        dataStoreManager
+                            .saveLanguage(
+                                selectedItem.code
+                            )
 
 
-                            // -------------------------------------
-                            // CONTINUE
-                            // -------------------------------------
+                        // -----------------------------------------
+                        // APPLY LANGUAGE
+                        // -----------------------------------------
 
-                            onLanguageSelected
-                                ?.invoke()
-                        }
+                        AppLanguageManager
+                            .setLanguage(
+                                selectedItem.code
+                            )
+
+
+                        // -----------------------------------------
+                        // CONTINUE
+                        // -----------------------------------------
+
+                        onLanguageSelected
+                            ?.invoke()
                     }
                 },
 
-                // ---------------------------------------------
+
+                // =================================================
+                // ALWAYS ENABLED
+                // =================================================
 
                 enabled =
-                    selectedLanguageCode != null,
+                    true,
+
 
                 modifier =
                     Modifier
@@ -439,10 +516,12 @@ fun LanguagesScreen(
                         )
                         .height(51.dp),
 
+
                 shape =
                     RoundedCornerShape(
                         14.dp
                     ),
+
 
                 colors =
                     ButtonDefaults.buttonColors(
@@ -533,10 +612,6 @@ private fun LanguageCard(
                     cardShape
                 )
 
-                // ---------------------------------------------
-                // BLUE BORDER WHEN SELECTED
-                // ---------------------------------------------
-
                 .then(
 
                     if (selected) {
@@ -578,12 +653,9 @@ private fun LanguageCard(
         shape =
             cardShape,
 
+
         colors =
             CardDefaults.cardColors(
-
-                // ---------------------------------------------
-                // LIGHT BLUE WHEN SELECTED
-                // ---------------------------------------------
 
                 containerColor =
                     if (selected) {
@@ -595,6 +667,7 @@ private fun LanguageCard(
                         Color.White
                     }
             ),
+
 
         elevation =
             CardDefaults.cardElevation(
@@ -739,4 +812,95 @@ private fun LanguageCard(
             )
         }
     }
+}
+
+
+// =============================================================
+// LANGUAGE SELECTION TOAST
+// =============================================================
+
+private fun showLanguageSelectionToast(
+    context: Context
+) {
+
+    val textView =
+        TextView(context)
+
+
+    textView.text =
+        "Don't select your language\nPlease select your language"
+
+
+    textView.setTextColor(
+
+        AndroidColor.rgb(
+            92,
+            92,
+            92
+        )
+    )
+
+
+    textView.textSize =
+        14f
+
+
+    textView.gravity =
+        Gravity.CENTER
+
+
+    textView.setPadding(
+
+        28,
+        16,
+        28,
+        16
+    )
+
+
+    val background =
+        GradientDrawable()
+
+
+    background.setColor(
+        AndroidColor.WHITE
+    )
+
+
+    background.cornerRadius =
+        18f
+
+
+    textView.background =
+        background
+
+
+    textView.elevation =
+        6f
+
+
+    val toast =
+        Toast(context)
+
+
+    toast.view =
+        textView
+
+
+    toast.duration =
+        Toast.LENGTH_SHORT
+
+
+    toast.setGravity(
+
+        Gravity.BOTTOM or
+                Gravity.CENTER_HORIZONTAL,
+
+        0,
+
+        90
+    )
+
+
+    toast.show()
 }

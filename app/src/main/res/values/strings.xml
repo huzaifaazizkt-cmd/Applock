@@ -243,4 +243,10 @@
     <string name="applock">AppLock</string>
     <string name="enable_app_protection">Enable App Protection</string>
 
+
+    <string name="open_with">Open with</string>
+
+
+
+
 </resources>
