@@ -72,10 +72,15 @@ private data class SettingsItemData(
 
 
 @Composable
+
 fun SettingsScreen(
     onIntruderClick: () -> Unit,
     onLanguageClick: () -> Unit,
     onResetPasswordClick: () -> Unit
+
+
+
+
 ) {
 
     val context = LocalContext.current
@@ -1273,10 +1278,6 @@ private fun SettingsItem(
     }
 }
 
-
-// =============================================================
-// HIDE SETTINGS
-// =============================================================
 
 @Composable
 private fun HideSettingsExpandedContent(

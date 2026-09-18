@@ -941,7 +941,6 @@ fun PinConfirmScreen(
 
                 // =====================================================
                 // CONFIRM PATTERN GRID
-                // Same 330dp size as PinCreateScreen
                 // =====================================================
 
                 ConfirmPatternGrid(
@@ -1134,7 +1133,6 @@ fun PinConfirmScreen(
 
                 // =====================================================
                 // PIN DOTS
-                // Same spacing as PinCreateScreen
                 // =====================================================
 
                 Row(
@@ -1176,18 +1174,58 @@ fun PinConfirmScreen(
                     }
                 }
 
+                Spacer(
+                    modifier =
+                        Modifier.height(
+                            15.dp
+                        )
+                )
+                // =====================================================
+                // PIN ERROR MESSAGE
+                // =====================================================
+
+                Box(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(22.dp)
+                            .padding(
+                                top = 5.dp
+                            ),
+
+                    contentAlignment =
+                        Alignment.Center
+                ) {
+
+                    if (error.isNotEmpty()) {
+
+                        Text(
+                            text =
+                                error,
+
+                            color =
+                                Color.Red,
+
+                            fontSize =
+                                16.sp,
+
+                            textAlign =
+                                TextAlign.Center
+                        )
+                    }
+                }
+
 
                 Spacer(
                     modifier =
                         Modifier.height(
-                            82.dp
+                            50.dp
                         )
                 )
 
 
                 // =====================================================
                 // NUMBER PAD
-                // Same position structure as PinCreateScreen
                 // =====================================================
 
                 NumberPad(
@@ -1784,6 +1822,7 @@ private fun PermissionRequiredDialog(
 // =====================================================================
 // PERMISSION ROW
 // =====================================================================
+
 @Composable
 private fun PermissionRow(
     icon: @Composable () -> Unit,
@@ -2646,9 +2685,7 @@ private fun ConfirmPatternGrid(
     Box(
         modifier =
             Modifier
-                // Same size as PinCreateScreen
                 .size(330.dp)
-
                 .pointerInput(Unit) {
 
                     var currentDots =
@@ -2840,7 +2877,6 @@ private fun ConfirmPatternGrid(
                     )
 
 
-                // Outer circle
                 drawCircle(
                     color =
                         dotColor,
@@ -2853,7 +2889,6 @@ private fun ConfirmPatternGrid(
                 )
 
 
-                // Inner background
                 drawCircle(
                     color =
                         backgroundColor,
@@ -2866,7 +2901,6 @@ private fun ConfirmPatternGrid(
                 )
 
 
-                // Center dot
                 drawCircle(
                     color =
                         when {
@@ -2896,7 +2930,6 @@ private fun ConfirmPatternGrid(
 
 // =====================================================================
 // CONFIRM GRID POSITIONS
-// Same positions as PinCreateScreen
 // =====================================================================
 
 private fun getConfirmPositions(
