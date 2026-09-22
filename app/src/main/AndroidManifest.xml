@@ -10,19 +10,34 @@
         android:required="false" />
 
     <!-- App permissions -->
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
-    <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
-    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <uses-permission
+        android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+
+    <uses-permission
+        android:name="android.permission.QUERY_ALL_PACKAGES" />
+
+    <uses-permission
+        android:name="android.permission.VIBRATE" />
+
+    <uses-permission
+        android:name="android.permission.CAMERA" />
+
+    <uses-permission
+        android:name="android.permission.USE_BIOMETRIC" />
+
+    <uses-permission
+        android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 
     <!-- Boot completed -->
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission
+        android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <!-- Media permissions -->
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
-    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+    <uses-permission
+        android:name="android.permission.READ_MEDIA_IMAGES" />
+
+    <uses-permission
+        android:name="android.permission.READ_MEDIA_VIDEO" />
 
     <!-- Android 12 and below -->
     <uses-permission
@@ -30,25 +45,41 @@
         android:maxSdkVersion="32" />
 
     <!-- Foreground Service -->
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission
+        android:name="android.permission.FOREGROUND_SERVICE" />
 
     <!-- Android 14+ Special Use Foreground Service -->
     <uses-permission
         android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
+
     <application
+
         android:allowBackup="true"
+
         android:dataExtractionRules="@xml/data_extraction_rules"
+
         android:enableOnBackInvokedCallback="false"
+
         android:fullBackupContent="@xml/backup_rules"
+
         android:icon="@mipmap/ic_launcher"
+
         android:label="@string/app_name"
+
         android:requestLegacyExternalStorage="true"
+
         android:roundIcon="@mipmap/ic_launcher_round"
+
         android:supportsRtl="true"
+
         android:theme="@style/Theme.AppLock">
 
-        <!-- Main Activity -->
+
+        <!-- ===================================================== -->
+        <!-- MAIN ACTIVITY -->
+        <!-- ===================================================== -->
+
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -66,34 +97,53 @@
         </activity>
 
 
-        <!-- Lock Screen -->
+        <!-- ===================================================== -->
+        <!-- LOCK SCREEN -->
+        <!-- IMPORTANT: SEPARATE TASK -->
+        <!-- ===================================================== -->
+
         <activity
             android:name=".Design.screens.LockScreenActivity"
+
             android:exported="false"
-            android:excludeFromRecents="true"
+
             android:launchMode="singleTask"
+
+            android:taskAffinity="com.example.applock.lockscreen"
+
+            android:excludeFromRecents="true"
+
             android:noHistory="false"
+
             android:showWhenLocked="true"
+
             android:turnScreenOn="true" />
 
 
-        <!-- AppLock Accessibility + Foreground Service -->
+        <!-- ===================================================== -->
+        <!-- APPLOCK ACCESSIBILITY + FOREGROUND SERVICE -->
+        <!-- ===================================================== -->
+
         <service
             android:name=".service.AppLockService"
+
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+
             android:exported="false"
+
             android:foregroundServiceType="specialUse">
 
             <intent-filter>
+
                 <action
                     android:name="android.accessibilityservice.AccessibilityService" />
+
             </intent-filter>
 
             <meta-data
                 android:name="android.accessibilityservice"
                 android:resource="@xml/accessibility_service_config" />
 
-            <!-- Android 14+ Special Use explanation -->
             <property
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="AppLock accessibility service for app locking and monitoring locked applications" />
@@ -101,11 +151,17 @@
         </service>
 
 
-        <!-- Boot Receiver -->
+        <!-- ===================================================== -->
+        <!-- BOOT RECEIVER -->
+        <!-- ===================================================== -->
+
         <receiver
             android:name=".BootReceiver"
+
             android:enabled="true"
+
             android:exported="true"
+
             android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
 
             <intent-filter>
@@ -124,11 +180,17 @@
         </receiver>
 
 
-        <!-- File Provider -->
+        <!-- ===================================================== -->
+        <!-- FILE PROVIDER -->
+        <!-- ===================================================== -->
+
         <provider
             android:name="androidx.core.content.FileProvider"
+
             android:authorities="${applicationId}.fileprovider"
+
             android:exported="false"
+
             android:grantUriPermissions="true">
 
             <meta-data
