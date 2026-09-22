@@ -1,12 +1,12 @@
-package com.example.applock.Design.screens
 
-import com.example.applock.Design.screens.AppListCache
+package com.example.applock.Design.screens
 
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.GradientDrawable
 import android.net.Uri
+import android.os.Build
 import android.provider.Settings
 import android.view.Gravity
 import android.widget.TextView
@@ -75,118 +75,213 @@ fun PinConfirmScreen(
     isReset: Boolean = false
 ) {
 
-    val scope = rememberCoroutineScope()
+    val scope =
+        rememberCoroutineScope()
 
-    val appContext = remember {
-        context.applicationContext
-    }
+    val appContext =
+        remember {
+            context.applicationContext
+        }
 
-    val dataStore = remember {
-        DataStoreManager(appContext)
-    }
+    val dataStore =
+        remember {
+            DataStoreManager(
+                appContext
+            )
+        }
 
-    val lifecycleOwner = LocalLifecycleOwner.current
+    val lifecycleOwner =
+        LocalLifecycleOwner.current
+
 
     LaunchedEffect(Unit) {
-        AppListCache.preload(appContext)
+
+        AppListCache.preload(
+            appContext
+        )
     }
 
-    var confirmPin by remember {
+
+    var confirmPin by
+    remember {
         mutableStateOf("")
     }
 
-    var confirmPattern by remember {
-        mutableStateOf<List<Int>>(emptyList())
+
+    var confirmPattern by
+    remember {
+        mutableStateOf<List<Int>>(
+            emptyList()
+        )
     }
 
-    var error by remember {
+
+    var error by
+    remember {
         mutableStateOf("")
     }
 
-    var patternError by remember {
+
+    var patternError by
+    remember {
         mutableStateOf(false)
     }
 
-    var patternConfirmed by remember {
+
+    var patternConfirmed by
+    remember {
         mutableStateOf(false)
     }
 
-    var clearErrorJob by remember {
+
+    var clearErrorJob by
+    remember {
         mutableStateOf<Job?>(null)
     }
 
-    var showPermissionDialog by remember {
+
+    var showPermissionDialog by
+    remember {
         mutableStateOf(false)
     }
 
-    var showSecurityDialog by remember {
+
+    var showSecurityDialog by
+    remember {
         mutableStateOf(false)
     }
 
-    var isNavigatingToAppList by remember {
+
+    var isNavigatingToAppList by
+    remember {
         mutableStateOf(false)
     }
 
-    var overlayAllowed by remember {
+
+    var overlayAllowed by
+    remember {
         mutableStateOf(
-            Settings.canDrawOverlays(context)
+            Settings.canDrawOverlays(
+                context
+            )
         )
     }
 
-    var accessibilityAllowed by remember {
+
+    var accessibilityAllowed by
+    remember {
         mutableStateOf(
-            isAccessibilityServiceEnabled(context)
+            isAccessibilityServiceEnabled(
+                context
+            )
         )
     }
 
-    var autoStartAllowed by remember {
+
+    /*
+     * Auto Start is OEM specific.
+     *
+     * We first detect whether this device has
+     * a known Auto Start settings screen.
+     */
+    var autoStartAvailable by
+    remember {
         mutableStateOf(false)
     }
 
-    var selectedQuestion by remember {
+
+    /*
+     * IMPORTANT:
+     *
+     * Do not set this to true just because the
+     * Auto Start settings screen was opened.
+     *
+     * Android does not provide one universal public
+     * API to check OEM Auto Start state.
+     */
+    var autoStartAllowed by
+    remember {
+        mutableStateOf(false)
+    }
+
+
+    var autoStartOpened by
+    remember {
+        mutableStateOf(false)
+    }
+
+
+    LaunchedEffect(Unit) {
+
+        autoStartAvailable =
+            getAutoStartIntent(
+                appContext
+            ) != null
+    }
+
+
+    var selectedQuestion by
+    remember {
         mutableStateOf("")
     }
 
-    var securityAnswer by remember {
+
+    var securityAnswer by
+    remember {
         mutableStateOf("")
     }
 
-    var securityDropdownExpanded by remember {
+
+    var securityDropdownExpanded by
+    remember {
         mutableStateOf(false)
     }
 
-    var securityAnswerError by remember {
+
+    var securityAnswerError by
+    remember {
         mutableStateOf(false)
     }
 
-    var securityQuestionLocked by remember {
+
+    var securityQuestionLocked by
+    remember {
         mutableStateOf(false)
     }
 
-    val isPattern = type.equals(
-        "pattern",
-        ignoreCase = true
-    )
+
+    val isPattern =
+        type.equals(
+            "pattern",
+            ignoreCase = true
+        )
+
 
     val backgroundColor =
         Color(0xFF29A0F0)
 
+
     val numberButtonColor =
         Color(0xFF69B9F3)
+
 
     val patternDotColor =
         Color(0xFF83CCFF)
 
+
     val errorColor =
         Color.Red
 
+
     val pinLength =
         value.length
+
 
     val passwordNotMatchText =
         stringResource(
             R.string.password_not_match
         )
+
 
     val enterCorrectPasswordText =
         stringResource(
@@ -238,6 +333,7 @@ fun PinConfirmScreen(
                     6f
             }
 
+
         Toast(context).apply {
 
             duration =
@@ -261,52 +357,53 @@ fun PinConfirmScreen(
     fun checkPermissions() {
 
         overlayAllowed =
-            Settings.canDrawOverlays(context)
+            Settings.canDrawOverlays(
+                context
+            )
 
         accessibilityAllowed =
-            isAccessibilityServiceEnabled(context)
+            isAccessibilityServiceEnabled(
+                context
+            )
     }
 
 
+    /*
+     * Auto Start is optional because there is no
+     * universal Android API to verify OEM Auto Start.
+     *
+     * Overlay + Accessibility are the actual
+     * permissions required to continue.
+     */
     fun allPermissionsAllowed(): Boolean {
 
         return overlayAllowed &&
-                accessibilityAllowed &&
-                autoStartAllowed
+                accessibilityAllowed
     }
 
 
     fun openSecurityQuestion() {
 
-        showPermissionDialog = false
+        showPermissionDialog =
+            false
 
-        securityAnswer = ""
+        securityAnswer =
+            ""
 
-        securityAnswerError = false
+        securityAnswerError =
+            false
 
-        securityDropdownExpanded = false
+        securityDropdownExpanded =
+            false
 
-        scope.launch {
+        selectedQuestion =
+            ""
 
-            try {
+        securityQuestionLocked =
+            false
 
-                selectedQuestion = ""
-
-                securityQuestionLocked = false
-
-                showSecurityDialog = true
-
-            } catch (e: Exception) {
-
-                e.printStackTrace()
-
-                selectedQuestion = ""
-
-                securityQuestionLocked = false
-
-                showSecurityDialog = true
-            }
-        }
+        showSecurityDialog =
+            true
     }
 
 
@@ -316,24 +413,32 @@ fun PinConfirmScreen(
     )
 
 
-    DisposableEffect(lifecycleOwner) {
+    DisposableEffect(
+        lifecycleOwner
+    ) {
 
         val observer =
             LifecycleEventObserver { _, event ->
 
                 if (
-                    event == Lifecycle.Event.ON_RESUME
+                    event ==
+                    Lifecycle.Event.ON_RESUME
                 ) {
 
-                    if (currentShowPermissionDialog) {
+                    if (
+                        currentShowPermissionDialog
+                    ) {
 
                         val newOverlayAllowed =
-                            Settings.canDrawOverlays(context)
+                            Settings.canDrawOverlays(
+                                context
+                            )
 
                         val newAccessibilityAllowed =
                             isAccessibilityServiceEnabled(
                                 context
                             )
+
 
                         overlayAllowed =
                             newOverlayAllowed
@@ -341,10 +446,17 @@ fun PinConfirmScreen(
                         accessibilityAllowed =
                             newAccessibilityAllowed
 
+
+                        /*
+                         * DO NOT change autoStartAllowed
+                         * here merely because the user returned.
+                         *
+                         * Auto Start status cannot be reliably
+                         * checked on all Android/OEM devices.
+                         */
                         if (
                             newOverlayAllowed &&
-                            newAccessibilityAllowed &&
-                            autoStartAllowed
+                            newAccessibilityAllowed
                         ) {
 
                             showPermissionDialog =
@@ -356,9 +468,11 @@ fun PinConfirmScreen(
                 }
             }
 
+
         lifecycleOwner.lifecycle.addObserver(
             observer
         )
+
 
         onDispose {
 
@@ -373,11 +487,15 @@ fun PinConfirmScreen(
         showPermissionDialog
     ) {
 
-        if (showPermissionDialog) {
+        if (
+            showPermissionDialog
+        ) {
 
             checkPermissions()
 
-            if (allPermissionsAllowed()) {
+            if (
+                allPermissionsAllowed()
+            ) {
 
                 showPermissionDialog =
                     false
@@ -390,15 +508,13 @@ fun PinConfirmScreen(
 
     LaunchedEffect(
         overlayAllowed,
-        accessibilityAllowed,
-        autoStartAllowed
+        accessibilityAllowed
     ) {
 
         if (
             showPermissionDialog &&
             overlayAllowed &&
-            accessibilityAllowed &&
-            autoStartAllowed
+            accessibilityAllowed
         ) {
 
             showPermissionDialog =
@@ -413,11 +529,14 @@ fun PinConfirmScreen(
 
         clearErrorJob?.cancel()
 
-        clearErrorJob = null
+        clearErrorJob =
+            null
 
-        patternError = false
+        patternError =
+            false
 
-        error = ""
+        error =
+            ""
 
         confirmPattern =
             emptyList()
@@ -428,7 +547,8 @@ fun PinConfirmScreen(
 
         clearErrorJob?.cancel()
 
-        patternError = true
+        patternError =
+            true
 
         error =
             passwordNotMatchText
@@ -455,9 +575,12 @@ fun PinConfirmScreen(
 
     fun finishReset() {
 
-        if (isNavigatingToAppList) {
+        if (
+            isNavigatingToAppList
+        ) {
             return
         }
+
 
         isNavigatingToAppList =
             true
@@ -467,6 +590,7 @@ fun PinConfirmScreen(
 
         showPermissionDialog =
             false
+
 
         scope.launch(
             Dispatchers.IO
@@ -495,11 +619,13 @@ fun PinConfirmScreen(
                     )
                 }
 
+
                 withContext(
                     Dispatchers.Main
                 ) {
 
                     showResetToast()
+
 
                     if (
                         !navController.popBackStack(
@@ -518,9 +644,12 @@ fun PinConfirmScreen(
                     }
                 }
 
-            } catch (e: Exception) {
+            } catch (
+                e: Exception
+            ) {
 
                 e.printStackTrace()
+
 
                 withContext(
                     Dispatchers.Main
@@ -549,10 +678,13 @@ fun PinConfirmScreen(
             return
         }
 
+
         checkPermissions()
+
 
         showPermissionDialog =
             true
+
 
         scope.launch(
             Dispatchers.IO
@@ -568,7 +700,9 @@ fun PinConfirmScreen(
                     "pin"
                 )
 
-            } catch (e: Exception) {
+            } catch (
+                e: Exception
+            ) {
 
                 e.printStackTrace()
             }
@@ -585,10 +719,13 @@ fun PinConfirmScreen(
             return
         }
 
+
         checkPermissions()
+
 
         showPermissionDialog =
             true
+
 
         scope.launch(
             Dispatchers.IO
@@ -604,7 +741,9 @@ fun PinConfirmScreen(
                     "pattern"
                 )
 
-            } catch (e: Exception) {
+            } catch (
+                e: Exception
+            ) {
 
                 e.printStackTrace()
             }
@@ -628,7 +767,9 @@ fun PinConfirmScreen(
                 intent
             )
 
-        } catch (e: Exception) {
+        } catch (
+            e: Exception
+        ) {
 
             try {
 
@@ -638,7 +779,9 @@ fun PinConfirmScreen(
                     )
                 )
 
-            } catch (e2: Exception) {
+            } catch (
+                e2: Exception
+            ) {
 
                 try {
 
@@ -648,7 +791,9 @@ fun PinConfirmScreen(
                         )
                     )
 
-                } catch (e3: Exception) {
+                } catch (
+                    e3: Exception
+                ) {
 
                     e3.printStackTrace()
                 }
@@ -667,18 +812,92 @@ fun PinConfirmScreen(
                 )
             )
 
-        } catch (e: Exception) {
+        } catch (
+            e: Exception
+        ) {
 
             e.printStackTrace()
         }
     }
 
 
-    fun goToAppList() {
+    fun openAutoStartSettings() {
 
-        if (isNavigatingToAppList) {
+        val autoStartIntent =
+            getAutoStartIntent(
+                context
+            )
+
+
+        if (
+            autoStartIntent == null
+        ) {
+
+            autoStartAvailable =
+                false
+
             return
         }
+
+
+        autoStartOpened =
+            true
+
+
+        try {
+
+            context.startActivity(
+                autoStartIntent
+            )
+
+        } catch (
+            e: Exception
+        ) {
+
+            autoStartOpened =
+                false
+
+            try {
+
+                context.startActivity(
+                    Intent(
+                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                        Uri.parse(
+                            "package:${context.packageName}"
+                        )
+                    )
+                )
+
+            } catch (
+                e2: Exception
+            ) {
+
+                e2.printStackTrace()
+            }
+        }
+
+
+        /*
+         * IMPORTANT:
+         *
+         * We intentionally DO NOT do:
+         *
+         * autoStartAllowed = true
+         *
+         * because opening Settings is not proof
+         * that the user enabled Auto Start.
+         */
+    }
+
+
+    fun goToAppList() {
+
+        if (
+            isNavigatingToAppList
+        ) {
+            return
+        }
+
 
         isNavigatingToAppList =
             true
@@ -689,6 +908,7 @@ fun PinConfirmScreen(
         showPermissionDialog =
             false
 
+
         scope.launch {
 
             try {
@@ -697,10 +917,13 @@ fun PinConfirmScreen(
                     true
                 )
 
-            } catch (e: Exception) {
+            } catch (
+                e: Exception
+            ) {
 
                 e.printStackTrace()
             }
+
 
             navController.navigate(
                 "appList"
@@ -731,6 +954,7 @@ fun PinConfirmScreen(
     ) {
 
         Column(
+
             modifier =
                 Modifier
                     .fillMaxSize()
@@ -745,11 +969,8 @@ fun PinConfirmScreen(
                 Arrangement.Center
         ) {
 
-            // =========================================================
-            // TITLE
-            // =========================================================
-
             Text(
+
                 text =
                     if (isPattern) {
 
@@ -780,10 +1001,6 @@ fun PinConfirmScreen(
             )
 
 
-            // =========================================================
-            // STEP INDICATOR
-            // =========================================================
-
             Row(
                 verticalAlignment =
                     Alignment.CenterVertically
@@ -794,9 +1011,9 @@ fun PinConfirmScreen(
                         Modifier
                             .size(25.dp)
                             .border(
-                                width = 2.dp,
-                                color = Color.White,
-                                shape = CircleShape
+                                2.dp,
+                                Color.White,
+                                CircleShape
                             ),
 
                     contentAlignment =
@@ -833,13 +1050,11 @@ fun PinConfirmScreen(
                                 CircleShape
                             )
                             .border(
-                                width = 2.dp,
-                                color =
-                                    Color.White.copy(
-                                        alpha = 0.35f
-                                    ),
-                                shape =
-                                    CircleShape
+                                2.dp,
+                                Color.White.copy(
+                                    alpha = 0.35f
+                                ),
+                                CircleShape
                             ),
 
                     contentAlignment =
@@ -861,7 +1076,8 @@ fun PinConfirmScreen(
 
                         Text(
                             text = "2",
-                            color = backgroundColor,
+                            color =
+                                backgroundColor,
                             fontSize = 15.sp
                         )
                     }
@@ -876,10 +1092,6 @@ fun PinConfirmScreen(
                     )
             )
 
-
-            // =========================================================
-            // PATTERN
-            // =========================================================
 
             if (isPattern) {
 
@@ -915,17 +1127,14 @@ fun PinConfirmScreen(
                         Alignment.Center
                 ) {
 
-                    if (error.isNotEmpty()) {
+                    if (
+                        error.isNotEmpty()
+                    ) {
 
                         Text(
-                            text =
-                                error,
-
-                            color =
-                                Color.Red,
-
-                            fontSize =
-                                15.sp
+                            text = error,
+                            color = Color.Red,
+                            fontSize = 15.sp
                         )
                     }
                 }
@@ -938,10 +1147,6 @@ fun PinConfirmScreen(
                         )
                 )
 
-
-                // =====================================================
-                // CONFIRM PATTERN GRID
-                // =====================================================
 
                 ConfirmPatternGrid(
 
@@ -957,7 +1162,9 @@ fun PinConfirmScreen(
                             confirmPattern =
                                 dots
 
-                            if (patternError) {
+                            if (
+                                patternError
+                            ) {
 
                                 clearErrorJob?.cancel()
 
@@ -1041,10 +1248,6 @@ fun PinConfirmScreen(
                 )
 
 
-                // =====================================================
-                // CONTINUE
-                // =====================================================
-
                 Row(
                     modifier =
                         Modifier
@@ -1105,10 +1308,6 @@ fun PinConfirmScreen(
 
             } else {
 
-                // =========================================================
-                // PIN
-                // =========================================================
-
                 Text(
                     text =
                         stringResource(
@@ -1130,10 +1329,6 @@ fun PinConfirmScreen(
                         )
                 )
 
-
-                // =====================================================
-                // PIN DOTS
-                // =====================================================
 
                 Row(
                     horizontalArrangement =
@@ -1174,15 +1369,14 @@ fun PinConfirmScreen(
                     }
                 }
 
+
                 Spacer(
                     modifier =
                         Modifier.height(
                             15.dp
                         )
                 )
-                // =====================================================
-                // PIN ERROR MESSAGE
-                // =====================================================
+
 
                 Box(
                     modifier =
@@ -1197,20 +1391,15 @@ fun PinConfirmScreen(
                         Alignment.Center
                 ) {
 
-                    if (error.isNotEmpty()) {
+                    if (
+                        error.isNotEmpty()
+                    ) {
 
                         Text(
-                            text =
-                                error,
-
-                            color =
-                                Color.Red,
-
-                            fontSize =
-                                16.sp,
-
-                            textAlign =
-                                TextAlign.Center
+                            text = error,
+                            color = Color.Red,
+                            fontSize = 16.sp,
+                            textAlign = TextAlign.Center
                         )
                     }
                 }
@@ -1223,10 +1412,6 @@ fun PinConfirmScreen(
                         )
                 )
 
-
-                // =====================================================
-                // NUMBER PAD
-                // =====================================================
 
                 NumberPad(
 
@@ -1275,10 +1460,6 @@ fun PinConfirmScreen(
                 )
 
 
-                // =====================================================
-                // RESET + CONTINUE
-                // =====================================================
-
                 Row(
                     modifier =
                         Modifier
@@ -1293,10 +1474,6 @@ fun PinConfirmScreen(
                             Alignment.End
                         )
                 ) {
-
-                    // =================================================
-                    // RESET
-                    // =================================================
 
                     Text(
                         text =
@@ -1347,10 +1524,6 @@ fun PinConfirmScreen(
                                 )
                     )
 
-
-                    // =================================================
-                    // CONTINUE
-                    // =================================================
 
                     Text(
                         text =
@@ -1406,6 +1579,7 @@ fun PinConfirmScreen(
                                         return@clickable
                                     }
 
+
                                     continueWithPin()
                                 }
                                 .padding(
@@ -1417,13 +1591,17 @@ fun PinConfirmScreen(
         }
 
 
-        // =============================================================
-        // PERMISSION DIALOG
-        // =============================================================
-
-        if (showPermissionDialog) {
+        if (
+            showPermissionDialog
+        ) {
 
             PermissionRequiredDialog(
+
+                autoStartAvailable =
+                    autoStartAvailable,
+
+                autoStartAllowed =
+                    autoStartAllowed,
 
                 overlayAllowed =
                     overlayAllowed,
@@ -1431,8 +1609,10 @@ fun PinConfirmScreen(
                 accessibilityAllowed =
                     accessibilityAllowed,
 
-                autoStartAllowed =
-                    autoStartAllowed,
+                onAutoStartAllow = {
+
+                    openAutoStartSettings()
+                },
 
                 onOverlayAllow = {
 
@@ -1444,23 +1624,14 @@ fun PinConfirmScreen(
                     openAccessibilitySettings()
                 },
 
-                onAutoStartAllow = {
-
-                    autoStartAllowed =
-                        true
-                },
-
-                onDone = {
-                }
+                onDone = {}
             )
         }
 
 
-        // =============================================================
-        // SECURITY QUESTION DIALOG
-        // =============================================================
-
-        if (showSecurityDialog) {
+        if (
+            showSecurityDialog
+        ) {
 
             SecurityQuestionDialog(
 
@@ -1484,7 +1655,9 @@ fun PinConfirmScreen(
 
                 onDropdownClick = {
 
-                    if (!securityQuestionLocked) {
+                    if (
+                        !securityQuestionLocked
+                    ) {
 
                         securityDropdownExpanded =
                             !securityDropdownExpanded
@@ -1564,12 +1737,16 @@ fun PinConfirmScreen(
                                     enteredAnswer
                                 )
 
+
                             securityAnswerError =
                                 false
 
+
                             goToAppList()
 
-                        } catch (e: Exception) {
+                        } catch (
+                            e: Exception
+                        ) {
 
                             e.printStackTrace()
 
@@ -1584,18 +1761,15 @@ fun PinConfirmScreen(
 }
 
 
-// =====================================================================
-// PERMISSION REQUIRED DIALOG
-// =====================================================================
-
 @Composable
 private fun PermissionRequiredDialog(
+    autoStartAvailable: Boolean,
+    autoStartAllowed: Boolean,
     overlayAllowed: Boolean,
     accessibilityAllowed: Boolean,
-    autoStartAllowed: Boolean,
+    onAutoStartAllow: () -> Unit,
     onOverlayAllow: () -> Unit,
     onAccessibilityAllow: () -> Unit,
-    onAutoStartAllow: () -> Unit,
     onDone: () -> Unit
 ) {
 
@@ -1663,13 +1837,65 @@ private fun PermissionRequiredDialog(
                 )
 
 
+                /*
+                 * AUTO START FIRST
+                 */
+                if (autoStartAvailable) {
+
+                    PermissionRow(
+                        icon = {
+
+                            Image(
+                                painter =
+                                    painterResource(
+                                        R.drawable.group3
+                                    ),
+
+                                contentDescription =
+                                    stringResource(
+                                        R.string.auto_start
+                                    ),
+
+                                modifier =
+                                    Modifier.size(20.dp),
+
+                                contentScale =
+                                    ContentScale.Fit
+                            )
+                        },
+
+                        title =
+                            stringResource(
+                                R.string.auto_start
+                            ),
+
+                        description =
+                            stringResource(
+                                R.string.keep_applock_running
+                            ),
+
+                        allowed =
+                            autoStartAllowed,
+
+                        onAllow =
+                            onAutoStartAllow
+                    )
+
+
+                    PermissionDivider()
+                }
+
+
+                /*
+                 * OVERLAY
+                 */
                 PermissionRow(
                     icon = {
 
                         Image(
                             painter =
                                 painterResource(
-                                    id = R.drawable.group1
+                                    R.drawable.group1
                                 ),
 
                             contentDescription =
@@ -1706,13 +1932,16 @@ private fun PermissionRequiredDialog(
                 PermissionDivider()
 
 
+                /*
+                 * ACCESSIBILITY
+                 */
                 PermissionRow(
                     icon = {
 
                         Image(
                             painter =
                                 painterResource(
-                                    id = R.drawable.group2
+                                    R.drawable.group2
                                 ),
 
                             contentDescription =
@@ -1746,52 +1975,6 @@ private fun PermissionRequiredDialog(
                 )
 
 
-                PermissionDivider()
-
-
-                PermissionRow(
-                    icon = {
-
-                        Image(
-                            painter =
-                                painterResource(
-                                    id = R.drawable.group3
-                                ),
-
-                            contentDescription =
-                                stringResource(
-                                    R.string.auto_start
-                                ),
-
-                            modifier =
-                                Modifier.size(20.dp),
-
-                            contentScale =
-                                ContentScale.Fit
-                        )
-                    },
-
-                    title =
-                        stringResource(
-                            R.string.auto_start
-                        ),
-
-                    description =
-                        stringResource(
-                            R.string.keep_applock_running
-                        ),
-
-                    allowed =
-                        autoStartAllowed,
-
-                    onAllow =
-                        onAutoStartAllow
-                )
-
-
-                PermissionDivider()
-
-
                 Text(
                     text =
                         stringResource(
@@ -1818,10 +2001,6 @@ private fun PermissionRequiredDialog(
     }
 }
 
-
-// =====================================================================
-// PERMISSION ROW
-// =====================================================================
 
 @Composable
 private fun PermissionRow(
@@ -1914,17 +2093,15 @@ private fun PermissionRow(
                     .width(72.dp)
                     .height(40.dp)
                     .background(
-                        color =
-                            if (allowed) {
-                                Color(0xFF4CAF50)
-                            } else {
-                                Color(0xFF2196F3)
-                            },
+                        if (allowed) {
+                            Color(0xFF4CAF50)
+                        } else {
+                            Color(0xFF2196F3)
+                        },
 
-                        shape =
-                            RoundedCornerShape(
-                                4.dp
-                            )
+                        RoundedCornerShape(
+                            4.dp
+                        )
                     )
                     .clickable(
                         enabled =
@@ -1969,10 +2146,6 @@ private fun PermissionRow(
 }
 
 
-// =====================================================================
-// PERMISSION DIVIDER
-// =====================================================================
-
 @Composable
 private fun PermissionDivider() {
 
@@ -2002,10 +2175,6 @@ private fun PermissionDivider() {
 }
 
 
-// =====================================================================
-// SECURITY QUESTION DIALOG
-// =====================================================================
-
 @Composable
 private fun SecurityQuestionDialog(
     selectedQuestion: String,
@@ -2023,6 +2192,7 @@ private fun SecurityQuestionDialog(
 
     val questions =
         listOf(
+
             stringResource(
                 R.string.security_question_name
             ),
@@ -2191,7 +2361,10 @@ private fun SecurityQuestionDialog(
                                         }
                                 ) {
 
-                                    if (!questionLocked) {
+                                    if (
+                                        !questionLocked
+                                    ) {
+
                                         onDropdownClick()
                                     }
                                 }
@@ -2291,11 +2464,9 @@ private fun SecurityQuestionDialog(
                                             RoundedCornerShape(15.dp)
                                         )
                                         .border(
-                                            width = 1.dp,
-                                            color =
-                                                Color(0xFFE5E5E5),
-                                            shape =
-                                                RoundedCornerShape(15.dp)
+                                            1.dp,
+                                            Color(0xFFE5E5E5),
+                                            RoundedCornerShape(15.dp)
                                         )
                             ) {
 
@@ -2437,7 +2608,9 @@ private fun SecurityQuestionDialog(
                                     Alignment.CenterStart
                             ) {
 
-                                if (answer.isEmpty()) {
+                                if (
+                                    answer.isEmpty()
+                                ) {
 
                                     Text(
                                         text =
@@ -2449,10 +2622,7 @@ private fun SecurityQuestionDialog(
                                             Color(0xFFBDBDBD),
 
                                         fontSize =
-                                            12.sp,
-
-                                        maxLines =
-                                            1
+                                            12.sp
                                     )
                                 }
 
@@ -2603,10 +2773,6 @@ private fun SecurityQuestionDialog(
 }
 
 
-// =====================================================================
-// ACCESSIBILITY SERVICE CHECK
-// =====================================================================
-
 private fun isAccessibilityServiceEnabled(
     context: Context
 ): Boolean {
@@ -2620,7 +2786,9 @@ private fun isAccessibilityServiceEnabled(
             )
 
 
-        if (enabledServices.isNullOrEmpty()) {
+        if (
+            enabledServices.isNullOrEmpty()
+        ) {
 
             false
 
@@ -2628,6 +2796,7 @@ private fun isAccessibilityServiceEnabled(
 
             val packageName =
                 context.packageName
+
 
             enabledServices
                 .split(":")
@@ -2638,6 +2807,7 @@ private fun isAccessibilityServiceEnabled(
                             serviceName
                         )
 
+
                     component
                         ?.packageName
                         ?.equals(
@@ -2647,7 +2817,9 @@ private fun isAccessibilityServiceEnabled(
                 }
         }
 
-    } catch (e: Exception) {
+    } catch (
+        e: Exception
+    ) {
 
         e.printStackTrace()
 
@@ -2656,9 +2828,152 @@ private fun isAccessibilityServiceEnabled(
 }
 
 
-// =====================================================================
-// CONFIRM PATTERN GRID
-// =====================================================================
+/*
+ * Returns a real OEM Auto Start settings screen
+ * only when the device exposes one of the known
+ * Auto Start activities.
+ *
+ * If there is no known Auto Start screen,
+ * null is returned and the Auto Start row is hidden.
+ */
+private fun getAutoStartIntent(
+    context: Context
+): Intent? {
+
+    val manufacturer =
+        Build.MANUFACTURER
+            .lowercase()
+
+
+    val intents =
+        when {
+
+            manufacturer.contains(
+                "xiaomi"
+            ) -> {
+
+                listOf(
+
+                    Intent(
+                        "miui.intent.action.OP_AUTO_START"
+                    ),
+
+                    Intent().setComponent(
+                        ComponentName(
+                            "com.miui.securitycenter",
+                            "com.miui.permcenter.autostart.AutoStartManagementActivity"
+                        )
+                    )
+                )
+            }
+
+
+            manufacturer.contains(
+                "oppo"
+            ) -> {
+
+                listOf(
+
+                    Intent(
+                        "oppo.intent.action.OPPO_AUTO_START"
+                    ),
+
+                    Intent().setComponent(
+                        ComponentName(
+                            "com.coloros.safecenter",
+                            "com.coloros.safecenter.permission.startup.StartupAppListActivity"
+                        )
+                    )
+                )
+            }
+
+
+            manufacturer.contains(
+                "vivo"
+            ) -> {
+
+                listOf(
+
+                    Intent(
+                        "vivo.intent.action.OP_AUTO_START"
+                    ),
+
+                    Intent().setComponent(
+                        ComponentName(
+                            "com.vivo.permissionmanager",
+                            "com.vivo.permissionmanager.activity.BgStartUpManagerActivity"
+                        )
+                    )
+                )
+            }
+
+
+            manufacturer.contains(
+                "huawei"
+            ) -> {
+
+                listOf(
+
+                    Intent().setComponent(
+                        ComponentName(
+                            "com.huawei.systemmanager",
+                            "com.huawei.systemmanager.startupmgr.ui.StartupNormalAppListActivity"
+                        )
+                    )
+                )
+            }
+
+
+            manufacturer.contains(
+                "honor"
+            ) -> {
+
+                listOf(
+
+                    Intent().setComponent(
+                        ComponentName(
+                            "com.hihonor.systemmanager",
+                            "com.hihonor.systemmanager.startupmgr.ui.StartupNormalAppListActivity"
+                        )
+                    )
+                )
+            }
+
+
+            else -> {
+
+                emptyList()
+            }
+        }
+
+
+    for (
+    intent in intents
+    ) {
+
+        try {
+
+            if (
+                intent.resolveActivity(
+                    context.packageManager
+                ) != null
+            ) {
+
+                return intent
+            }
+
+        } catch (
+            e: Exception
+        ) {
+
+            e.printStackTrace()
+        }
+    }
+
+
+    return null
+}
+
 
 @Composable
 private fun ConfirmPatternGrid(
@@ -2675,6 +2990,7 @@ private fun ConfirmPatternGrid(
     rememberUpdatedState(
         onPatternChanged
     )
+
 
     val latestOnPatternFinished by
     rememberUpdatedState(
@@ -2706,19 +3022,18 @@ private fun ConfirmPatternGrid(
                                 patternFinished =
                                     false
 
+
                                 val dot =
                                     findConfirmDot(
-                                        touch =
-                                            offset,
-
-                                        width =
-                                            size.width.toFloat(),
-
-                                        height =
-                                            size.height.toFloat()
+                                        offset,
+                                        size.width.toFloat(),
+                                        size.height.toFloat()
                                     )
 
-                                if (dot != null) {
+
+                                if (
+                                    dot != null
+                                ) {
 
                                     currentDots.add(
                                         dot
@@ -2736,21 +3051,20 @@ private fun ConfirmPatternGrid(
 
                                 change.consume()
 
+
                                 val dot =
                                     findConfirmDot(
-                                        touch =
-                                            change.position,
-
-                                        width =
-                                            size.width.toFloat(),
-
-                                        height =
-                                            size.height.toFloat()
+                                        change.position,
+                                        size.width.toFloat(),
+                                        size.height.toFloat()
                                     )
+
 
                                 if (
                                     dot != null &&
-                                    !currentDots.contains(dot)
+                                    !currentDots.contains(
+                                        dot
+                                    )
                                 ) {
 
                                     currentDots.add(
@@ -2766,13 +3080,16 @@ private fun ConfirmPatternGrid(
 
                         onDragEnd = {
 
-                            if (!patternFinished) {
+                            if (
+                                !patternFinished
+                            ) {
 
                                 patternFinished =
                                     true
 
                                 val finalPattern =
                                     currentDots.toList()
+
 
                                 if (
                                     finalPattern.isNotEmpty()
@@ -2788,13 +3105,16 @@ private fun ConfirmPatternGrid(
 
                         onDragCancel = {
 
-                            if (!patternFinished) {
+                            if (
+                                !patternFinished
+                            ) {
 
                                 patternFinished =
                                     true
 
                                 val finalPattern =
                                     currentDots.toList()
+
 
                                 if (
                                     finalPattern.isNotEmpty()
@@ -2817,32 +3137,25 @@ private fun ConfirmPatternGrid(
 
             val positions =
                 getConfirmPositions(
-                    width =
-                        size.width,
-
-                    height =
-                        size.height
+                    size.width,
+                    size.height
                 )
 
 
-            // =========================================================
-            // PATTERN LINES
-            // =========================================================
-
-            if (selectedDots.size >= 2) {
+            if (
+                selectedDots.size >= 2
+            ) {
 
                 for (
                 i in 0 until selectedDots.size - 1
                 ) {
 
                     drawLine(
+
                         color =
                             if (isError) {
-
                                 errorColor
-
                             } else {
-
                                 Color.White
                             },
 
@@ -2862,10 +3175,6 @@ private fun ConfirmPatternGrid(
                 }
             }
 
-
-            // =========================================================
-            // PATTERN DOTS
-            // =========================================================
 
             positions.forEachIndexed {
                     index,
@@ -2928,10 +3237,6 @@ private fun ConfirmPatternGrid(
 }
 
 
-// =====================================================================
-// CONFIRM GRID POSITIONS
-// =====================================================================
-
 private fun getConfirmPositions(
     width: Float,
     height: Float
@@ -2959,57 +3264,20 @@ private fun getConfirmPositions(
 
     return listOf(
 
-        Offset(
-            x1,
-            y1
-        ),
+        Offset(x1, y1),
+        Offset(x2, y1),
+        Offset(x3, y1),
 
-        Offset(
-            x2,
-            y1
-        ),
+        Offset(x1, y2),
+        Offset(x2, y2),
+        Offset(x3, y2),
 
-        Offset(
-            x3,
-            y1
-        ),
-
-        Offset(
-            x1,
-            y2
-        ),
-
-        Offset(
-            x2,
-            y2
-        ),
-
-        Offset(
-            x3,
-            y2
-        ),
-
-        Offset(
-            x1,
-            y3
-        ),
-
-        Offset(
-            x2,
-            y3
-        ),
-
-        Offset(
-            x3,
-            y3
-        )
+        Offset(x1, y3),
+        Offset(x2, y3),
+        Offset(x3, y3)
     )
 }
 
-
-// =====================================================================
-// FIND CONFIRM DOT
-// =====================================================================
 
 private fun findConfirmDot(
     touch: Offset,
@@ -3019,11 +3287,8 @@ private fun findConfirmDot(
 
     val positions =
         getConfirmPositions(
-            width =
-                width,
-
-            height =
-                height
+            width,
+            height
         )
 
 

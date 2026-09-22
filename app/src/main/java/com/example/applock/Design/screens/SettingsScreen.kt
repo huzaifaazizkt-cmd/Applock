@@ -1,4 +1,3 @@
-
 package com.example.applock.Design.screens
 
 import android.app.Activity
@@ -25,6 +24,7 @@ import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -72,15 +72,10 @@ private data class SettingsItemData(
 
 
 @Composable
-
 fun SettingsScreen(
     onIntruderClick: () -> Unit,
     onLanguageClick: () -> Unit,
     onResetPasswordClick: () -> Unit
-
-
-
-
 ) {
 
     val context = LocalContext.current
@@ -359,11 +354,6 @@ fun SettingsScreen(
                             bottom = 25.dp
                         )
             ) {
-
-
-                // =====================================================
-                // APP PROTECTION
-                // =====================================================
 
                 AppProtectionCard(
 
@@ -821,7 +811,22 @@ private fun AppProtectionCard(
                 )
                 .clip(
                     cardShape
-                ),
+                )
+                .clickable(
+
+                    interactionSource =
+                        remember {
+                            MutableInteractionSource()
+                        },
+
+                    indication =
+                        ripple(
+                            bounded = true
+                        )
+                ) {
+                    // Touch indication only.
+                    // Switch still controls App Protection.
+                },
 
         shape =
             cardShape,
@@ -1085,13 +1090,15 @@ private fun SettingsItem(
                 )
                 .clickable(
 
-                    indication =
-                        null,
-
                     interactionSource =
                         remember {
                             MutableInteractionSource()
-                        }
+                        },
+
+                    indication =
+                        ripple(
+                            bounded = true
+                        )
 
                 ) {
 
@@ -1278,6 +1285,10 @@ private fun SettingsItem(
     }
 }
 
+
+// =============================================================
+// HIDE SETTINGS
+// =============================================================
 
 @Composable
 private fun HideSettingsExpandedContent(
@@ -2241,7 +2252,9 @@ private fun SecurityQuestionSettingsDialog(
                                 .clickable(
 
                                     indication =
-                                        null,
+                                        ripple(
+                                            bounded = true
+                                        ),
 
                                     interactionSource =
                                         remember {
@@ -2399,7 +2412,9 @@ private fun SecurityQuestionSettingsDialog(
                                                 .clickable(
 
                                                     indication =
-                                                        null,
+                                                        ripple(
+                                                            bounded = true
+                                                        ),
 
                                                     interactionSource =
                                                         remember {
@@ -2602,7 +2617,9 @@ private fun SecurityQuestionSettingsDialog(
                                 .clickable(
 
                                     indication =
-                                        null,
+                                        ripple(
+                                            bounded = true
+                                        ),
 
                                     interactionSource =
                                         remember {
@@ -2666,7 +2683,9 @@ private fun SecurityQuestionSettingsDialog(
                                         saveEnabled,
 
                                     indication =
-                                        null,
+                                        ripple(
+                                            bounded = true
+                                        ),
 
                                     interactionSource =
                                         remember {
@@ -2693,7 +2712,7 @@ private fun SecurityQuestionSettingsDialog(
 
 
 // =============================================================
-// RELock TEXT
+// RELOCK TEXT
 // =============================================================
 
 @Composable
@@ -3391,4 +3410,3 @@ private fun SettingDivider() {
             Color(0xFFE8E8E8)
     )
 }
-

@@ -4,10 +4,15 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
+import android.os.PowerManager
+import android.provider.Settings
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -30,7 +35,6 @@ import androidx.compose.runtime.*
 
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
@@ -40,8 +44,10 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 
 import androidx.core.graphics.drawable.toBitmap
 
@@ -55,24 +61,45 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 
+// =====================================================================
+// APP ITEM
+// =====================================================================
+
 data class AppItem(
-    val applicationInfo: ApplicationInfo,
-    val appName: String,
-    val searchName: String,
-    val iconBitmap: androidx.compose.ui.graphics.ImageBitmap?
+
+    val applicationInfo:
+    ApplicationInfo,
+
+    val appName:
+    String,
+
+    val searchName:
+    String,
+
+    val iconBitmap:
+    androidx.compose.ui.graphics.ImageBitmap?
 )
 
+
+// =====================================================================
+// APP LIST CACHE
+// =====================================================================
 
 object AppListCache {
 
     @Volatile
-    private var apps: List<AppItem>? = null
+    private var apps:
+            List<AppItem>? =
+        null
+
 
     private val preloadMutex =
         Mutex()
 
 
-    fun getApps(): List<AppItem>? {
+    fun getApps():
+            List<AppItem>? {
+
         return apps
     }
 
@@ -81,20 +108,29 @@ object AppListCache {
         context: Context
     ) {
 
-        if (apps != null) {
+        if (
+            apps != null
+        ) {
+
             return
         }
 
+
         preloadMutex.withLock {
 
-            if (apps != null) {
+            if (
+                apps != null
+            ) {
+
                 return@withLock
             }
+
 
             try {
 
                 val appContext =
                     context.applicationContext
+
 
                 val result =
                     withContext(
@@ -103,6 +139,7 @@ object AppListCache {
 
                         val pm =
                             appContext.packageManager
+
 
                         val launcherIntent =
                             Intent(
@@ -114,14 +151,17 @@ object AppListCache {
                                 )
                             }
 
+
                         val launcherApps =
                             pm.queryIntentActivities(
                                 launcherIntent,
                                 PackageManager.MATCH_ALL
                             )
 
+
                         launcherApps
-                            .mapNotNull { resolveInfo ->
+                            .mapNotNull {
+                                    resolveInfo ->
 
                                 try {
 
@@ -131,8 +171,10 @@ object AppListCache {
                                             ?.applicationInfo
                                             ?: return@mapNotNull null
 
+
                                     val packageName =
                                         applicationInfo.packageName
+
 
                                     if (
                                         packageName ==
@@ -142,12 +184,14 @@ object AppListCache {
                                         return@mapNotNull null
                                     }
 
+
                                     val appName =
                                         resolveInfo
                                             .loadLabel(
                                                 pm
                                             )
                                             .toString()
+
 
                                     val iconBitmap =
                                         try {
@@ -168,6 +212,7 @@ object AppListCache {
 
                                             null
                                         }
+
 
                                     AppItem(
 
@@ -191,15 +236,19 @@ object AppListCache {
                                     null
                                 }
                             }
+
                             .distinctBy {
 
-                                it.applicationInfo.packageName
+                                it.applicationInfo
+                                    .packageName
                             }
+
                             .sortedBy {
 
                                 it.searchName
                             }
                     }
+
 
                 apps =
                     result
@@ -216,14 +265,17 @@ object AppListCache {
 
     fun updateIcon(
         packageName: String,
-        icon: androidx.compose.ui.graphics.ImageBitmap
+        icon:
+        androidx.compose.ui.graphics.ImageBitmap
     ) {
 
         val currentApps =
             apps ?: return
 
+
         apps =
-            currentApps.map { appItem ->
+            currentApps.map {
+                    appItem ->
 
                 if (
                     appItem
@@ -253,6 +305,108 @@ object AppListCache {
 }
 
 
+// =====================================================================
+// BATTERY OPTIMIZATION CHECK
+// =====================================================================
+
+private fun isBatteryOptimizationIgnored(
+    context: Context
+): Boolean {
+
+    if (
+        Build.VERSION.SDK_INT <
+        Build.VERSION_CODES.M
+    ) {
+
+        return true
+    }
+
+
+    return try {
+
+        val powerManager =
+            context.getSystemService(
+                Context.POWER_SERVICE
+            ) as PowerManager
+
+
+        powerManager.isIgnoringBatteryOptimizations(
+            context.packageName
+        )
+
+    } catch (
+        e: Exception
+    ) {
+
+        e.printStackTrace()
+
+        false
+    }
+}
+
+
+// =====================================================================
+// OPEN BATTERY OPTIMIZATION
+// =====================================================================
+
+private fun openBatteryOptimizationSettings(
+    context: Context
+) {
+
+    if (
+        Build.VERSION.SDK_INT <
+        Build.VERSION_CODES.M
+    ) {
+
+        return
+    }
+
+
+    try {
+
+        val intent =
+            Intent(
+                Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+
+                Uri.parse(
+                    "package:${context.packageName}"
+                )
+            )
+
+
+        context.startActivity(
+            intent
+        )
+
+    } catch (
+        e: Exception
+    ) {
+
+        e.printStackTrace()
+
+
+        try {
+
+            context.startActivity(
+                Intent(
+                    Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS
+                )
+            )
+
+        } catch (
+            e2: Exception
+        ) {
+
+            e2.printStackTrace()
+        }
+    }
+}
+
+
+// =====================================================================
+// APP LIST SCREEN
+// =====================================================================
+
 @Composable
 fun AppListScreen(
     context: Context
@@ -263,8 +417,10 @@ fun AppListScreen(
             context.applicationContext
         }
 
+
     val scope =
         rememberCoroutineScope()
+
 
     val dataStore =
         remember {
@@ -274,17 +430,29 @@ fun AppListScreen(
         }
 
 
+    // ================================================================
+    // TAB
+    // ================================================================
+
     var selectedTab by
     remember {
         mutableStateOf(0)
     }
 
 
+    // ================================================================
+    // SEARCH
+    // ================================================================
+
     var searchText by
     remember {
         mutableStateOf("")
     }
 
+
+    // ================================================================
+    // APPS
+    // ================================================================
 
     var apps by
     remember {
@@ -297,11 +465,57 @@ fun AppListScreen(
     }
 
 
+    // ================================================================
+    // BATTERY DIALOG
+    // ================================================================
+
+    var showBatteryOptimizationDialog by
+    remember {
+        mutableStateOf(false)
+    }
+
+
+    // ================================================================
+    // IMPORTANT:
+    //
+    // This flag belongs to the current AppListScreen session.
+    //
+    // First lock:
+    //      dialog
+    //
+    // Second lock:
+    //      no dialog
+    //
+    // AppListScreen destroyed and opened again:
+    //      flag becomes false again
+    // ================================================================
+
+    var batteryDialogShownThisSession by
+    remember {
+        mutableStateOf(false)
+    }
+
+
+    // ================================================================
+    // APP WAITING TO BE LOCKED
+    // ================================================================
+
+    var pendingPackageName by
+    remember {
+        mutableStateOf<String?>(null)
+    }
+
+
+    // ================================================================
+    // PRELOAD
+    // ================================================================
+
     LaunchedEffect(Unit) {
 
         val cachedApps =
             AppListCache
                 .getApps()
+
 
         if (
             cachedApps != null
@@ -312,10 +526,10 @@ fun AppListScreen(
 
         } else {
 
-            AppListCache
-                .preload(
-                    appContext
-                )
+            AppListCache.preload(
+                appContext
+            )
+
 
             AppListCache
                 .getApps()
@@ -328,6 +542,10 @@ fun AppListScreen(
     }
 
 
+    // ================================================================
+    // LOCKED APPS
+    // ================================================================
+
     val lockedApps by
     dataStore
         .lockedAppsFlow
@@ -336,6 +554,10 @@ fun AppListScreen(
                 emptySet()
         )
 
+
+    // ================================================================
+    // SEARCH
+    // ================================================================
 
     val normalizedSearch =
         remember(
@@ -347,6 +569,10 @@ fun AppListScreen(
                 .lowercase()
         }
 
+
+    // ================================================================
+    // FILTER
+    // ================================================================
 
     val filteredApps =
         remember(
@@ -367,7 +593,8 @@ fun AppListScreen(
                     selectedTab == 0
                 ) {
 
-                    apps.filter { appItem ->
+                    apps.filter {
+                            appItem ->
 
                         !lockedApps.contains(
 
@@ -379,7 +606,8 @@ fun AppListScreen(
 
                 } else {
 
-                    apps.filter { appItem ->
+                    apps.filter {
+                            appItem ->
 
                         lockedApps.contains(
 
@@ -399,7 +627,8 @@ fun AppListScreen(
 
             } else {
 
-                tabApps.filter { appItem ->
+                tabApps.filter {
+                        appItem ->
 
                     appItem.searchName.contains(
                         normalizedSearch
@@ -408,6 +637,10 @@ fun AppListScreen(
             }
         }
 
+
+    // ================================================================
+    // MAIN
+    // ================================================================
 
     Column(
 
@@ -420,9 +653,9 @@ fun AppListScreen(
     ) {
 
 
-        // =====================================================
-        // TITLE + ICON
-        // =====================================================
+        // ============================================================
+        // TITLE
+        // ============================================================
 
         Row(
 
@@ -479,9 +712,9 @@ fun AppListScreen(
         }
 
 
-        // =====================================================
+        // ============================================================
         // TABS
-        // =====================================================
+        // ============================================================
 
         TabRow(
 
@@ -499,7 +732,8 @@ fun AppListScreen(
                     top = 18.dp
                 ),
 
-            indicator = { tabPositions ->
+            indicator = {
+                    tabPositions ->
 
                 if (
                     selectedTab <
@@ -510,7 +744,6 @@ fun AppListScreen(
 
                         modifier =
                             Modifier.tabIndicatorOffset(
-
                                 tabPositions[
                                     selectedTab
                                 ]
@@ -527,9 +760,9 @@ fun AppListScreen(
         ) {
 
 
-            // =================================================
+            // ========================================================
             // UNLOCKED
-            // =================================================
+            // ========================================================
 
             Tab(
 
@@ -633,9 +866,9 @@ fun AppListScreen(
             }
 
 
-            // =================================================
+            // ========================================================
             // LOCKED
-            // =================================================
+            // ========================================================
 
             Tab(
 
@@ -740,9 +973,9 @@ fun AppListScreen(
         }
 
 
-        // =====================================================
+        // ============================================================
         // SEARCH
-        // =====================================================
+        // ============================================================
 
         Box(
 
@@ -774,12 +1007,7 @@ fun AppListScreen(
                     .border(
 
                         width =
-                            2
-
-
-
-
-                                .dp,
+                            2.dp,
 
                         color =
                             Color.White,
@@ -797,12 +1025,8 @@ fun AppListScreen(
                     Modifier
                         .fillMaxSize()
                         .padding(
-
-                            start =
-                                12.dp,
-
-                            end =
-                                12.dp
+                            start = 12.dp,
+                            end = 12.dp
                         ),
 
                 verticalAlignment =
@@ -904,6 +1128,7 @@ fun AppListScreen(
                                 )
                             }
 
+
                             innerTextField()
                         }
                     }
@@ -920,9 +1145,9 @@ fun AppListScreen(
         )
 
 
-        // =====================================================
+        // ============================================================
         // GENERAL
-        // =====================================================
+        // ============================================================
 
         Text(
 
@@ -960,9 +1185,9 @@ fun AppListScreen(
         )
 
 
-        // =====================================================
-        // LOCKED EMPTY STATE
-        // =====================================================
+        // ============================================================
+        // EMPTY LOCKED
+        // ============================================================
 
         if (
             selectedTab == 1 &&
@@ -1024,9 +1249,9 @@ fun AppListScreen(
         } else {
 
 
-            // =================================================
+            // ========================================================
             // APP LIST
-            // =================================================
+            // ========================================================
 
             LazyColumn(
 
@@ -1062,22 +1287,27 @@ fun AppListScreen(
                     items =
                         filteredApps,
 
-                    key = { appItem ->
+                    key = {
+                            appItem ->
 
                         appItem
                             .applicationInfo
                             .packageName
                     }
 
-                ) { appItem ->
+                ) {
+                        appItem ->
+
 
                     val appName =
                         appItem.appName
+
 
                     val packageName =
                         appItem
                             .applicationInfo
                             .packageName
+
 
                     val isLocked =
                         lockedApps.contains(
@@ -1085,22 +1315,21 @@ fun AppListScreen(
                         )
 
 
-                    // =============================================
-                    // APP CARD
-                    // =============================================
-
                     val cardShape =
                         RoundedCornerShape(
                             12.dp
                         )
 
 
+                    // =================================================
+                    // APP CARD
+                    // =================================================
+
                     Card(
 
                         modifier =
                             Modifier
                                 .fillMaxWidth()
-
                                 .shadow(
 
                                     elevation =
@@ -1124,7 +1353,6 @@ fun AppListScreen(
                                                 0.10f
                                         )
                                 )
-
                                 .clip(
                                     cardShape
                                 ),
@@ -1174,7 +1402,7 @@ fun AppListScreen(
 
 
                             // =========================================
-                            // APP ICON
+                            // ICON
                             // =========================================
 
                             if (
@@ -1198,7 +1426,6 @@ fun AppListScreen(
                             } else {
 
                                 Spacer(
-
                                     modifier =
                                         Modifier.size(
                                             32.dp
@@ -1208,7 +1435,6 @@ fun AppListScreen(
 
 
                             Spacer(
-
                                 modifier =
                                     Modifier.width(
                                         18.dp
@@ -1217,7 +1443,7 @@ fun AppListScreen(
 
 
                             // =========================================
-                            // APP NAME
+                            // NAME
                             // =========================================
 
                             Text(
@@ -1249,23 +1475,62 @@ fun AppListScreen(
 
                                 onClick = {
 
-                                    scope.launch {
+                                    if (
+                                        isLocked
+                                    ) {
 
-                                        if (
-                                            isLocked
-                                        ) {
+                                        // =============================
+                                        // UNLOCK
+                                        // =============================
+
+                                        scope.launch {
 
                                             dataStore
                                                 .removeLockedApp(
                                                     packageName
                                                 )
+                                        }
+
+                                    } else {
+
+                                        // =============================
+                                        // LOCK
+                                        // =============================
+
+                                        val batteryOptimizationIgnored =
+                                            isBatteryOptimizationIgnored(
+                                                appContext
+                                            )
+
+
+                                        if (
+                                            !batteryDialogShownThisSession &&
+                                            !batteryOptimizationIgnored
+                                        ) {
+
+                                            // =========================
+                                            // SHOW BATTERY DIALOG
+                                            // =========================
+
+                                            pendingPackageName =
+                                                packageName
+
+                                            showBatteryOptimizationDialog =
+                                                true
 
                                         } else {
 
-                                            dataStore
-                                                .saveLockedApp(
-                                                    packageName
-                                                )
+                                            // =========================
+                                            // DIRECT LOCK
+                                            // =========================
+
+                                            scope.launch {
+
+                                                dataStore
+                                                    .saveLockedApp(
+                                                        packageName
+                                                    )
+                                            }
                                         }
                                     }
                                 },
@@ -1326,6 +1591,286 @@ fun AppListScreen(
                         }
                     }
                 }
+            }
+        }
+    }
+
+
+    // =================================================================
+    // BATTERY OPTIMIZATION DIALOG
+    // =================================================================
+
+    if (
+        showBatteryOptimizationDialog
+    ) {
+
+        BatteryOptimizationDialog(
+
+            onAllow = {
+
+                showBatteryOptimizationDialog =
+                    false
+
+
+                // IMPORTANT:
+                // Dialog has been shown for this
+                // AppList session.
+
+                batteryDialogShownThisSession =
+                    true
+
+
+                // Lock the requested app immediately.
+
+                pendingPackageName?.let {
+                        packageName ->
+
+                    scope.launch {
+
+                        dataStore
+                            .saveLockedApp(
+                                packageName
+                            )
+                    }
+                }
+
+
+                pendingPackageName =
+                    null
+
+
+                // Open Android battery settings.
+
+                openBatteryOptimizationSettings(
+                    appContext
+                )
+            },
+
+
+            onDeny = {
+
+                showBatteryOptimizationDialog =
+                    false
+
+
+                // IMPORTANT:
+                // Even if user denies,
+                // don't show it again in this
+                // AppList session.
+
+                batteryDialogShownThisSession =
+                    true
+
+
+                // Lock anyway.
+
+                pendingPackageName?.let {
+                        packageName ->
+
+                    scope.launch {
+
+                        dataStore
+                            .saveLockedApp(
+                                packageName
+                            )
+                    }
+                }
+
+
+                pendingPackageName =
+                    null
+            }
+        )
+    }
+}
+
+
+// =====================================================================
+// BATTERY OPTIMIZATION DIALOG
+// =====================================================================
+
+@Composable
+private fun BatteryOptimizationDialog(
+    onAllow: () -> Unit,
+    onDeny: () -> Unit
+) {
+
+    Dialog(
+        onDismissRequest = {
+
+            // Treat outside/back dismissal
+            // exactly like Deny.
+
+            onDeny()
+        }
+    ) {
+
+        Column(
+
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .background(
+
+                        Color.White,
+
+                        RoundedCornerShape(
+                            20.dp
+                        )
+                    )
+                    .padding(
+
+                        horizontal =
+                            24.dp,
+
+                        vertical =
+                            24.dp
+                    )
+        ) {
+
+            // =========================================================
+            // TITLE
+            // =========================================================
+
+            Text(
+
+                text =
+                    "Battery Optimization",
+
+                color =
+                    Color(0xFF333333),
+
+                fontSize =
+                    20.sp,
+
+                modifier =
+                    Modifier.fillMaxWidth(),
+
+                textAlign =
+                    TextAlign.Center
+            )
+
+
+            Spacer(
+                modifier =
+                    Modifier.height(
+                        14.dp
+                    )
+            )
+
+
+            // =========================================================
+            // DESCRIPTION
+            // =========================================================
+
+            Text(
+
+                text =
+                    "Allow AppLock to run without battery optimization so your locked apps can be protected reliably in the background.",
+
+                color =
+                    Color(0xFF777777),
+
+                fontSize =
+                    14.sp,
+
+                lineHeight =
+                    20.sp,
+
+                modifier =
+                    Modifier.fillMaxWidth(),
+
+                textAlign =
+                    TextAlign.Center
+            )
+
+
+            Spacer(
+                modifier =
+                    Modifier.height(
+                        24.dp
+                    )
+            )
+
+
+            // =========================================================
+            // BUTTONS
+            // =========================================================
+
+            Row(
+
+                modifier =
+                    Modifier.fillMaxWidth(),
+
+                horizontalArrangement =
+                    Arrangement.End,
+
+                verticalAlignment =
+                    Alignment.CenterVertically
+            ) {
+
+                Text(
+
+                    text =
+                        "Deny",
+
+                    color =
+                        Color(0xFF2196F3),
+
+                    fontSize =
+                        15.sp,
+
+                    modifier =
+                        Modifier
+                            .clickable {
+
+                                onDeny()
+                            }
+                            .padding(
+
+                                horizontal =
+                                    14.dp,
+
+                                vertical =
+                                    10.dp
+                            )
+                )
+
+
+                Spacer(
+                    modifier =
+                        Modifier.width(
+                            8.dp
+                        )
+                )
+
+
+                Text(
+
+                    text =
+                        "Allow",
+
+                    color =
+                        Color(0xFF2196F3),
+
+                    fontSize =
+                        15.sp,
+
+                    modifier =
+                        Modifier
+                            .clickable {
+
+                                onAllow()
+                            }
+                            .padding(
+
+                                horizontal =
+                                    14.dp,
+
+                                vertical =
+                                    10.dp
+                            )
+                )
             }
         }
     }

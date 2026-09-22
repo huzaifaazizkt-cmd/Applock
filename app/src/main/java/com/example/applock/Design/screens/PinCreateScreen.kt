@@ -37,12 +37,14 @@ fun PinCreateScreen(
         mutableStateOf("")
     }
 
+    // DEFAULT = 4 DIGIT PIN
     var pinLength by remember {
-        mutableStateOf(6)
+        mutableStateOf(4)
     }
 
+    // DEFAULT = 4 DIGIT PIN
     var authType by remember {
-        mutableStateOf("6")
+        mutableStateOf("4")
     }
 
     var expanded by remember {
@@ -121,7 +123,7 @@ fun PinCreateScreen(
                                 )
 
                                 else -> stringResource(
-                                    R.string.six_digit_pin
+                                    R.string.four_digit_pin
                                 )
                             },
                             color = Color.White,
@@ -407,7 +409,6 @@ fun PinCreateScreen(
                         )
                 ) {
 
-
                     // =================================================
                     // RESET
                     // =================================================
@@ -558,7 +559,6 @@ fun PinCreateScreen(
                             Alignment.End
                         )
                 ) {
-
 
                     // =================================================
                     // RESET

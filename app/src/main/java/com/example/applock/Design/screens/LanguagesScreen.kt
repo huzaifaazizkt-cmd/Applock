@@ -27,6 +27,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -68,9 +69,6 @@ data class LanguageItem(
 fun LanguagesScreen(
     onBackClick: (() -> Unit)? = null,
     onLanguageSelected: (() -> Unit)? = null,
-
-    // true  = Start / Setup
-    // false = Settings
     isSetup: Boolean = false
 ) {
 
@@ -87,22 +85,7 @@ fun LanguagesScreen(
 
 
     // =========================================================
-    // IMPORTANT SETUP DETECTION
-    // =========================================================
-    //
-    // Setup screen normally has NO back button.
-    //
-    // Therefore:
-    //
-    // isSetup == true
-    // OR
-    // onBackClick == null
-    //
-    // means FIRST SETUP.
-    //
-    // This prevents an old saved language such as English
-    // from being automatically selected.
-    //
+    // SETUP DETECTION
     // =========================================================
 
     val setupMode =
@@ -199,14 +182,6 @@ fun LanguagesScreen(
     // =========================================================
     // SELECTED LANGUAGE
     // =========================================================
-    //
-    // FIRST SETUP:
-    // Always NULL.
-    //
-    // SETTINGS:
-    // Saved language will be selected.
-    //
-    // =========================================================
 
     var selectedLanguageCode by
     remember(setupMode) {
@@ -228,29 +203,10 @@ fun LanguagesScreen(
 
         if (setupMode) {
 
-            // =================================================
-            // FIRST SETUP
-            // =================================================
-            //
-            // NEVER select saved language.
-            //
-            // Even if DataStore already contains "en",
-            // nothing will be selected.
-            //
-            // =================================================
-
             selectedLanguageCode =
                 null
 
         } else {
-
-            // =================================================
-            // SETTINGS
-            // =================================================
-            //
-            // Show previously saved language.
-            //
-            // =================================================
 
             selectedLanguageCode =
                 savedLanguageCode
@@ -329,13 +285,15 @@ fun LanguagesScreen(
                                 .size(25.dp)
                                 .clickable(
 
-                                    indication =
-                                        null,
-
                                     interactionSource =
                                         remember {
                                             MutableInteractionSource()
-                                        }
+                                        },
+
+                                    indication =
+                                        ripple(
+                                            bounded = true
+                                        )
 
                                 ) {
 
@@ -398,11 +356,6 @@ fun LanguagesScreen(
                     )
             ) {
 
-
-                // =================================================
-                // EACH LANGUAGE
-                // =================================================
-
                 languages.forEach { language ->
 
                     LanguageCard(
@@ -415,10 +368,6 @@ fun LanguagesScreen(
                                     language.code,
 
                         onClick = {
-
-                            // -------------------------------------
-                            // USER SELECTED LANGUAGE
-                            // -------------------------------------
 
                             selectedLanguageCode =
                                 language.code
@@ -436,10 +385,6 @@ fun LanguagesScreen(
 
                 onClick = {
 
-                    // ---------------------------------------------
-                    // FIND SELECTED LANGUAGE
-                    // ---------------------------------------------
-
                     val selectedItem =
                         languages.firstOrNull {
 
@@ -447,10 +392,6 @@ fun LanguagesScreen(
                                     selectedLanguageCode
                         }
 
-
-                    // =================================================
-                    // NOTHING SELECTED
-                    // =================================================
 
                     if (selectedItem == null) {
 
@@ -462,15 +403,7 @@ fun LanguagesScreen(
                     }
 
 
-                    // =================================================
-                    // LANGUAGE SELECTED
-                    // =================================================
-
                     scope.launch {
-
-                        // -----------------------------------------
-                        // SAVE LANGUAGE
-                        // -----------------------------------------
 
                         dataStoreManager
                             .saveLanguage(
@@ -478,33 +411,19 @@ fun LanguagesScreen(
                             )
 
 
-                        // -----------------------------------------
-                        // APPLY LANGUAGE
-                        // -----------------------------------------
-
                         AppLanguageManager
                             .setLanguage(
                                 selectedItem.code
                             )
 
 
-                        // -----------------------------------------
-                        // CONTINUE
-                        // -----------------------------------------
-
                         onLanguageSelected
                             ?.invoke()
                     }
                 },
 
-
-                // =================================================
-                // ALWAYS ENABLED
-                // =================================================
-
                 enabled =
                     true,
-
 
                 modifier =
                     Modifier
@@ -516,12 +435,10 @@ fun LanguagesScreen(
                         )
                         .height(51.dp),
 
-
                 shape =
                     RoundedCornerShape(
                         14.dp
                     ),
-
 
                 colors =
                     ButtonDefaults.buttonColors(
@@ -636,13 +553,15 @@ private fun LanguageCard(
 
                 .clickable(
 
-                    indication =
-                        null,
-
                     interactionSource =
                         remember {
                             MutableInteractionSource()
-                        }
+                        },
+
+                    indication =
+                        ripple(
+                            bounded = true
+                        )
 
                 ) {
 
@@ -730,10 +649,6 @@ private fun LanguageCard(
                     ContentScale.Fit
             )
 
-
-            // =================================================
-            // SPACE
-            // =================================================
 
             Spacer(
 
