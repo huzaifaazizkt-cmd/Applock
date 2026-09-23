@@ -10,6 +10,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,62 +38,31 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.applock.R
 
 @Composable
-fun StartScreen(
-    navController: NavController,
-    appInitialized: Boolean
-) {
-
-    // ---------------------------------------------------------
-    // LOTTIE LOADING BAR
-    // ---------------------------------------------------------
-
-    val composition by rememberLottieComposition(
-        LottieCompositionSpec.RawRes(R.raw.loadingbar)
-    )
-
-    var navigationDone by remember {
-        mutableStateOf(false)
-    }
-
-    val progress by animateLottieCompositionAsState(
-        composition = composition,
-        iterations = 1
-    )
-
-    // ---------------------------------------------------------
-    // JSON ANIMATION COMPLETE
-    // ---------------------------------------------------------
+fun StartScreen(navController: NavController, appInitialized: Boolean) {
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.loadingbar))
+    var navigationDone by remember { mutableStateOf(false) }
+    val progress by animateLottieCompositionAsState(composition = composition, iterations = 1)
 
     LaunchedEffect(
         progress,
         appInitialized
     ) {
-
         if (
             composition != null &&
             progress >= 1f &&
             !navigationDone
         ) {
-
             navigationDone = true
 
-
             if (appInitialized) {
-
-                navController.navigate("appList") {
-
+                navController.navigate("unlockScreen") {
                     popUpTo("startScreen") {
                         inclusive = true
                     }
-
                     launchSingleTop = true
                 }
-
             } else {
-
-
                 navController.navigate("welcomeScreen") {
-
                     popUpTo("startScreen") {
                         inclusive = true
                     }
@@ -99,10 +71,6 @@ fun StartScreen(
         }
     }
 
-    // ---------------------------------------------------------
-    // UI
-    // ---------------------------------------------------------
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -110,27 +78,20 @@ fun StartScreen(
                 Color.White.copy(alpha = 0.9f)
             )
     ) {
-
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
             Image(
-                painter = painterResource(
-                    id = R.drawable.startscreen
-                ),
+                painter = painterResource(id = R.drawable.startscreen),
                 contentDescription = "App Lock",
                 modifier = Modifier.size(270.dp)
             )
 
-            Spacer(
-                modifier = Modifier.height(10.dp)
-            )
+            Spacer(modifier = Modifier.height(10.dp))
 
             Text(
                 text = buildAnnotatedString {
-
                     withStyle(
                         style = SpanStyle(
                             color = Color(0xFF333333),
@@ -152,9 +113,7 @@ fun StartScreen(
                 fontSize = 34.sp
             )
 
-            Spacer(
-                modifier = Modifier.height(9.dp)
-            )
+            Spacer(modifier = Modifier.height(9.dp))
 
             Text(
                 text = "Secure your apps. Protect your privacy.",
@@ -163,14 +122,11 @@ fun StartScreen(
             )
         }
 
-        // -----------------------------------------------------
-        // JSON LOADING BAR
-        // -----------------------------------------------------
-
         Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
+                .windowInsetsPadding(WindowInsets.navigationBars)
                 .padding(
                     start = 100.dp,
                     end = 100.dp,
@@ -178,7 +134,6 @@ fun StartScreen(
                 ),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
             LottieAnimation(
                 composition = composition,
                 progress = {
@@ -189,9 +144,7 @@ fun StartScreen(
                     .height(25.dp)
             )
 
-            Spacer(
-                modifier = Modifier.height(10.dp)
-            )
+            Spacer(modifier = Modifier.height(10.dp))
 
             Text(
                 text = "This action may contain ads",

@@ -298,14 +298,6 @@ class DataStoreManager(
     // LOCKED APPS
     // =========================================================
 
-    suspend fun saveLockedApps(
-        apps: Set<String>
-    ) {
-        context.dataStore.edit {
-            it[LOCKED_APPS] = apps
-        }
-    }
-
     suspend fun saveLockedApp(
         packageName: String
     ) {
@@ -518,9 +510,19 @@ class DataStoreManager(
     fun getIntruderObservationAttempts(): Flow<Int> {
         return context.dataStore.data
             .map {
-                it[INTRUDER_OBSERVATION_ATTEMPTS]
-                    ?.toIntOrNull()
-                    ?: 3
+
+                when (
+                    it[INTRUDER_OBSERVATION_ATTEMPTS]
+                        ?.toIntOrNull()
+                ) {
+
+                    0 -> 0
+                    3 -> 3
+                    5 -> 5
+                    10 -> 10
+
+                    else -> 0
+                }
             }
     }
 
@@ -652,9 +654,7 @@ class DataStoreManager(
         }
     }
 
-    fun getHideFromRecents():
-            Flow<Boolean> {
-
+    fun getHideFromRecents(): Flow<Boolean> {
         return context.dataStore.data
             .map {
                 it[HIDE_FROM_RECENTS]
@@ -743,6 +743,7 @@ class DataStoreManager(
     }
 
     fun getPremium(): Flow<Boolean> {
+
         return context.dataStore.data
             .catch { exception ->
 
@@ -753,6 +754,7 @@ class DataStoreManager(
                 }
             }
             .map {
+
                 it[PREMIUM_KEY]
                     ?: false
             }

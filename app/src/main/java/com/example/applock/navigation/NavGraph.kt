@@ -2,17 +2,14 @@ package com.example.applock.navigation
 
 import android.content.Context
 import android.net.Uri
-
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-
 import com.example.applock.Design.screens.ExitScreen
 import com.example.applock.Design.screens.HomeScreen
 import com.example.applock.Design.screens.IntruderScreen
@@ -23,500 +20,218 @@ import com.example.applock.Design.screens.PinConfirmScreen
 import com.example.applock.Design.screens.PinCreateScreen
 import com.example.applock.Design.screens.PremiumScreen
 import com.example.applock.Design.screens.StartScreen
+import com.example.applock.Design.screens.UnlockScreen
 import com.example.applock.Design.screens.WelcomeScreen
-
 import com.example.applock.data.DataStoreManager
-
 
 @Composable
 fun NavGraph(
     context: Context,
     startDestination: String = "startScreen"
 ) {
+    val appContext = context.applicationContext
+    val dataStore = DataStoreManager(appContext)
+    val appInitialized by dataStore.getAppInitialized().collectAsState(initial = null)
 
-    val appContext =
-        context.applicationContext
-
-
-    val dataStore =
-        DataStoreManager(
-            appContext
-        )
-
-
-    val appInitialized by
-    dataStore
-        .getAppInitialized()
-        .collectAsState(
-            initial = null
-        )
-
-
-    if (
-        appInitialized == null
-    ) {
-
+    if (appInitialized == null) {
         return
     }
 
-
-    val navController =
-        rememberNavController()
-
+    val navController = rememberNavController()
 
     NavHost(
-
-        navController =
-            navController,
-
-        startDestination =
-            startDestination
+        navController = navController,
+        startDestination = startDestination
     ) {
-
-
-        // =====================================================
-        // START SCREEN
-        // =====================================================
-
-        composable(
-            "startScreen"
-        ) {
-
+        composable("startScreen") {
             StartScreen(
-
-                navController =
-                    navController,
-
-                appInitialized =
-                    appInitialized == true
+                navController = navController,
+                appInitialized = appInitialized == true
             )
         }
 
+        composable("unlockScreen") {
+            UnlockScreen(
+                onUnlockSuccess = {
+                    navController.navigate("appList") {
+                        popUpTo("unlockScreen") {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
+                },
+                onForgotPasswordSuccess = {
+                    navController.navigate("resetCreate") {
+                        popUpTo("unlockScreen") {
+                            inclusive = true
+                        }
+                    }
+                },
+                onFingerprintRequest = {
+                }
+            )
+        }
 
-        // =====================================================
-        // WELCOME
-        // =====================================================
-
-        composable(
-            "welcomeScreen"
-        ) {
-
+        composable("welcomeScreen") {
             WelcomeScreen(
-                navController =
-                    navController
+                navController = navController
             )
         }
 
-
-        // =====================================================
-        // LANGUAGE SETUP
-        // =====================================================
-
-        composable(
-            "languagesSetup"
-        ) {
-
+        composable("languagesSetup") {
             LanguagesScreen(
-
-                onBackClick =
-                    null,
-
+                onBackClick = null,
                 onLanguageSelected = {
-
-                    navController.navigate(
-                        "onboardingScreen"
-                    ) {
-
-                        popUpTo(
-                            "languagesSetup"
-                        ) {
-
-                            inclusive =
-                                true
+                    navController.navigate("onboardingScreen") {
+                        popUpTo("languagesSetup") {
+                            inclusive = true
                         }
                     }
                 }
             )
         }
 
-
-        // =====================================================
-        // ONBOARDING
-        // =====================================================
-
-        composable(
-            "onboardingScreen"
-        ) {
-
+        composable("onboardingScreen") {
             OnboardingScreen(
-                navController =
-                    navController
+                navController = navController
             )
         }
 
-
-        // =====================================================
-        // PREMIUM
-        // =====================================================
-
-        composable(
-            "premium"
-        ) {
-
+        composable("premium") {
             PremiumScreen(
-                navController =
-                    navController
+                navController = navController
             )
         }
 
-
-        // =====================================================
-        // CREATE PASSWORD
-        // =====================================================
-
-        composable(
-            "create"
-        ) {
-
+        composable("create") {
             PinCreateScreen(
-
-                onNext = {
-                        type,
-                        value ->
-
+                onNext = { type, value ->
                     navController.navigate(
-
-                        "confirm/${
-                            Uri.encode(type)
-                        }/${
-                            Uri.encode(value)
-                        }"
+                        "confirm/${Uri.encode(type)}/${Uri.encode(value)}"
                     )
                 }
             )
         }
 
-
-        // =====================================================
-        // CONFIRM PASSWORD
-        // =====================================================
-
         composable(
-
-            route =
-                "confirm/{type}/{value}",
-
-            arguments =
-                listOf(
-
-                    navArgument(
-                        "type"
-                    ) {
-
-                        type =
-                            NavType.StringType
-                    },
-
-                    navArgument(
-                        "value"
-                    ) {
-
-                        type =
-                            NavType.StringType
-                    }
-                )
+            route = "confirm/{type}/{value}",
+            arguments = listOf(
+                navArgument("type") {
+                    type = NavType.StringType
+                },
+                navArgument("value") {
+                    type = NavType.StringType
+                }
+            )
         ) {
-
-            val type =
-                it.arguments
-                    ?.getString(
-                        "type"
-                    )
-                    ?: "pin"
-
-
-            val value =
-                Uri.decode(
-
-                    it.arguments
-                        ?.getString(
-                            "value"
-                        )
-                        ?: ""
-                )
-
+            val type = it.arguments?.getString("type") ?: "pin"
+            val value = Uri.decode(
+                it.arguments?.getString("value") ?: ""
+            )
 
             PinConfirmScreen(
-
-                navController =
-                    navController,
-
-                context =
-                    context,
-
-                type =
-                    type,
-
-                value =
-                    value,
-
-                isReset =
-                    false
+                navController = navController,
+                context = context,
+                type = type,
+                value = value,
+                isReset = false
             )
         }
 
-
-        // =====================================================
-        // RESET PASSWORD CREATE
-        // =====================================================
-
-        composable(
-            "resetCreate"
-        ) {
-
+        composable("resetCreate") {
             PinCreateScreen(
-
-                onNext = {
-                        type,
-                        value ->
-
+                onNext = { type, value ->
                     navController.navigate(
-
-                        "resetConfirm/${
-                            Uri.encode(type)
-                        }/${
-                            Uri.encode(value)
-                        }"
+                        "resetConfirm/${Uri.encode(type)}/${Uri.encode(value)}"
                     )
                 }
             )
         }
 
-
-        // =====================================================
-        // RESET PASSWORD CONFIRM
-        // =====================================================
-
         composable(
-
-            route =
-                "resetConfirm/{type}/{value}",
-
-            arguments =
-                listOf(
-
-                    navArgument(
-                        "type"
-                    ) {
-
-                        type =
-                            NavType.StringType
-                    },
-
-                    navArgument(
-                        "value"
-                    ) {
-
-                        type =
-                            NavType.StringType
-                    }
-                )
+            route = "resetConfirm/{type}/{value}",
+            arguments = listOf(
+                navArgument("type") {
+                    type = NavType.StringType
+                },
+                navArgument("value") {
+                    type = NavType.StringType
+                }
+            )
         ) {
-
-            val type =
-                it.arguments
-                    ?.getString(
-                        "type"
-                    )
-                    ?: "pin"
-
-
-            val value =
-                Uri.decode(
-
-                    it.arguments
-                        ?.getString(
-                            "value"
-                        )
-                        ?: ""
-                )
-
+            val type = it.arguments?.getString("type") ?: "pin"
+            val value = Uri.decode(
+                it.arguments?.getString("value") ?: ""
+            )
 
             PinConfirmScreen(
-
-                navController =
-                    navController,
-
-                context =
-                    context,
-
-                type =
-                    type,
-
-                value =
-                    value,
-
-                isReset =
-                    true
+                navController = navController,
+                context = context,
+                type = type,
+                value = value,
+                isReset = true
             )
         }
 
-
-        // =====================================================
-        // HOME
-        // =====================================================
-
-        composable(
-            "home"
-        ) {
-
+        composable("home") {
             HomeScreen(
-                navController =
-                    navController
+                navController = navController
             )
         }
 
-
-        // =====================================================
-        // MAIN APP
-        // =====================================================
-
-        composable(
-            "appList"
-        ) {
-
-            val currentEntry =
-                navController
-                    .currentBackStackEntry
-
+        composable("appList") {
+            val currentEntry = navController.currentBackStackEntry
 
             val openSettings =
                 currentEntry
                     ?.savedStateHandle
-                    ?.get<Boolean>(
-                        "openSettings"
-                    )
+                    ?.get<Boolean>("openSettings")
                     ?: false
 
-
             MainScreen(
-
-                context =
-                    context,
-
-                // =================================================
-                // SETTINGS -> INTRUDER
-                // =================================================
-
+                context = context,
                 onIntruderClick = {
-
                     currentEntry
                         ?.savedStateHandle
-                        ?.set(
-                            "returnToSettings",
-                            true
-                        )
+                        ?.set("returnToSettings", true)
 
-
-                    navController.navigate(
-                        "intruder"
-                    )
+                    navController.navigate("intruder")
                 },
-
-
-                // =================================================
-                // SETTINGS -> LANGUAGES
-                // =================================================
-
                 onLanguageClick = {
-
                     currentEntry
                         ?.savedStateHandle
-                        ?.set(
-                            "returnToSettings",
-                            true
-                        )
+                        ?.set("returnToSettings", true)
 
-
-                    navController.navigate(
-                        "languages"
-                    )
+                    navController.navigate("languages")
                 },
-
-
-                // =================================================
-                // SETTINGS -> RESET PASSWORD
-                // =================================================
-
                 onResetPasswordClick = {
-
-                    navController.navigate(
-                        "resetCreate"
-                    )
+                    navController.navigate("resetCreate")
                 },
-
-
-                openSettings =
-                    openSettings,
-
-                navController =
-                    navController
+                openSettings = openSettings,
+                navController = navController
             )
         }
 
-
-        // =====================================================
-        // LANGUAGES
-        // =====================================================
-
-        composable(
-            "languages"
-        ) {
-
+        composable("languages") {
             LanguagesScreen(
-
                 onBackClick = {
-
-                    navController
-                        .popBackStack()
+                    navController.popBackStack()
                 },
-
-                onLanguageSelected =
-                    null
+                onLanguageSelected = null
             )
         }
 
-
-        // =====================================================
-        // INTRUDER
-        // =====================================================
-
-        composable(
-            "intruder"
-        ) {
-
+        composable("intruder") {
             IntruderScreen(
-
                 onBackClick = {
-
-                    navController
-                        .popBackStack()
+                    navController.popBackStack()
                 }
             )
         }
 
-
-        // =====================================================
-        // EXIT
-        // =====================================================
-
-        composable(
-            "exit"
-        ) {
-
+        composable("exit") {
             ExitScreen(
-                navController =
-                    navController
+                navController = navController
             )
         }
     }

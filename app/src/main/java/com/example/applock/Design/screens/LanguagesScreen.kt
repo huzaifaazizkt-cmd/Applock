@@ -49,21 +49,11 @@ import com.example.applock.data.DataStoreManager
 
 import kotlinx.coroutines.launch
 
-
-// =============================================================
-// LANGUAGE DATA
-// =============================================================
-
 data class LanguageItem(
     val name: String,
     val flagRes: Int,
     val code: String
 )
-
-
-// =============================================================
-// LANGUAGES SCREEN
-// =============================================================
 
 @Composable
 fun LanguagesScreen(
@@ -83,18 +73,8 @@ fun LanguagesScreen(
     val scope =
         rememberCoroutineScope()
 
-
-    // =========================================================
-    // SETUP DETECTION
-    // =========================================================
-
     val setupMode =
         isSetup || onBackClick == null
-
-
-    // =========================================================
-    // LANGUAGES LIST
-    // =========================================================
 
     val languages =
         listOf(
@@ -166,22 +146,12 @@ fun LanguagesScreen(
             )
         )
 
-
-    // =========================================================
-    // SAVED LANGUAGE
-    // =========================================================
-
     val savedLanguageCode by
     dataStoreManager
         .getLanguage()
         .collectAsState(
             initial = null
         )
-
-
-    // =========================================================
-    // SELECTED LANGUAGE
-    // =========================================================
 
     var selectedLanguageCode by
     remember(setupMode) {
@@ -190,11 +160,6 @@ fun LanguagesScreen(
             null
         )
     }
-
-
-    // =========================================================
-    // LOAD LANGUAGE
-    // =========================================================
 
     LaunchedEffect(
         setupMode,
@@ -213,21 +178,10 @@ fun LanguagesScreen(
         }
     }
 
-
-    // =========================================================
-    // SCROLL STATE
-    // =========================================================
-
     val scrollState =
         rememberScrollState()
 
-
-    // =========================================================
-    // ROOT
-    // =========================================================
-
     Box(
-
         modifier =
             Modifier
                 .fillMaxSize()
@@ -237,34 +191,21 @@ fun LanguagesScreen(
     ) {
 
         Column(
-
             modifier =
                 Modifier
                     .fillMaxSize()
         ) {
 
-
-            // =================================================
-            // TOP BAR
-            // =================================================
-
             Box(
-
                 modifier =
                     Modifier
                         .fillMaxWidth()
                         .height(90.dp)
             ) {
 
-
-                // =================================================
-                // BACK BUTTON
-                // =================================================
-
                 if (onBackClick != null) {
 
                     Icon(
-
                         imageVector =
                             Icons.AutoMirrored.Filled.ArrowBack,
 
@@ -302,13 +243,7 @@ fun LanguagesScreen(
                     )
                 }
 
-
-                // =================================================
-                // TITLE
-                // =================================================
-
                 Text(
-
                     text =
                         stringResource(
                             R.string.languages
@@ -330,13 +265,7 @@ fun LanguagesScreen(
                 )
             }
 
-
-            // =================================================
-            // LANGUAGE LIST
-            // =================================================
-
             Column(
-
                 modifier =
                     Modifier
                         .fillMaxWidth()
@@ -359,7 +288,6 @@ fun LanguagesScreen(
                 languages.forEach { language ->
 
                     LanguageCard(
-
                         language =
                             language,
 
@@ -376,13 +304,7 @@ fun LanguagesScreen(
                 }
             }
 
-
-            // =================================================
-            // SELECT BUTTON
-            // =================================================
-
             Button(
-
                 onClick = {
 
                     val selectedItem =
@@ -391,7 +313,6 @@ fun LanguagesScreen(
                             it.code ==
                                     selectedLanguageCode
                         }
-
 
                     if (selectedItem == null) {
 
@@ -402,7 +323,6 @@ fun LanguagesScreen(
                         return@Button
                     }
 
-
                     scope.launch {
 
                         dataStoreManager
@@ -410,12 +330,10 @@ fun LanguagesScreen(
                                 selectedItem.code
                             )
 
-
                         AppLanguageManager
                             .setLanguage(
                                 selectedItem.code
                             )
-
 
                         onLanguageSelected
                             ?.invoke()
@@ -428,6 +346,7 @@ fun LanguagesScreen(
                 modifier =
                     Modifier
                         .fillMaxWidth()
+                        .navigationBarsPadding()
                         .padding(
                             start = 14.dp,
                             end = 14.dp,
@@ -455,7 +374,6 @@ fun LanguagesScreen(
             ) {
 
                 Text(
-
                     text =
                         stringResource(
                             R.string.select
@@ -475,20 +393,11 @@ fun LanguagesScreen(
     }
 }
 
-
-// =============================================================
-// LANGUAGE CARD
-// =============================================================
-
 @Composable
 private fun LanguageCard(
-
     language: LanguageItem,
-
     selected: Boolean,
-
     onClick: () -> Unit
-
 ) {
 
     val cardShape =
@@ -496,15 +405,11 @@ private fun LanguageCard(
             12.dp
         )
 
-
     Card(
-
         modifier =
             Modifier
                 .fillMaxWidth()
-
                 .shadow(
-
                     elevation =
                         5.dp,
 
@@ -524,17 +429,14 @@ private fun LanguageCard(
                             alpha = 0.10f
                         )
                 )
-
                 .clip(
                     cardShape
                 )
-
                 .then(
 
                     if (selected) {
 
                         Modifier.border(
-
                             width =
                                 1.5.dp,
 
@@ -550,7 +452,6 @@ private fun LanguageCard(
                         Modifier
                     }
                 )
-
                 .clickable(
 
                     interactionSource =
@@ -568,10 +469,8 @@ private fun LanguageCard(
                     onClick()
                 },
 
-
         shape =
             cardShape,
-
 
         colors =
             CardDefaults.cardColors(
@@ -587,7 +486,6 @@ private fun LanguageCard(
                     }
             ),
 
-
         elevation =
             CardDefaults.cardElevation(
 
@@ -599,13 +497,7 @@ private fun LanguageCard(
             )
     ) {
 
-
-        // =====================================================
-        // LANGUAGE ROW
-        // =====================================================
-
         Row(
-
             modifier =
                 Modifier
                     .fillMaxWidth()
@@ -619,13 +511,7 @@ private fun LanguageCard(
                 Alignment.CenterVertically
         ) {
 
-
-            // =================================================
-            // FLAG
-            // =================================================
-
             Image(
-
                 painter =
                     painterResource(
                         id =
@@ -637,7 +523,6 @@ private fun LanguageCard(
 
                 modifier =
                     Modifier.size(
-
                         width =
                             32.dp,
 
@@ -649,22 +534,14 @@ private fun LanguageCard(
                     ContentScale.Fit
             )
 
-
             Spacer(
-
                 modifier =
                     Modifier.width(
                         18.dp
                     )
             )
 
-
-            // =================================================
-            // LANGUAGE NAME
-            // =================================================
-
             Text(
-
                 text =
                     language.name,
 
@@ -697,13 +574,7 @@ private fun LanguageCard(
                     }
             )
 
-
-            // =================================================
-            // RADIO BUTTON
-            // =================================================
-
             RadioButton(
-
                 selected =
                     selected,
 
@@ -729,11 +600,6 @@ private fun LanguageCard(
     }
 }
 
-
-// =============================================================
-// LANGUAGE SELECTION TOAST
-// =============================================================
-
 private fun showLanguageSelectionToast(
     context: Context
 ) {
@@ -741,13 +607,10 @@ private fun showLanguageSelectionToast(
     val textView =
         TextView(context)
 
-
     textView.text =
         "Don't select your language\nPlease select your language"
 
-
     textView.setTextColor(
-
         AndroidColor.rgb(
             92,
             92,
@@ -755,59 +618,45 @@ private fun showLanguageSelectionToast(
         )
     )
 
-
     textView.textSize =
         14f
-
 
     textView.gravity =
         Gravity.CENTER
 
-
     textView.setPadding(
-
         28,
         16,
         28,
         16
     )
 
-
     val background =
         GradientDrawable()
-
 
     background.setColor(
         AndroidColor.WHITE
     )
 
-
     background.cornerRadius =
         18f
-
 
     textView.background =
         background
 
-
     textView.elevation =
         6f
-
 
     val toast =
         Toast(context)
 
-
     toast.view =
         textView
-
 
     toast.duration =
         Toast.LENGTH_SHORT
 
-
     toast.setGravity(
-
         Gravity.BOTTOM or
                 Gravity.CENTER_HORIZONTAL,
 
@@ -815,7 +664,6 @@ private fun showLanguageSelectionToast(
 
         90
     )
-
 
     toast.show()
 }

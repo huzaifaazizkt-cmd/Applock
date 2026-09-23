@@ -4,23 +4,14 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.applock">
 
-    <!-- ========================================================= -->
-    <!-- CAMERA -->
-    <!-- ========================================================= -->
-
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
 
-    <!-- ========================================================= -->
-    <!-- APP PERMISSIONS -->
-    <!-- ========================================================= -->
-
     <uses-permission
         android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
-    <uses-permission
-        android:name="android.permission.QUERY_ALL_PACKAGES" />
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
 
     <uses-permission
         android:name="android.permission.VIBRATE" />
@@ -31,17 +22,8 @@
     <uses-permission
         android:name="android.permission.USE_BIOMETRIC" />
 
-    <!-- Battery optimization -->
-    <uses-permission
-        android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
-
-    <!-- Boot -->
     <uses-permission
         android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-
-    <!-- ========================================================= -->
-    <!-- MEDIA PERMISSIONS -->
-    <!-- ========================================================= -->
 
     <uses-permission
         android:name="android.permission.READ_MEDIA_IMAGES" />
@@ -49,53 +31,33 @@
     <uses-permission
         android:name="android.permission.READ_MEDIA_VIDEO" />
 
-    <!-- Android 12 and below -->
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
 
-    <!-- ========================================================= -->
-    <!-- FOREGROUND SERVICE -->
-    <!-- ========================================================= -->
-
     <uses-permission
         android:name="android.permission.FOREGROUND_SERVICE" />
 
-    <!-- Android 14+ -->
     <uses-permission
         android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
-
     <application
-
         android:allowBackup="true"
-
         android:dataExtractionRules="@xml/data_extraction_rules"
-
         android:enableOnBackInvokedCallback="false"
-
         android:fullBackupContent="@xml/backup_rules"
-
         android:icon="@mipmap/ic_launcher"
-
         android:label="@string/app_name"
-
         android:requestLegacyExternalStorage="true"
-
         android:roundIcon="@mipmap/ic_launcher_round"
-
         android:supportsRtl="true"
-
         android:theme="@style/Theme.AppLock">
-
-
-        <!-- ===================================================== -->
-        <!-- MAIN ACTIVITY -->
-        <!-- ===================================================== -->
 
         <activity
             android:name=".MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:windowSoftInputMode="adjustNothing">
 
             <intent-filter>
 
@@ -109,42 +71,20 @@
 
         </activity>
 
-
-        <!-- ===================================================== -->
-        <!-- LOCK SCREEN -->
-        <!-- ===================================================== -->
-
         <activity
-
             android:name=".Design.screens.LockScreenActivity"
-
             android:exported="false"
-
             android:launchMode="singleTask"
-
             android:taskAffinity="com.example.applock.lockscreen"
-
             android:excludeFromRecents="true"
-
             android:noHistory="false"
-
             android:showWhenLocked="true"
-
             android:turnScreenOn="true" />
 
-
-        <!-- ===================================================== -->
-        <!-- APPLOCK ACCESSIBILITY + FOREGROUND SERVICE -->
-        <!-- ===================================================== -->
-
         <service
-
             android:name=".service.AppLockService"
-
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
-
             android:exported="false"
-
             android:foregroundServiceType="specialUse">
 
             <intent-filter>
@@ -155,32 +95,19 @@
             </intent-filter>
 
             <meta-data
-
                 android:name="android.accessibilityservice"
-
                 android:resource="@xml/accessibility_service_config" />
 
             <property
-
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-
                 android:value="AppLock accessibility service for app locking and monitoring locked applications" />
 
         </service>
 
-
-        <!-- ===================================================== -->
-        <!-- BOOT RECEIVER -->
-        <!-- ===================================================== -->
-
         <receiver
-
             android:name=".BootReceiver"
-
             android:enabled="true"
-
             android:exported="true"
-
             android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
 
             <intent-filter>
@@ -198,25 +125,14 @@
 
         </receiver>
 
-
-        <!-- ===================================================== -->
-        <!-- FILE PROVIDER -->
-        <!-- ===================================================== -->
-
         <provider
-
             android:name="androidx.core.content.FileProvider"
-
             android:authorities="${applicationId}.fileprovider"
-
             android:exported="false"
-
             android:grantUriPermissions="true">
 
             <meta-data
-
                 android:name="android.support.FILE_PROVIDER_PATHS"
-
                 android:resource="@xml/file_paths" />
 
         </provider>

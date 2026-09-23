@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -49,33 +50,17 @@ fun PremiumScreen(
     navController: NavController
 ) {
 
-    // =========================================================
-    // CONTEXT / ACTIVITY
-    // =========================================================
-
     val context = LocalContext.current
 
     val activity = context as? Activity
-
-    // =========================================================
-    // BILLING
-    // =========================================================
 
     val billing = remember(context) {
         Billing(context)
     }
 
-    // =========================================================
-    // LIFETIME PRICE
-    // =========================================================
-
     var lifetimePrice by remember {
         mutableStateOf("$6.99")
     }
-
-    // =========================================================
-    // LOAD ACTUAL GOOGLE PLAY PRICE
-    // =========================================================
 
     LaunchedEffect(Unit) {
 
@@ -85,10 +70,6 @@ fun PremiumScreen(
         }
     }
 
-    // =========================================================
-    // CLOSE BILLING CONNECTION
-    // =========================================================
-
     DisposableEffect(Unit) {
 
         onDispose {
@@ -96,10 +77,6 @@ fun PremiumScreen(
             billing.endConnection()
         }
     }
-
-    // =========================================================
-    // COLORS
-    // =========================================================
 
     val blueColor =
         Color(0xFF2196F3)
@@ -110,17 +87,9 @@ fun PremiumScreen(
     val grayText =
         Color(0xFF777777)
 
-    // =========================================================
-    // SELECTED PLAN
-    // =========================================================
-
     var selectedPlan by remember {
         mutableStateOf(true)
     }
-
-    // =========================================================
-    // UI
-    // =========================================================
 
     Box(
         modifier = Modifier
@@ -134,14 +103,9 @@ fun PremiumScreen(
                 .padding(
                     start = 20.dp,
                     end = 20.dp,
-                    top = 30.dp,
-                    bottom = 12.dp
+                    top = 30.dp
                 )
         ) {
-
-            // =================================================
-            // CLOSE
-            // =================================================
 
             Box(
                 modifier = Modifier
@@ -178,10 +142,6 @@ fun PremiumScreen(
                 )
             }
 
-            // =================================================
-            // PREMIUM IMAGE
-            // =================================================
-
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -205,10 +165,6 @@ fun PremiumScreen(
                 modifier = Modifier.height(20.dp)
             )
 
-            // =================================================
-            // TITLE
-            // =================================================
-
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment =
@@ -225,9 +181,11 @@ fun PremiumScreen(
                         fontSize = 26.sp,
                         fontWeight = FontWeight.Bold
                     )
+
                     Spacer(
                         modifier = Modifier.width(8.dp)
                     )
+
                     Text(
                         text = stringResource(
                             R.string.premium_all_features
@@ -252,10 +210,6 @@ fun PremiumScreen(
                 modifier = Modifier.height(8.dp)
             )
 
-            // =================================================
-            // DESCRIPTION
-            // =================================================
-
             Text(
                 text = stringResource(
                     R.string.premium_description
@@ -273,10 +227,6 @@ fun PremiumScreen(
                 modifier = Modifier.height(20.dp)
             )
 
-            // =================================================
-            // PREMIUM BENEFITS TITLE
-            // =================================================
-
             Text(
                 text = stringResource(
                     R.string.premium_benefits
@@ -290,10 +240,6 @@ fun PremiumScreen(
                 modifier = Modifier.height(14.dp)
             )
 
-            // =================================================
-            // BENEFIT 1
-            // =================================================
-
             PremiumBenefitRow(
                 icon = R.drawable.hideinapp,
                 text = stringResource(
@@ -304,10 +250,6 @@ fun PremiumScreen(
             Spacer(
                 modifier = Modifier.height(10.dp)
             )
-
-            // =================================================
-            // BENEFIT 2
-            // =================================================
 
             PremiumBenefitRow(
                 icon = R.drawable.selfie,
@@ -320,10 +262,6 @@ fun PremiumScreen(
                 modifier = Modifier.height(10.dp)
             )
 
-            // =================================================
-            // BENEFIT 3
-            // =================================================
-
             PremiumBenefitRow(
                 icon = R.drawable.noads,
                 text = stringResource(
@@ -334,10 +272,6 @@ fun PremiumScreen(
             Spacer(
                 modifier = Modifier.height(10.dp)
             )
-
-            // =================================================
-            // BENEFIT 4
-            // =================================================
 
             PremiumBenefitRow(
                 icon = R.drawable.priority,
@@ -350,10 +284,6 @@ fun PremiumScreen(
                 modifier = Modifier.height(15.dp)
             )
 
-            // =================================================
-            // ONE TIME PURCHASE CARD
-            // =================================================
-
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -364,10 +294,6 @@ fun PremiumScreen(
                         shape = RoundedCornerShape(16.dp)
                     )
             ) {
-
-                // =================================================
-                // BEST VALUE
-                // =================================================
 
                 Box(
                     modifier = Modifier
@@ -398,10 +324,6 @@ fun PremiumScreen(
                     )
                 }
 
-                // =================================================
-                // PLAN
-                // =================================================
-
                 Row(
                     modifier = Modifier
                         .fillMaxSize()
@@ -414,10 +336,6 @@ fun PremiumScreen(
                     verticalAlignment =
                         Alignment.CenterVertically
                 ) {
-
-                    // =================================================
-                    // RADIO
-                    // =================================================
 
                     Box(
                         modifier = Modifier
@@ -448,10 +366,6 @@ fun PremiumScreen(
                         modifier = Modifier.width(15.dp)
                     )
 
-                    // =================================================
-                    // PLAN NAME
-                    // =================================================
-
                     Column(
                         modifier = Modifier.weight(1f)
                     ) {
@@ -477,10 +391,6 @@ fun PremiumScreen(
                             fontSize = 13.sp
                         )
                     }
-
-                    // =================================================
-                    // PRICE
-                    // =================================================
 
                     Column(
                         horizontalAlignment =
@@ -512,10 +422,6 @@ fun PremiumScreen(
             Spacer(
                 modifier = Modifier.height(16.dp)
             )
-
-            // =================================================
-            // NO SUBSCRIPTION
-            // =================================================
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -551,10 +457,6 @@ fun PremiumScreen(
             Spacer(
                 modifier = Modifier.height(16.dp)
             )
-
-            // =================================================
-            // UNLOCK PREMIUM BUTTON
-            // =================================================
 
             Box(
                 modifier = Modifier
@@ -593,12 +495,10 @@ fun PremiumScreen(
                 modifier = Modifier.height(14.dp)
             )
 
-            // =================================================
-            // TERMS + PRIVACY
-            // =================================================
-
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding(),
                 horizontalArrangement =
                     Arrangement.SpaceBetween,
                 verticalAlignment =
@@ -613,7 +513,6 @@ fun PremiumScreen(
                     fontSize = 10.sp,
                     modifier = Modifier.clickable {
 
-                        // Terms screen
                     }
                 )
 
@@ -625,18 +524,16 @@ fun PremiumScreen(
                     fontSize = 10.sp,
                     modifier = Modifier.clickable {
 
-                        // Privacy screen
                     }
                 )
             }
+
+            Spacer(
+                modifier = Modifier.height(10.dp)
+            )
         }
     }
 }
-
-
-// =============================================================
-// PREMIUM BENEFIT ROW
-// =============================================================
 
 @Composable
 private fun PremiumBenefitRow(
@@ -651,10 +548,6 @@ private fun PremiumBenefitRow(
         verticalAlignment =
             Alignment.CenterVertically
     ) {
-
-        // =====================================================
-        // ICON CIRCLE
-        // =====================================================
 
         Box(
             modifier = Modifier
@@ -679,10 +572,6 @@ private fun PremiumBenefitRow(
         Spacer(
             modifier = Modifier.width(8.dp)
         )
-
-        // =====================================================
-        // BENEFIT TEXT
-        // =====================================================
 
         Text(
             text = text,

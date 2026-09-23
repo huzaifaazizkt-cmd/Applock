@@ -8,15 +8,20 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,7 +32,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -38,7 +42,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.applock.R
 
-
 @Composable
 fun MainScreen(
     context: Context,
@@ -48,26 +51,11 @@ fun MainScreen(
     openSettings: Boolean = false,
     navController: NavController
 ) {
-
-    // ====================================================
-    // SAVED STATE HANDLE
-    // ====================================================
-
     val savedStateHandle =
         navController.currentBackStackEntry
             ?.savedStateHandle
 
-
-    // ====================================================
-    // SELECTED TAB
-    //
-    // 0 = AppList
-    // 1 = Vault
-    // 2 = Settings
-    // ====================================================
-
     var selectedTab by remember {
-
         mutableIntStateOf(
             if (openSettings) {
                 2
@@ -77,82 +65,37 @@ fun MainScreen(
         )
     }
 
-
-    // ====================================================
-    // VAULT PREVIEW STATE
-    // ====================================================
-
     var isVaultPreviewOpen by remember {
         mutableStateOf(false)
     }
 
-
-    // ====================================================
-    // PREVIOUS TAB FOR SETTINGS
-    //
-    // 0 = AppList
-    // 1 = Vault
-    // ====================================================
-
     var settingsPreviousTab by remember {
-
         mutableIntStateOf(
             savedStateHandle
-                ?.get<Int>(
-                    "settingsPreviousTab"
-                )
+                ?.get<Int>("settingsPreviousTab")
                 ?: 0
         )
     }
 
-
-    // ====================================================
-    // FORCE APP LIST
-    // ====================================================
-
     val forceAppList =
         savedStateHandle
-            ?.get<Boolean>(
-                "forceAppList"
-            )
+            ?.get<Boolean>("forceAppList")
             ?: false
-
-
-    // ====================================================
-    // RETURN TO SETTINGS
-    // ====================================================
 
     val returnToSettings =
         savedStateHandle
-            ?.get<Boolean>(
-                "returnToSettings"
-            )
+            ?.get<Boolean>("returnToSettings")
             ?: false
-
-
-    // ====================================================
-    // HANDLE NAVIGATION STATE
-    // ====================================================
 
     LaunchedEffect(
         openSettings,
         forceAppList,
         returnToSettings
     ) {
-
         when {
-
-            // =================================================
-            // FORCE APP LIST
-            // =================================================
-
             forceAppList -> {
-
-                selectedTab =
-                    0
-
-                settingsPreviousTab =
-                    0
+                selectedTab = 0
+                settingsPreviousTab = 0
 
                 savedStateHandle?.set(
                     "settingsPreviousTab",
@@ -172,30 +115,16 @@ fun MainScreen(
                 )
             }
 
-
-            // =================================================
-            // RETURN TO SETTINGS
-            // =================================================
-
             returnToSettings -> {
-
-                selectedTab =
-                    2
+                selectedTab = 2
 
                 savedStateHandle?.remove<Boolean>(
                     "returnToSettings"
                 )
             }
 
-
-            // =================================================
-            // OPEN SETTINGS
-            // =================================================
-
             openSettings -> {
-
-                selectedTab =
-                    2
+                selectedTab = 2
 
                 savedStateHandle?.remove<Boolean>(
                     "openSettings"
@@ -204,38 +133,14 @@ fun MainScreen(
         }
     }
 
-
-    // ====================================================
-    // TAB SELECTION
-    // ====================================================
-
-    fun selectTab(
-        tab: Int
-    ) {
-
-        if (
-            tab ==
-            selectedTab
-        ) {
+    fun selectTab(tab: Int) {
+        if (tab == selectedTab) {
             return
         }
 
-
-        // =================================================
-        // SAVE CURRENT TAB BEFORE SETTINGS
-        // =================================================
-
-        if (
-            tab == 2
-        ) {
-
-            if (
-                selectedTab == 0 ||
-                selectedTab == 1
-            ) {
-
-                settingsPreviousTab =
-                    selectedTab
+        if (tab == 2) {
+            if (selectedTab == 0 || selectedTab == 1) {
+                settingsPreviousTab = selectedTab
 
                 savedStateHandle?.set(
                     "settingsPreviousTab",
@@ -244,77 +149,33 @@ fun MainScreen(
             }
         }
 
-
-        // Close preview if another tab is selected
-
-        isVaultPreviewOpen =
-            false
-
-
-        selectedTab =
-            tab
+        isVaultPreviewOpen = false
+        selectedTab = tab
     }
 
-
-    // ====================================================
-    // BACK BUTTON
-    // ====================================================
-
     BackHandler {
-
-        // =================================================
-        // VAULT PREVIEW
-        //
-        // Preview -> Vault
-        // =================================================
-
         if (isVaultPreviewOpen) {
-
-            isVaultPreviewOpen =
-                false
-
+            isVaultPreviewOpen = false
             return@BackHandler
         }
 
-
         when {
-
-            // =================================================
-            // SETTINGS
-            // =================================================
-
             selectedTab == 2 -> {
-
                 val previousTab =
                     savedStateHandle
-                        ?.get<Int>(
-                            "settingsPreviousTab"
-                        )
+                        ?.get<Int>("settingsPreviousTab")
                         ?: settingsPreviousTab
 
-
                 selectedTab =
-                    if (
-                        previousTab == 1
-                    ) {
-
+                    if (previousTab == 1) {
                         1
-
                     } else {
-
                         0
                     }
             }
 
-
-            // =================================================
-            // VAULT
-            // =================================================
-
             selectedTab == 1 -> {
-
-                selectedTab =
-                    0
+                selectedTab = 0
 
                 savedStateHandle?.set(
                     "settingsPreviousTab",
@@ -322,114 +183,58 @@ fun MainScreen(
                 )
             }
 
-
-            // =================================================
-            // APP LIST
-            // =================================================
-
             selectedTab == 0 -> {
-
-                navController.navigate(
-                    "exit"
-                )
+                navController.navigate("exit")
             }
         }
     }
 
-
-    // ====================================================
-    // MAIN UI
-    // ====================================================
+    val navigationBarBottomPadding =
+        WindowInsets.navigationBars
+            .asPaddingValues()
+            .calculateBottomPadding()
 
     Box(
-
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .background(
-                    Color.White
-                )
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
     ) {
-
-
-        // ====================================================
-        // CONTENT
-        // ====================================================
-
         Box(
-
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .then(
-
-                        if (
-                            isVaultPreviewOpen
-                        ) {
-
-                            Modifier
-
-                        } else {
-
-                            Modifier.padding(
-                                bottom = 74.dp
-                            )
-                        }
-                    )
+            modifier = Modifier
+                .fillMaxSize()
+                .then(
+                    if (isVaultPreviewOpen) {
+                        Modifier
+                    } else {
+                        Modifier.padding(
+                            bottom = 74.dp + navigationBarBottomPadding
+                        )
+                    }
+                )
         ) {
-
-            when (
-                selectedTab
-            ) {
-
-                // =================================================
-                // APP LIST
-                // =================================================
-
+            when (selectedTab) {
                 0 -> {
-
                     AppListScreen(
                         context = context
                     )
                 }
 
-
-                // =================================================
-                // VAULT
-                // =================================================
-
                 1 -> {
-
                     VaultScreen(
-
-                        onPreviewStateChange = {
-                                isOpen ->
-
-                            isVaultPreviewOpen =
-                                isOpen
+                        onPreviewStateChange = { isOpen ->
+                            isVaultPreviewOpen = isOpen
                         }
                     )
                 }
 
-
-                // =================================================
-                // SETTINGS
-                // =================================================
-
                 2 -> {
-
                     SettingsScreen(
-
                         onIntruderClick = {
-
                             onIntruderClick()
                         },
-
                         onLanguageClick = {
-
                             onLanguageClick()
                         },
-
                         onResetPasswordClick =
                             onResetPasswordClick
                     )
@@ -437,320 +242,117 @@ fun MainScreen(
             }
         }
 
-
-        // ====================================================
-        // BOTTOM NAVIGATION
-        //
-        // PREVIEW OPEN HO TO HIDE
-        // ====================================================
-
-        if (
-            !isVaultPreviewOpen
-        ) {
-
+        if (!isVaultPreviewOpen) {
             AppLockBottomNavigation(
-
-                selectedTab =
-                    selectedTab,
-
+                selectedTab = selectedTab,
                 onTabSelected = { tab ->
-
-                    selectTab(
-                        tab
-                    )
+                    selectTab(tab)
                 },
-
-                modifier =
-                    Modifier.align(
-                        Alignment.BottomCenter
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .windowInsetsPadding(
+                        WindowInsets.navigationBars
                     )
             )
         }
     }
 }
 
-
-// ============================================================
-// BOTTOM NAVIGATION
-// ============================================================
-
 @Composable
 private fun AppLockBottomNavigation(
-
     selectedTab: Int,
-
-    onTabSelected:
-        (Int) -> Unit,
-
-    modifier: Modifier =
-        Modifier
-
+    onTabSelected: (Int) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-
     Row(
-
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .height(74.dp)
-                .background(
-                    Color.White
-                )
-                .padding(
-                    horizontal = 28.dp,
-                    vertical = 10.dp
-                ),
-
-        horizontalArrangement =
-            Arrangement.SpaceBetween,
-
-        verticalAlignment =
-            Alignment.CenterVertically
+        modifier = modifier
+            .fillMaxWidth()
+            .height(74.dp)
+            .background(Color.White)
+            .padding(
+                horizontal = 28.dp,
+                vertical = 10.dp
+            ),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-
-
-        // ====================================================
-        // APP LIST
-        // ====================================================
-
         BottomNavigationItem(
-
-            selected =
-                selectedTab == 0,
-
-            icon =
-                R.drawable.group6,
-
-            text =
-                stringResource(
-                    R.string.apps_lock
-                ),
-
+            selected = selectedTab == 0,
+            icon = R.drawable.group6,
+            text = stringResource(R.string.apps_lock),
             onClick = {
-
-                onTabSelected(
-                    0
-                )
+                onTabSelected(0)
             }
         )
 
-
-        // ====================================================
-        // VAULT
-        // ====================================================
-
         BottomNavigationItem(
-
-            selected =
-                selectedTab == 1,
-
-            icon =
-                R.drawable.group8,
-
-            text =
-                stringResource(
-                    R.string.vault
-                ),
-
+            selected = selectedTab == 1,
+            icon = R.drawable.group8,
+            text = stringResource(R.string.vault),
             onClick = {
-
-                onTabSelected(
-                    1
-                )
+                onTabSelected(1)
             }
         )
 
-
-        // ====================================================
-        // SETTINGS
-        // ====================================================
-
         BottomNavigationItem(
-
-            selected =
-                selectedTab == 2,
-
-            icon =
-                R.drawable.group7,
-
-            text =
-                stringResource(
-                    R.string.settings
-                ),
-
+            selected = selectedTab == 2,
+            icon = R.drawable.group7,
+            text = stringResource(R.string.settings),
             onClick = {
-
-                onTabSelected(
-                    2
-                )
+                onTabSelected(2)
             }
         )
     }
 }
 
-
-// ============================================================
-// BOTTOM NAVIGATION ITEM
-// ============================================================
-
 @Composable
 private fun BottomNavigationItem(
-
     selected: Boolean,
-
     icon: Int,
-
     text: String,
-
     onClick: () -> Unit
-
 ) {
-
-    val blueColor =
-        Color(0xFF2196F3)
-
-    val grayColor =
-        Color(0xFFBDBDBD)
-
+    val blueColor = Color(0xFF2196F3)
+    val grayColor = Color(0xFFBDBDBD)
 
     Box(
-
-        modifier =
-            Modifier
-                .height(38.dp)
-                .clickable(
-
-                    indication =
-                        null,
-
-                    interactionSource =
-                        remember {
-                            MutableInteractionSource()
-                        }
-
-                ) {
-
-                    onClick()
+        modifier = Modifier
+            .height(38.dp)
+            .clickable(
+                indication = null,
+                interactionSource = remember {
+                    MutableInteractionSource()
                 }
-
-                .background(
-
-                    color =
-                        if (selected) {
-
-                            blueColor
-
-                        } else {
-
-                            Color.Transparent
-                        },
-
-                    shape =
-                        RoundedCornerShape(
-                            22.dp
-                        )
-                )
-
-                .padding(
-
-                    horizontal =
-                        if (selected) {
-
-                            12.dp
-
-                        } else {
-
-                            5.dp
-                        }
-                ),
-
-        contentAlignment =
-            Alignment.Center
+            ) {
+                onClick()
+            }
+            .background(
+                color = if (selected) { blueColor } else { Color.Transparent },
+                shape = RoundedCornerShape(22.dp)
+            )
+            .padding(
+                horizontal = if (selected) { 12.dp } else { 5.dp }),
+        contentAlignment = Alignment.Center
     ) {
-
         Row(
-
-            verticalAlignment =
-                Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically
         ) {
-
-            // =================================================
-            // ICON
-            // =================================================
-
             Image(
-
-                painter =
-                    painterResource(
-                        id = icon
-                    ),
-
-                contentDescription =
-                    text,
-
-                colorFilter =
-                    ColorFilter.tint(
-
-                        if (selected) {
-
-                            Color.White
-
-                        } else {
-
-                            grayColor
-                        }
-                    ),
-
-                modifier =
-                    Modifier
-                        .size(22.dp)
-                        .alpha(
-
-                            if (selected) {
-
-                                1f
-
-                            } else {
-
-                                0.9f
-                            }
-                        )
+                painter = painterResource(id = icon),
+                contentDescription = text,
+                colorFilter = ColorFilter.tint(
+                    if (selected) { Color.White } else { grayColor }),
+                modifier = Modifier
+                    .size(22.dp)
+                    .alpha(if (selected) { 1f } else { 0.9f })
             )
 
-
-            // =================================================
-            // SPACE
-            // =================================================
-
-            Spacer(
-                modifier =
-                    Modifier.width(
-                        5.dp
-                    )
-            )
-
-
-            // =================================================
-            // TEXT
-            // =================================================
+            Spacer(modifier = Modifier.width(5.dp))
 
             Text(
-
-                text =
-                    text,
-
-                color =
-                    if (selected) {
-
-                        Color.White
-
-                    } else {
-
-                        grayColor
-                    },
-
-                fontSize =
-                    12.sp
+                text = text,
+                color = if (selected) { Color.White } else { grayColor },
+                fontSize = 12.sp
             )
         }
     }

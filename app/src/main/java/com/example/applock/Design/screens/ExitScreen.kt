@@ -43,176 +43,87 @@ import androidx.navigation.NavController
 import com.example.applock.R
 
 @Composable
-fun ExitScreen(
-    navController: NavController
-) {
+fun ExitScreen(navController: NavController) {
 
     val context = LocalContext.current
     val activity = context as? Activity
 
-    var selectedRating by remember {
-        mutableIntStateOf(0)
-    }
+    var selectedRating by remember { mutableIntStateOf(0) }
 
-    // ---------------------------------------------------------
-    // ANDROID BACK BUTTON
-    // ---------------------------------------------------------
+    BackHandler { navController.popBackStack() }
 
-    BackHandler {
-        navController.popBackStack()
-    }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
+    Column(modifier = Modifier.fillMaxSize()
             .background(Color.White)
     ) {
 
-        // ---------------------------------------------------------
         // TOP BAR
-        // ---------------------------------------------------------
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
+        Row(modifier = Modifier.fillMaxWidth()
                 .height(72.dp)
                 .padding(horizontal = 16.dp),
-
             verticalAlignment = Alignment.CenterVertically
         ) {
-
             Icon(
                 imageVector = Icons.Default.ArrowBack,
-
-                contentDescription = stringResource(
-                    R.string.exit_screen_back
-                ),
-
+                contentDescription = stringResource(R.string.exit_screen_back),
                 tint = Color(0xFF3D3D3D),
-
                 modifier = Modifier
                     .size(28.dp)
-                    .clickable(
-                        indication = null,
-                        interactionSource = remember {
-                            MutableInteractionSource()
-                        }
-                    ) {
-                        navController.popBackStack()
-                    }
+                    .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) {
+                        navController.popBackStack() }
             )
 
-
-            Spacer(
-                modifier = Modifier.size(18.dp)
-            )
-
+            Spacer(modifier = Modifier.size(18.dp))
 
             Text(
-                text = stringResource(
-                    R.string.exit_screen_title
-                ),
-
+                text = stringResource(R.string.exit_screen_title),
                 fontSize = 24.sp,
-
                 fontWeight = FontWeight.Normal,
-
                 color = Color(0xFF3D3D3D)
             )
         }
 
-
-        // ---------------------------------------------------------
         // CONTENT
-        // ---------------------------------------------------------
 
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
+        Column(modifier = Modifier.fillMaxWidth()
                 .weight(1f)
                 .padding(horizontal = 15.dp),
-
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            Spacer(
-                modifier = Modifier.height(40.dp)
-            )
+            Spacer(modifier = Modifier.height(40.dp))
 
-
-            // -----------------------------------------------------
             // EXIT IMAGE
-            // -----------------------------------------------------
 
             Image(
-                painter = painterResource(
-                    id = R.drawable.exitlock
-                ),
+                painter = painterResource(id = R.drawable.exitlock),
+                contentDescription = stringResource(R.string.exit_image_description),
+                modifier = Modifier.size(200.dp))
 
-                contentDescription = stringResource(
-                    R.string.exit_image_description
-                ),
+            Spacer(modifier = Modifier.height(25.dp))
 
-                modifier = Modifier.size(200.dp)
-            )
-
-
-            Spacer(
-                modifier = Modifier.height(25.dp)
-            )
-
-
-            // -----------------------------------------------------
             // EXIT TITLE
-            // -----------------------------------------------------
 
             Text(
-                text = stringResource(
-                    R.string.exit_app_lock_title
-                ),
-
+                text = stringResource(R.string.exit_app_lock_title),
                 fontSize = 22.sp,
-
                 fontWeight = FontWeight.Bold,
-
                 color = Color(0xFF333333),
-
                 textAlign = TextAlign.Center
             )
 
+            Spacer(modifier = Modifier.height(8.dp))
 
-            Spacer(
-                modifier = Modifier.height(8.dp)
-            )
-
-
-            // -----------------------------------------------------
             // EXIT DESCRIPTION
-            // -----------------------------------------------------
 
             Text(
-                text = stringResource(
-                    R.string.exit_app_lock_description
-                ),
-
+                text = stringResource(R.string.exit_app_lock_description),
                 fontSize = 13.sp,
-
                 lineHeight = 17.sp,
-
                 color = Color(0xFF555555),
+                textAlign = TextAlign.Center)
 
-                textAlign = TextAlign.Center
-            )
-
-
-            Spacer(
-                modifier = Modifier.height(30.dp)
-            )
-
-
-            // -----------------------------------------------------
-            // RATING STARS
-            // -----------------------------------------------------
+            Spacer(modifier = Modifier.height(30.dp))
 
             Row(
                 horizontalArrangement = Arrangement.Center,
@@ -220,219 +131,105 @@ fun ExitScreen(
             ) {
 
                 for (index in 1..5) {
-
-                    Text(
-                        text = if (index <= selectedRating) {
-                            "★"
-                        } else {
-                            "☆"
-                        },
-
+                    Text(text = if (index <= selectedRating) { "★" } else { "☆" },
                         fontSize = 30.sp,
-
-                        color = if (index <= selectedRating) {
-                            Color(0xFF2196F3)
-                        } else {
-                            Color(0xFF3D3D3D)
-                        },
-
+                        color = if (index <= selectedRating) { Color(0xFF2196F3) } else { Color(0xFF3D3D3D) },
                         modifier = Modifier
                             .clickable(
                                 indication = null,
-                                interactionSource = remember {
-                                    MutableInteractionSource()
-                                }
-                            ) {
-                                selectedRating =
-                                    if (selectedRating == index) {
-                                        0
-                                    } else {
-                                        index
-                                    }
-                            }
+                                interactionSource = remember { MutableInteractionSource() }
+                            ) { selectedRating = if (selectedRating == index) { 0 } else { index } }
                             .padding(horizontal = 3.dp)
                     )
                 }
             }
-            Spacer(
-                modifier = Modifier.height(15.dp)
-            )
-            // -----------------------------------------------------
+
+            Spacer(modifier = Modifier.height(15.dp))
+
             // RATING DESCRIPTION
-            // -----------------------------------------------------
 
             Text(
-                text = stringResource(
-                    R.string.exit_rating_description
-                ),
-
+                text = stringResource(R.string.exit_rating_description),
                 fontSize = 13.sp,
-
                 lineHeight = 17.sp,
-
                 color = Color(0xFF555555),
-
                 textAlign = TextAlign.Center
             )
-
 
             Spacer(
                 modifier = Modifier.height(26.dp)
             )
 
-
-            // -----------------------------------------------------
             // STAY PROTECTED
-            // -----------------------------------------------------
 
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
+                modifier = Modifier.fillMaxWidth()
                     .height(51.dp)
-                    .clip(
-                        RoundedCornerShape(14.dp)
-                    )
-                    .background(
-                        Color(0xFF2196F3)
-                    )
-                    .clickable {
-
-                        // Back to exact previous screen
-                        navController.popBackStack()
-                    },
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(Color(0xFF2196F3))
+                    .clickable { navController.popBackStack() },
 
                 contentAlignment = Alignment.Center
             ) {
 
                 Row(
-                    verticalAlignment =
-                        Alignment.CenterVertically,
-
-                    horizontalArrangement =
-                        Arrangement.Center
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
                 ) {
 
                     Image(
-                        painter = painterResource(
-                            id = R.drawable.stay
-                        ),
+                        painter = painterResource(id = R.drawable.stay),
+                        contentDescription = stringResource(R.string.exit_stay_protected_description),
+                        modifier = Modifier.size(19.dp))
 
-                        contentDescription =
-                            stringResource(
-                                R.string.exit_stay_protected_description
-                            ),
-
-                        modifier =
-                            Modifier.size(19.dp)
-                    )
-
-
-                    Spacer(
-                        modifier = Modifier.size(10.dp)
-                    )
-
+                    Spacer(modifier = Modifier.size(10.dp))
 
                     Text(
-                        text = stringResource(
-                            R.string.exit_stay_protected
-                        ),
-
+                        text = stringResource(R.string.exit_stay_protected),
                         fontSize = 15.sp,
-
-                        fontWeight =
-                            FontWeight.SemiBold,
-
+                        fontWeight = FontWeight.SemiBold,
                         color = Color.White
                     )
                 }
             }
 
+            Spacer(modifier = Modifier.height(17.dp))
 
-            Spacer(
-                modifier = Modifier.height(17.dp)
-            )
-
-
-            // -----------------------------------------------------
             // EXIT ANYWAY
-            // -----------------------------------------------------
 
-            Box(
-                modifier = Modifier
+            Box(modifier = Modifier
                     .fillMaxWidth()
                     .height(51.dp)
-                    .clip(
-                        RoundedCornerShape(14.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(Color.White)
+                    .border(width = 1.dp,
+                        color = Color(0xFF2196F3),
+                        shape = RoundedCornerShape(14.dp)
                     )
-                    .background(
-                        Color.White
-                    )
-                    .border(
-                        width = 1.dp,
-
-                        color =
-                            Color(0xFF2196F3),
-
-                        shape =
-                            RoundedCornerShape(14.dp)
-                    )
-                    .clickable {
-
-                        // Completely exit application
-                        activity?.finishAffinity()
-                    },
-
+                    .clickable { activity?.finishAffinity() },
                 contentAlignment = Alignment.Center
             ) {
 
                 Row(
-                    verticalAlignment =
-                        Alignment.CenterVertically,
-
-                    horizontalArrangement =
-                        Arrangement.Center
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
                 ) {
+                    Image(painter = painterResource(id = R.drawable.anyway),
+                        contentDescription = stringResource(R.string.exit_anyway_description),
+                        modifier = Modifier.size(19.dp))
 
-                    Image(
-                        painter = painterResource(
-                            id = R.drawable.anyway
-                        ),
-
-                        contentDescription =
-                            stringResource(
-                                R.string.exit_anyway_description
-                            ),
-
-                        modifier =
-                            Modifier.size(19.dp)
-                    )
-
-
-                    Spacer(
-                        modifier = Modifier.size(10.dp)
-                    )
-
+                    Spacer(modifier = Modifier.size(10.dp))
 
                     Text(
-                        text = stringResource(
-                            R.string.exit_anyway
-                        ),
-
+                        text = stringResource(R.string.exit_anyway),
                         fontSize = 15.sp,
-
-                        fontWeight =
-                            FontWeight.Medium,
-
-                        color =
-                            Color(0xFF2196F3)
+                        fontWeight = FontWeight.Medium,
+                        color = Color(0xFF2196F3)
                     )
                 }
             }
 
-
-            Spacer(
-                modifier = Modifier.height(30.dp)
-            )
+            Spacer(modifier = Modifier.height(30.dp))
         }
     }
 }

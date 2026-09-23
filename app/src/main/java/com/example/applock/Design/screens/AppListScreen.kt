@@ -4,10 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
-import android.net.Uri
-import android.os.Build
-import android.os.PowerManager
-import android.provider.Settings
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -32,7 +28,6 @@ import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 
 import androidx.compose.runtime.*
-
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,10 +39,8 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 
 import androidx.core.graphics.drawable.toBitmap
 
@@ -60,576 +53,229 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
-
-// =====================================================================
-// APP ITEM
-// =====================================================================
-
 data class AppItem(
-
-    val applicationInfo:
-    ApplicationInfo,
-
-    val appName:
-    String,
-
-    val searchName:
-    String,
-
-    val iconBitmap:
-    androidx.compose.ui.graphics.ImageBitmap?
+    val applicationInfo: ApplicationInfo,
+    val appName: String,
+    val searchName: String,
+    val iconBitmap: androidx.compose.ui.graphics.ImageBitmap?
 )
-
-
-// =====================================================================
-// APP LIST CACHE
-// =====================================================================
 
 object AppListCache {
 
     @Volatile
-    private var apps:
-            List<AppItem>? =
-        null
+    private var apps: List<AppItem>? = null
 
+    private val preloadMutex = Mutex()
 
-    private val preloadMutex =
-        Mutex()
-
-
-    fun getApps():
-            List<AppItem>? {
-
+    fun getApps(): List<AppItem>? {
         return apps
     }
 
+    suspend fun preload(context: Context) {
 
-    suspend fun preload(
-        context: Context
-    ) {
-
-        if (
-            apps != null
-        ) {
-
+        if (apps != null) {
             return
         }
 
-
         preloadMutex.withLock {
 
-            if (
-                apps != null
-            ) {
-
+            if (apps != null) {
                 return@withLock
             }
 
-
             try {
+                val appContext = context.applicationContext
 
-                val appContext =
-                    context.applicationContext
+                val result = withContext(Dispatchers.IO) {
 
+                    val pm = appContext.packageManager
 
-                val result =
-                    withContext(
-                        Dispatchers.IO
-                    ) {
+                    val launcherIntent =
+                        Intent(Intent.ACTION_MAIN).apply {
+                            addCategory(Intent.CATEGORY_LAUNCHER)
+                        }
 
-                        val pm =
-                            appContext.packageManager
+                    val launcherApps =
+                        pm.queryIntentActivities(
+                            launcherIntent,
+                            PackageManager.MATCH_ALL
+                        )
 
+                    launcherApps.mapNotNull { resolveInfo ->
 
-                        val launcherIntent =
-                            Intent(
-                                Intent.ACTION_MAIN
-                            ).apply {
+                        try {
 
-                                addCategory(
-                                    Intent.CATEGORY_LAUNCHER
-                                )
+                            val applicationInfo =
+                                resolveInfo.activityInfo?.applicationInfo
+                                    ?: return@mapNotNull null
+
+                            val packageName =
+                                applicationInfo.packageName
+
+                            if (packageName == appContext.packageName) {
+                                return@mapNotNull null
                             }
 
+                            val appName =
+                                resolveInfo.loadLabel(pm).toString()
 
-                        val launcherApps =
-                            pm.queryIntentActivities(
-                                launcherIntent,
-                                PackageManager.MATCH_ALL
-                            )
-
-
-                        launcherApps
-                            .mapNotNull {
-                                    resolveInfo ->
-
+                            val iconBitmap =
                                 try {
-
-                                    val applicationInfo =
-                                        resolveInfo
-                                            .activityInfo
-                                            ?.applicationInfo
-                                            ?: return@mapNotNull null
-
-
-                                    val packageName =
-                                        applicationInfo.packageName
-
-
-                                    if (
-                                        packageName ==
-                                        appContext.packageName
-                                    ) {
-
-                                        return@mapNotNull null
-                                    }
-
-
-                                    val appName =
-                                        resolveInfo
-                                            .loadLabel(
-                                                pm
-                                            )
-                                            .toString()
-
-
-                                    val iconBitmap =
-                                        try {
-
-                                            pm
-                                                .getApplicationIcon(
-                                                    applicationInfo
-                                                )
-                                                .toBitmap(
-                                                    64,
-                                                    64
-                                                )
-                                                .asImageBitmap()
-
-                                        } catch (
-                                            e: Exception
-                                        ) {
-
-                                            null
-                                        }
-
-
-                                    AppItem(
-
-                                        applicationInfo =
-                                            applicationInfo,
-
-                                        appName =
-                                            appName,
-
-                                        searchName =
-                                            appName.lowercase(),
-
-                                        iconBitmap =
-                                            iconBitmap
+                                    pm.getApplicationIcon(
+                                        applicationInfo
                                     )
-
-                                } catch (
-                                    e: Exception
-                                ) {
-
+                                        .toBitmap(64, 64)
+                                        .asImageBitmap()
+                                } catch (e: Exception) {
                                     null
                                 }
-                            }
 
-                            .distinctBy {
+                            AppItem(
+                                applicationInfo = applicationInfo,
+                                appName = appName,
+                                searchName = appName.lowercase(),
+                                iconBitmap = iconBitmap
+                            )
 
-                                it.applicationInfo
-                                    .packageName
-                            }
-
-                            .sortedBy {
-
-                                it.searchName
-                            }
+                        } catch (e: Exception) {
+                            null
+                        }
                     }
+                        .distinctBy {
+                            it.applicationInfo.packageName
+                        }
+                        .sortedBy {
+                            it.searchName
+                        }
+                }
 
+                apps = result
 
-                apps =
-                    result
-
-            } catch (
-                e: Exception
-            ) {
-
+            } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
     }
 
-
     fun updateIcon(
         packageName: String,
-        icon:
-        androidx.compose.ui.graphics.ImageBitmap
+        icon: androidx.compose.ui.graphics.ImageBitmap
     ) {
+        val currentApps = apps ?: return
 
-        val currentApps =
-            apps ?: return
+        apps = currentApps.map { appItem ->
 
-
-        apps =
-            currentApps.map {
-                    appItem ->
-
-                if (
-                    appItem
-                        .applicationInfo
-                        .packageName ==
-                    packageName
-                ) {
-
-                    appItem.copy(
-                        iconBitmap =
-                            icon
-                    )
-
-                } else {
-
-                    appItem
-                }
+            if (
+                appItem.applicationInfo.packageName ==
+                packageName
+            ) {
+                appItem.copy(
+                    iconBitmap = icon
+                )
+            } else {
+                appItem
             }
-    }
-
-
-    fun clear() {
-
-        apps =
-            null
-    }
-}
-
-
-// =====================================================================
-// BATTERY OPTIMIZATION CHECK
-// =====================================================================
-
-private fun isBatteryOptimizationIgnored(
-    context: Context
-): Boolean {
-
-    if (
-        Build.VERSION.SDK_INT <
-        Build.VERSION_CODES.M
-    ) {
-
-        return true
-    }
-
-
-    return try {
-
-        val powerManager =
-            context.getSystemService(
-                Context.POWER_SERVICE
-            ) as PowerManager
-
-
-        powerManager.isIgnoringBatteryOptimizations(
-            context.packageName
-        )
-
-    } catch (
-        e: Exception
-    ) {
-
-        e.printStackTrace()
-
-        false
-    }
-}
-
-
-// =====================================================================
-// OPEN BATTERY OPTIMIZATION
-// =====================================================================
-
-private fun openBatteryOptimizationSettings(
-    context: Context
-) {
-
-    if (
-        Build.VERSION.SDK_INT <
-        Build.VERSION_CODES.M
-    ) {
-
-        return
-    }
-
-
-    try {
-
-        val intent =
-            Intent(
-                Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
-
-                Uri.parse(
-                    "package:${context.packageName}"
-                )
-            )
-
-
-        context.startActivity(
-            intent
-        )
-
-    } catch (
-        e: Exception
-    ) {
-
-        e.printStackTrace()
-
-
-        try {
-
-            context.startActivity(
-                Intent(
-                    Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS
-                )
-            )
-
-        } catch (
-            e2: Exception
-        ) {
-
-            e2.printStackTrace()
         }
     }
+
+    fun clear() {
+        apps = null
+    }
 }
-
-
-// =====================================================================
-// APP LIST SCREEN
-// =====================================================================
 
 @Composable
 fun AppListScreen(
     context: Context
 ) {
-
     val appContext =
         remember {
             context.applicationContext
         }
 
-
     val scope =
         rememberCoroutineScope()
 
-
     val dataStore =
         remember {
-            DataStoreManager(
-                appContext
-            )
+            DataStoreManager(appContext)
         }
 
-
-    // ================================================================
-    // TAB
-    // ================================================================
-
-    var selectedTab by
-    remember {
+    var selectedTab by remember {
         mutableStateOf(0)
     }
 
-
-    // ================================================================
-    // SEARCH
-    // ================================================================
-
-    var searchText by
-    remember {
+    var searchText by remember {
         mutableStateOf("")
     }
 
-
-    // ================================================================
-    // APPS
-    // ================================================================
-
-    var apps by
-    remember {
-
+    var apps by remember {
         mutableStateOf(
-            AppListCache
-                .getApps()
-                ?: emptyList()
+            AppListCache.getApps() ?: emptyList()
         )
     }
-
-
-    // ================================================================
-    // BATTERY DIALOG
-    // ================================================================
-
-    var showBatteryOptimizationDialog by
-    remember {
-        mutableStateOf(false)
-    }
-
-
-    // ================================================================
-    // IMPORTANT:
-    //
-    // This flag belongs to the current AppListScreen session.
-    //
-    // First lock:
-    //      dialog
-    //
-    // Second lock:
-    //      no dialog
-    //
-    // AppListScreen destroyed and opened again:
-    //      flag becomes false again
-    // ================================================================
-
-    var batteryDialogShownThisSession by
-    remember {
-        mutableStateOf(false)
-    }
-
-
-    // ================================================================
-    // APP WAITING TO BE LOCKED
-    // ================================================================
-
-    var pendingPackageName by
-    remember {
-        mutableStateOf<String?>(null)
-    }
-
-
-    // ================================================================
-    // PRELOAD
-    // ================================================================
 
     LaunchedEffect(Unit) {
 
         val cachedApps =
-            AppListCache
-                .getApps()
+            AppListCache.getApps()
 
+        if (cachedApps != null) {
 
-        if (
-            cachedApps != null
-        ) {
-
-            apps =
-                cachedApps
+            apps = cachedApps
 
         } else {
 
-            AppListCache.preload(
-                appContext
-            )
+            AppListCache.preload(appContext)
 
-
-            AppListCache
-                .getApps()
-                ?.let { loadedApps ->
-
-                    apps =
-                        loadedApps
-                }
+            AppListCache.getApps()?.let { loadedApps ->
+                apps = loadedApps
+            }
         }
     }
 
-
-    // ================================================================
-    // LOCKED APPS
-    // ================================================================
-
     val lockedApps by
-    dataStore
-        .lockedAppsFlow
-        .collectAsState(
-            initial =
-                emptySet()
-        )
-
-
-    // ================================================================
-    // SEARCH
-    // ================================================================
+    dataStore.lockedAppsFlow.collectAsState(
+        initial = emptySet()
+    )
 
     val normalizedSearch =
-        remember(
-            searchText
-        ) {
-
-            searchText
-                .trim()
-                .lowercase()
+        remember(searchText) {
+            searchText.trim().lowercase()
         }
-
-
-    // ================================================================
-    // FILTER
-    // ================================================================
 
     val filteredApps =
         remember(
-
             apps,
-
             lockedApps,
-
             selectedTab,
-
             normalizedSearch
-
         ) {
 
             val tabApps =
+                if (selectedTab == 0) {
 
-                if (
-                    selectedTab == 0
-                ) {
-
-                    apps.filter {
-                            appItem ->
-
+                    apps.filter { appItem ->
                         !lockedApps.contains(
-
-                            appItem
-                                .applicationInfo
-                                .packageName
+                            appItem.applicationInfo.packageName
                         )
                     }
 
                 } else {
 
-                    apps.filter {
-                            appItem ->
-
+                    apps.filter { appItem ->
                         lockedApps.contains(
-
-                            appItem
-                                .applicationInfo
-                                .packageName
+                            appItem.applicationInfo.packageName
                         )
                     }
                 }
 
-
-            if (
-                normalizedSearch.isEmpty()
-            ) {
+            if (normalizedSearch.isEmpty()) {
 
                 tabApps
 
             } else {
 
-                tabApps.filter {
-                        appItem ->
-
+                tabApps.filter { appItem ->
                     appItem.searchName.contains(
                         normalizedSearch
                     )
@@ -637,497 +283,261 @@ fun AppListScreen(
             }
         }
 
-
-    // ================================================================
-    // MAIN
-    // ================================================================
-
     Column(
-
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .background(
-                    Color(0xFFF7F7F7)
-                )
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                Color(0xFFF7F7F7)
+            )
     ) {
 
-
-        // ============================================================
-        // TITLE
-        // ============================================================
-
         Row(
-
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        start = 20.dp,
-                        top = 15.dp
-                    ),
-
-            verticalAlignment =
-                Alignment.CenterVertically
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    start = 20.dp,
+                    top = 15.dp
+                ),
+            verticalAlignment = Alignment.CenterVertically
         ) {
 
             Image(
-
-                painter =
-                    painterResource(
-                        R.drawable.applock
-                    ),
-
-                contentDescription =
-                    null,
-
-                modifier =
-                    Modifier.size(
-                        24.dp
-                    )
+                painter = painterResource(
+                    R.drawable.applock
+                ),
+                contentDescription = null,
+                modifier = Modifier.size(24.dp)
             )
-
 
             Spacer(
-                modifier =
-                    Modifier.width(
-                        8.dp
-                    )
+                modifier = Modifier.width(8.dp)
             )
 
-
             Text(
-
-                text =
-                    stringResource(
-                        R.string.app_lock
-                    ),
-
-                color =
-                    Color.Black,
-
-                fontSize =
-                    20.sp
+                text = stringResource(
+                    R.string.app_lock
+                ),
+                color = Color.Black,
+                fontSize = 20.sp
             )
         }
 
-
-        // ============================================================
-        // TABS
-        // ============================================================
-
         TabRow(
+            selectedTabIndex = selectedTab,
+            containerColor = Color(0xFFF7F7F7),
+            contentColor = Color(0xFF0396FF),
+            modifier = Modifier.padding(
+                top = 18.dp
+            ),
+            indicator = { tabPositions ->
 
-            selectedTabIndex =
-                selectedTab,
-
-            containerColor =
-                Color(0xFFF7F7F7),
-
-            contentColor =
-                Color(0xFF0396FF),
-
-            modifier =
-                Modifier.padding(
-                    top = 18.dp
-                ),
-
-            indicator = {
-                    tabPositions ->
-
-                if (
-                    selectedTab <
-                    tabPositions.size
-                ) {
+                if (selectedTab < tabPositions.size) {
 
                     TabRowDefaults.Indicator(
-
                         modifier =
                             Modifier.tabIndicatorOffset(
-                                tabPositions[
-                                    selectedTab
-                                ]
+                                tabPositions[selectedTab]
                             ),
-
-                        color =
-                            Color(0xFF0396FF),
-
-                        height =
-                            2.dp
+                        color = Color(0xFF0396FF),
+                        height = 2.dp
                     )
                 }
             }
         ) {
 
-
-            // ========================================================
-            // UNLOCKED
-            // ========================================================
-
             Tab(
-
-                selected =
-                    selectedTab == 0,
-
+                selected = selectedTab == 0,
                 onClick = {
-
-                    selectedTab =
-                        0
+                    selectedTab = 0
                 },
-
-                modifier =
-                    Modifier.height(
-                        42.dp
-                    )
+                modifier = Modifier.height(42.dp)
             ) {
 
                 Row(
-
                     verticalAlignment =
                         Alignment.CenterVertically,
-
                     horizontalArrangement =
                         Arrangement.Center
                 ) {
 
                     Image(
-
-                        painter =
-                            painterResource(
-                                R.drawable.unlock
-                            ),
-
+                        painter = painterResource(
+                            R.drawable.unlock
+                        ),
                         contentDescription =
                             stringResource(
                                 R.string.unlocked
                             ),
-
                         colorFilter =
                             ColorFilter.tint(
-
-                                if (
-                                    selectedTab == 0
-                                ) {
-
-                                    Color(
-                                        0xFF0396FF
-                                    )
-
+                                if (selectedTab == 0) {
+                                    Color(0xFF0396FF)
                                 } else {
-
-                                    Color(
-                                        0xFFBDBDBD
-                                    )
+                                    Color(0xFFBDBDBD)
                                 }
                             ),
-
                         modifier =
-                            Modifier.size(
-                                18.dp
-                            )
+                            Modifier.size(18.dp)
                     )
-
 
                     Spacer(
-                        modifier =
-                            Modifier.width(
-                                5.dp
-                            )
+                        modifier = Modifier.width(5.dp)
                     )
 
-
                     Text(
-
-                        text =
-                            stringResource(
-                                R.string.unlocked
-                            ),
-
+                        text = stringResource(
+                            R.string.unlocked
+                        ),
                         color =
-                            if (
-                                selectedTab == 0
-                            ) {
-
-                                Color(
-                                    0xFF0396FF
-                                )
-
+                            if (selectedTab == 0) {
+                                Color(0xFF0396FF)
                             } else {
-
-                                Color(
-                                    0xFFBDBDBD
-                                )
+                                Color(0xFFBDBDBD)
                             },
-
-                        fontSize =
-                            16.sp
+                        fontSize = 16.sp
                     )
                 }
             }
 
-
-            // ========================================================
-            // LOCKED
-            // ========================================================
-
             Tab(
-
-                selected =
-                    selectedTab == 1,
-
+                selected = selectedTab == 1,
                 onClick = {
-
-                    selectedTab =
-                        1
+                    selectedTab = 1
                 },
-
-                modifier =
-                    Modifier.height(
-                        42.dp
-                    )
+                modifier = Modifier.height(42.dp)
             ) {
 
                 Row(
-
                     verticalAlignment =
                         Alignment.CenterVertically,
-
                     horizontalArrangement =
                         Arrangement.Center
                 ) {
 
                     Image(
-
-                        painter =
-                            painterResource(
-                                R.drawable.locked
-                            ),
-
+                        painter = painterResource(
+                            R.drawable.locked
+                        ),
                         contentDescription =
                             stringResource(
                                 R.string.locked
                             ),
-
                         colorFilter =
                             ColorFilter.tint(
-
-                                if (
-                                    selectedTab == 1
-                                ) {
-
-                                    Color(
-                                        0xFF0396FF
-                                    )
-
+                                if (selectedTab == 1) {
+                                    Color(0xFF0396FF)
                                 } else {
-
-                                    Color(
-                                        0xFFBDBDBD
-                                    )
+                                    Color(0xFFBDBDBD)
                                 }
                             ),
-
                         modifier =
-                            Modifier.size(
-                                18.dp
-                            )
+                            Modifier.size(18.dp)
                     )
-
 
                     Spacer(
-                        modifier =
-                            Modifier.width(
-                                5.dp
-                            )
+                        modifier = Modifier.width(5.dp)
                     )
 
-
                     Text(
-
-                        text =
-                            stringResource(
-                                R.string.locked
-                            ),
-
+                        text = stringResource(
+                            R.string.locked
+                        ),
                         color =
-                            if (
-                                selectedTab == 1
-                            ) {
-
-                                Color(
-                                    0xFF0396FF
-                                )
-
+                            if (selectedTab == 1) {
+                                Color(0xFF0396FF)
                             } else {
-
-                                Color(
-                                    0xFFBDBDBD
-                                )
+                                Color(0xFFBDBDBD)
                             },
-
-                        fontSize =
-                            16.sp
+                        fontSize = 16.sp
                     )
                 }
             }
         }
 
-
-        // ============================================================
-        // SEARCH
-        // ============================================================
-
         Box(
-
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(
-
-                        start =
-                            14.dp,
-
-                        end =
-                            14.dp,
-
-                        top =
-                            15.dp
-                    )
-                    .height(
-                        39.dp
-                    )
-                    .clip(
-                        RoundedCornerShape(
-                            22.dp
-                        )
-                    )
-                    .background(
-                        Color(0xFFF7F7F7)
-                    )
-                    .border(
-
-                        width =
-                            2.dp,
-
-                        color =
-                            Color.White,
-
-                        shape =
-                            RoundedCornerShape(
-                                22.dp
-                            )
-                    )
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    start = 14.dp,
+                    end = 14.dp,
+                    top = 15.dp
+                )
+                .height(39.dp)
+                .clip(
+                    RoundedCornerShape(22.dp)
+                )
+                .background(
+                    Color(0xFFF7F7F7)
+                )
+                .border(
+                    width = 2.dp,
+                    color = Color.White,
+                    shape = RoundedCornerShape(22.dp)
+                )
         ) {
 
             Row(
-
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .padding(
-                            start = 12.dp,
-                            end = 12.dp
-                        ),
-
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(
+                        start = 12.dp,
+                        end = 12.dp
+                    ),
                 verticalAlignment =
                     Alignment.CenterVertically
             ) {
 
                 Icon(
-
-                    imageVector =
-                        Icons.Default.Search,
-
+                    imageVector = Icons.Default.Search,
                     contentDescription =
                         stringResource(
                             R.string.search
                         ),
-
-                    tint =
-                        Color(0xFFBDBDBD),
-
-                    modifier =
-                        Modifier.size(
-                            19.dp
-                        )
+                    tint = Color(0xFFBDBDBD),
+                    modifier = Modifier.size(19.dp)
                 )
-
 
                 Spacer(
-                    modifier =
-                        Modifier.width(
-                            8.dp
-                        )
+                    modifier = Modifier.width(8.dp)
                 )
 
-
                 BasicTextField(
-
-                    value =
-                        searchText,
-
+                    value = searchText,
                     onValueChange = {
-
-                        searchText =
-                            it
+                        searchText = it
                     },
-
-                    singleLine =
-                        true,
-
-                    textStyle =
-                        TextStyle(
-
-                            color =
-                                Color(0xFF555555),
-
-                            fontSize =
-                                14.sp
-                        ),
-
+                    singleLine = true,
+                    textStyle = TextStyle(
+                        color = Color(0xFF555555),
+                        fontSize = 14.sp
+                    ),
                     cursorBrush =
                         SolidColor(
                             Color(0xFF0396FF)
                         ),
-
-                    modifier =
-                        Modifier
-                            .weight(1f)
-                            .fillMaxHeight(),
-
-                    decorationBox = {
-                            innerTextField ->
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight(),
+                    decorationBox = { innerTextField ->
 
                         Box(
-
-                            modifier =
-                                Modifier.fillMaxSize(),
-
+                            modifier = Modifier
+                                .fillMaxSize(),
                             contentAlignment =
                                 Alignment.CenterStart
                         ) {
 
-                            if (
-                                searchText.isEmpty()
-                            ) {
+                            if (searchText.isEmpty()) {
 
                                 Text(
-
-                                    text =
-                                        stringResource(
-                                            R.string.search
-                                        ),
-
+                                    text = stringResource(
+                                        R.string.search
+                                    ),
                                     color =
-                                        Color(
-                                            0xFFBDBDBD
-                                        ),
-
-                                    fontSize =
-                                        14.sp
+                                        Color(0xFFBDBDBD),
+                                    fontSize = 14.sp
                                 )
                             }
-
 
                             innerTextField()
                         }
@@ -1136,58 +546,26 @@ fun AppListScreen(
             }
         }
 
-
         Spacer(
-            modifier =
-                Modifier.height(
-                    10.dp
-                )
+            modifier = Modifier.height(10.dp)
         )
-
-
-        // ============================================================
-        // GENERAL
-        // ============================================================
 
         Text(
-
-            text =
-                stringResource(
-                    R.string.general
-                ),
-
-            color =
-                Color(0xFF878585),
-
-            fontSize =
-                14.sp,
-
-            modifier =
-                Modifier.padding(
-
-                    start =
-                        18.dp,
-
-                    top =
-                        7.dp,
-
-                    bottom =
-                        3.dp
-                )
+            text = stringResource(
+                R.string.general
+            ),
+            color = Color(0xFF878585),
+            fontSize = 14.sp,
+            modifier = Modifier.padding(
+                start = 18.dp,
+                top = 7.dp,
+                bottom = 3.dp
+            )
         )
-
 
         Spacer(
-            modifier =
-                Modifier.height(
-                    18.dp
-                )
+            modifier = Modifier.height(18.dp)
         )
-
-
-        // ============================================================
-        // EMPTY LOCKED
-        // ============================================================
 
         if (
             selectedTab == 1 &&
@@ -1195,682 +573,206 @@ fun AppListScreen(
         ) {
 
             Column(
-
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
-
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .navigationBarsPadding(),
                 horizontalAlignment =
                     Alignment.CenterHorizontally,
-
                 verticalArrangement =
                     Arrangement.Center
             ) {
 
                 Image(
-
                     painter =
                         painterResource(
                             R.drawable.applistlock
                         ),
-
-                    contentDescription =
-                        null,
-
+                    contentDescription = null,
                     modifier =
-                        Modifier.size(
-                            90.dp
-                        )
+                        Modifier.size(90.dp)
                 )
-
 
                 Spacer(
-                    modifier =
-                        Modifier.height(
-                            12.dp
-                        )
+                    modifier = Modifier.height(12.dp)
                 )
 
-
                 Text(
-
-                    text =
-                        "No locked app found",
-
-                    color =
-                        Color(0xFF878585),
-
-                    fontSize =
-                        15.sp
+                    text = "No locked app found",
+                    color = Color(0xFF878585),
+                    fontSize = 15.sp
                 )
             }
 
         } else {
 
-
-            // ========================================================
-            // APP LIST
-            // ========================================================
-
             LazyColumn(
-
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
-
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
                 verticalArrangement =
-                    Arrangement.spacedBy(
-                        10.dp
-                    ),
-
+                    Arrangement.spacedBy(10.dp),
                 contentPadding =
                     PaddingValues(
-
-                        start =
-                            14.dp,
-
-                        end =
-                            14.dp,
-
-                        top =
-                            4.dp,
-
-                        bottom =
-                            16.dp
+                        start = 14.dp,
+                        end = 14.dp,
+                        top = 4.dp,
+                        bottom = 16.dp
                     )
             ) {
 
                 items(
-
-                    items =
-                        filteredApps,
-
+                    items = filteredApps,
                     key = {
                             appItem ->
-
-                        appItem
-                            .applicationInfo
-                            .packageName
+                        appItem.applicationInfo.packageName
                     }
-
-                ) {
-                        appItem ->
-
+                ) { appItem ->
 
                     val appName =
                         appItem.appName
 
-
                     val packageName =
-                        appItem
-                            .applicationInfo
-                            .packageName
-
+                        appItem.applicationInfo.packageName
 
                     val isLocked =
                         lockedApps.contains(
                             packageName
                         )
 
-
                     val cardShape =
-                        RoundedCornerShape(
-                            12.dp
-                        )
-
-
-                    // =================================================
-                    // APP CARD
-                    // =================================================
+                        RoundedCornerShape(12.dp)
 
                     Card(
-
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .shadow(
-
-                                    elevation =
-                                        5.dp,
-
-                                    shape =
-                                        cardShape,
-
-                                    clip =
-                                        false,
-
-                                    ambientColor =
-                                        Color.Black.copy(
-                                            alpha =
-                                                0.10f
-                                        ),
-
-                                    spotColor =
-                                        Color.Black.copy(
-                                            alpha =
-                                                0.10f
-                                        )
-                                )
-                                .clip(
-                                    cardShape
-                                ),
-
-                        shape =
-                            cardShape,
-
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .shadow(
+                                elevation = 5.dp,
+                                shape = cardShape,
+                                clip = false,
+                                ambientColor =
+                                    Color.Black.copy(
+                                        alpha = 0.10f
+                                    ),
+                                spotColor =
+                                    Color.Black.copy(
+                                        alpha = 0.10f
+                                    )
+                            )
+                            .clip(cardShape),
+                        shape = cardShape,
                         colors =
                             CardDefaults.cardColors(
-
                                 containerColor =
                                     Color.White
                             ),
-
                         elevation =
                             CardDefaults.cardElevation(
-
-                                defaultElevation =
-                                    2.dp,
-
-                                pressedElevation =
-                                    1.dp
+                                defaultElevation = 2.dp,
+                                pressedElevation = 1.dp
                             )
                     ) {
 
-
                         Row(
-
-                            modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .height(
-                                        58.dp
-                                    )
-                                    .padding(
-
-                                        start =
-                                            12.dp,
-
-                                        end =
-                                            10.dp
-                                    ),
-
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(58.dp)
+                                .padding(
+                                    start = 12.dp,
+                                    end = 10.dp
+                                ),
                             verticalAlignment =
                                 Alignment.CenterVertically
                         ) {
-
-
-                            // =========================================
-                            // ICON
-                            // =========================================
 
                             if (
                                 appItem.iconBitmap != null
                             ) {
 
                                 Image(
-
                                     bitmap =
                                         appItem.iconBitmap,
-
-                                    contentDescription =
-                                        null,
-
+                                    contentDescription = null,
                                     modifier =
-                                        Modifier.size(
-                                            32.dp
-                                        )
+                                        Modifier.size(32.dp)
                                 )
 
                             } else {
 
                                 Spacer(
                                     modifier =
-                                        Modifier.size(
-                                            32.dp
-                                        )
+                                        Modifier.size(32.dp)
                                 )
                             }
 
-
                             Spacer(
                                 modifier =
-                                    Modifier.width(
-                                        18.dp
-                                    )
+                                    Modifier.width(18.dp)
                             )
-
-
-                            // =========================================
-                            // NAME
-                            // =========================================
 
                             Text(
-
-                                text =
-                                    appName,
-
+                                text = appName,
                                 modifier =
-                                    Modifier.weight(
-                                        1f
-                                    ),
-
+                                    Modifier.weight(1f),
                                 color =
                                     Color(0xFF555555),
-
-                                fontSize =
-                                    15.sp,
-
-                                maxLines =
-                                    1
+                                fontSize = 15.sp,
+                                maxLines = 1
                             )
 
-
-                            // =========================================
-                            // LOCK / UNLOCK
-                            // =========================================
-
                             IconButton(
-
                                 onClick = {
 
-                                    if (
-                                        isLocked
-                                    ) {
-
-                                        // =============================
-                                        // UNLOCK
-                                        // =============================
+                                    if (isLocked) {
 
                                         scope.launch {
-
-                                            dataStore
-                                                .removeLockedApp(
-                                                    packageName
-                                                )
+                                            dataStore.removeLockedApp(
+                                                packageName
+                                            )
                                         }
 
                                     } else {
 
-                                        // =============================
-                                        // LOCK
-                                        // =============================
-
-                                        val batteryOptimizationIgnored =
-                                            isBatteryOptimizationIgnored(
-                                                appContext
-                                            )
-
-
-                                        if (
-                                            !batteryDialogShownThisSession &&
-                                            !batteryOptimizationIgnored
-                                        ) {
-
-                                            // =========================
-                                            // SHOW BATTERY DIALOG
-                                            // =========================
-
-                                            pendingPackageName =
+                                        scope.launch {
+                                            dataStore.saveLockedApp(
                                                 packageName
-
-                                            showBatteryOptimizationDialog =
-                                                true
-
-                                        } else {
-
-                                            // =========================
-                                            // DIRECT LOCK
-                                            // =========================
-
-                                            scope.launch {
-
-                                                dataStore
-                                                    .saveLockedApp(
-                                                        packageName
-                                                    )
-                                            }
+                                            )
                                         }
                                     }
                                 },
-
                                 modifier =
-                                    Modifier.size(
-                                        30.dp
-                                    )
+                                    Modifier.size(30.dp)
                             ) {
 
                                 Image(
-
                                     painter =
                                         painterResource(
-
                                             id =
-                                                if (
-                                                    isLocked
-                                                ) {
-
+                                                if (isLocked) {
                                                     R.drawable.locked
-
                                                 } else {
-
                                                     R.drawable.unlock
                                                 }
                                         ),
-
                                     contentDescription =
-
-                                        if (
-                                            isLocked
-                                        ) {
-
+                                        if (isLocked) {
                                             stringResource(
-
                                                 R.string.unlock_app,
-
                                                 appName
                                             )
-
                                         } else {
-
                                             stringResource(
-
                                                 R.string.lock_app,
-
                                                 appName
                                             )
                                         },
-
                                     modifier =
-                                        Modifier.size(
-                                            21.dp
-                                        )
+                                        Modifier.size(21.dp)
                                 )
                             }
                         }
                     }
                 }
-            }
-        }
-    }
-
-
-    // =================================================================
-    // BATTERY OPTIMIZATION DIALOG
-    // =================================================================
-
-    if (
-        showBatteryOptimizationDialog
-    ) {
-
-        BatteryOptimizationDialog(
-
-            onAllow = {
-
-                showBatteryOptimizationDialog =
-                    false
-
-
-                // IMPORTANT:
-                // Dialog has been shown for this
-                // AppList session.
-
-                batteryDialogShownThisSession =
-                    true
-
-
-                // Lock the requested app immediately.
-
-                pendingPackageName?.let {
-                        packageName ->
-
-                    scope.launch {
-
-                        dataStore
-                            .saveLockedApp(
-                                packageName
-                            )
-                    }
-                }
-
-
-                pendingPackageName =
-                    null
-
-
-                // Open Android battery settings.
-
-                openBatteryOptimizationSettings(
-                    appContext
-                )
-            },
-
-
-            onDeny = {
-
-                showBatteryOptimizationDialog =
-                    false
-
-
-                // IMPORTANT:
-                // Even if user denies,
-                // don't show it again in this
-                // AppList session.
-
-                batteryDialogShownThisSession =
-                    true
-
-
-                // Lock anyway.
-
-                pendingPackageName?.let {
-                        packageName ->
-
-                    scope.launch {
-
-                        dataStore
-                            .saveLockedApp(
-                                packageName
-                            )
-                    }
-                }
-
-
-                pendingPackageName =
-                    null
-            }
-        )
-    }
-}
-
-
-// =====================================================================
-// BATTERY OPTIMIZATION DIALOG
-// =====================================================================
-
-@Composable
-private fun BatteryOptimizationDialog(
-    onAllow: () -> Unit,
-    onDeny: () -> Unit
-) {
-
-    Dialog(
-        onDismissRequest = {
-
-            // Treat outside/back dismissal
-            // exactly like Deny.
-
-            onDeny()
-        }
-    ) {
-
-        Column(
-
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .background(
-
-                        Color.White,
-
-                        RoundedCornerShape(
-                            20.dp
-                        )
-                    )
-                    .padding(
-
-                        horizontal =
-                            24.dp,
-
-                        vertical =
-                            24.dp
-                    )
-        ) {
-
-            // =========================================================
-            // TITLE
-            // =========================================================
-
-            Text(
-
-                text =
-                    "Battery Optimization",
-
-                color =
-                    Color(0xFF333333),
-
-                fontSize =
-                    20.sp,
-
-                modifier =
-                    Modifier.fillMaxWidth(),
-
-                textAlign =
-                    TextAlign.Center
-            )
-
-
-            Spacer(
-                modifier =
-                    Modifier.height(
-                        14.dp
-                    )
-            )
-
-
-            // =========================================================
-            // DESCRIPTION
-            // =========================================================
-
-            Text(
-
-                text =
-                    "Allow AppLock to run without battery optimization so your locked apps can be protected reliably in the background.",
-
-                color =
-                    Color(0xFF777777),
-
-                fontSize =
-                    14.sp,
-
-                lineHeight =
-                    20.sp,
-
-                modifier =
-                    Modifier.fillMaxWidth(),
-
-                textAlign =
-                    TextAlign.Center
-            )
-
-
-            Spacer(
-                modifier =
-                    Modifier.height(
-                        24.dp
-                    )
-            )
-
-
-            // =========================================================
-            // BUTTONS
-            // =========================================================
-
-            Row(
-
-                modifier =
-                    Modifier.fillMaxWidth(),
-
-                horizontalArrangement =
-                    Arrangement.End,
-
-                verticalAlignment =
-                    Alignment.CenterVertically
-            ) {
-
-                Text(
-
-                    text =
-                        "Deny",
-
-                    color =
-                        Color(0xFF2196F3),
-
-                    fontSize =
-                        15.sp,
-
-                    modifier =
-                        Modifier
-                            .clickable {
-
-                                onDeny()
-                            }
-                            .padding(
-
-                                horizontal =
-                                    14.dp,
-
-                                vertical =
-                                    10.dp
-                            )
-                )
-
-
-                Spacer(
-                    modifier =
-                        Modifier.width(
-                            8.dp
-                        )
-                )
-
-
-                Text(
-
-                    text =
-                        "Allow",
-
-                    color =
-                        Color(0xFF2196F3),
-
-                    fontSize =
-                        15.sp,
-
-                    modifier =
-                        Modifier
-                            .clickable {
-
-                                onAllow()
-                            }
-                            .padding(
-
-                                horizontal =
-                                    14.dp,
-
-                                vertical =
-                                    10.dp
-                            )
-                )
             }
         }
     }
