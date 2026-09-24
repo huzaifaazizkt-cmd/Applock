@@ -9,6 +9,7 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
 import android.view.Gravity
+import android.view.WindowManager
 import android.widget.TextView
 import android.widget.Toast
 
@@ -28,13 +29,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,10 +50,14 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.DialogWindowProvider
 
 import com.example.applock.Design.components.NumberPad
 import com.example.applock.R
@@ -1231,8 +1237,7 @@ fun UnlockScreen(
             showForgotPasswordDialog
         ) {
 
-            AlertDialog(
-
+            Dialog(
                 onDismissRequest = {
 
                     if (
@@ -1250,19 +1255,99 @@ fun UnlockScreen(
                     }
                 },
 
-                title = {
+                properties =
+                    DialogProperties(
+                        dismissOnBackPress =
+                            !checkingSecurityQuestion,
 
-                    Text(
-                        text =
-                            stringResource(
-                                R.string.security_question
-                            )
+                        dismissOnClickOutside =
+                            !checkingSecurityQuestion,
+
+                        usePlatformDefaultWidth =
+                            true
                     )
-                },
+            ) {
 
-                text = {
+                // =================================================
+                // IMPORTANT:
+                // Keyboard open hone par dialog resize nahi hoga
+                // =================================================
 
-                    Column {
+                val dialogWindow =
+                    (
+                            LocalView.current.parent
+                                    as? DialogWindowProvider
+                            )?.window
+
+                DisposableEffect(
+                    dialogWindow
+                ) {
+
+                    dialogWindow?.setSoftInputMode(
+                        WindowManager
+                            .LayoutParams
+                            .SOFT_INPUT_ADJUST_NOTHING
+                    )
+
+                    onDispose {
+
+                        dialogWindow?.setSoftInputMode(
+                            WindowManager
+                                .LayoutParams
+                                .SOFT_INPUT_ADJUST_RESIZE
+                        )
+                    }
+                }
+
+
+                Surface(
+
+                    shape =
+                        androidx.compose.material3
+                            .MaterialTheme
+                            .shapes
+                            .extraLarge,
+
+                    color =
+                        androidx.compose.material3
+                            .MaterialTheme
+                            .colorScheme
+                            .surface,
+
+                    tonalElevation =
+                        6.dp
+                ) {
+
+                    Column(
+                        modifier =
+                            Modifier
+                                .padding(
+                                    24.dp
+                                )
+                    ) {
+
+                        Text(
+                            text =
+                                stringResource(
+                                    R.string.security_question
+                                ),
+
+                            style =
+                                androidx.compose.material3
+                                    .MaterialTheme
+                                    .typography
+                                    .headlineSmall,
+
+                            fontWeight =
+                                FontWeight.SemiBold
+                        )
+
+                        Spacer(
+                            modifier =
+                                Modifier.height(
+                                    16.dp
+                                )
+                        )
 
                         Text(
                             text =
@@ -1277,7 +1362,9 @@ fun UnlockScreen(
 
                         Spacer(
                             modifier =
-                                Modifier.height(16.dp)
+                                Modifier.height(
+                                    16.dp
+                                )
                         )
 
                         TextField(
@@ -1297,6 +1384,9 @@ fun UnlockScreen(
                             singleLine =
                                 true,
 
+                            enabled =
+                                !checkingSecurityQuestion,
+
                             placeholder = {
 
                                 Text(
@@ -1306,7 +1396,9 @@ fun UnlockScreen(
                                         ),
 
                                     color =
-                                        Color(0xFF7B7B7B)
+                                        Color(
+                                            0xFF7B7B7B
+                                        )
                                 )
                             },
 
@@ -1328,7 +1420,11 @@ fun UnlockScreen(
 
                                     errorContainerColor =
                                         Color.Transparent
-                                )
+                                ),
+
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
                         )
 
                         if (
@@ -1338,7 +1434,9 @@ fun UnlockScreen(
 
                             Spacer(
                                 modifier =
-                                    Modifier.height(8.dp)
+                                    Modifier.height(
+                                        8.dp
+                                    )
                             )
 
                             Text(
@@ -1352,98 +1450,117 @@ fun UnlockScreen(
                                     13.sp
                             )
                         }
-                    }
-                },
 
-                confirmButton = {
-
-                    Button(
-
-                        enabled =
-                            !checkingSecurityQuestion,
-
-                        onClick = {
-
-                            verifySecurityAnswer()
-                        },
-
-                        colors =
-                            ButtonDefaults.buttonColors(
-
-                                containerColor =
-                                    Color.Transparent,
-
-                                disabledContainerColor =
-                                    Color.Transparent,
-
-                                contentColor =
-                                    backgroundColor,
-
-                                disabledContentColor =
-                                    backgroundColor
-                            )
-                    ) {
-
-                        Text(
-                            text =
-                                stringResource(
-                                    R.string.continue_text
-                                ),
-
-                            color =
-                                backgroundColor
+                        Spacer(
+                            modifier =
+                                Modifier.height(
+                                    8.dp
+                                )
                         )
-                    }
-                },
 
-                dismissButton = {
+                        Row(
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth(),
 
-                    Button(
+                            horizontalArrangement =
+                                Arrangement.End
+                        ) {
 
-                        enabled =
-                            !checkingSecurityQuestion,
+                            Button(
 
-                        onClick = {
+                                enabled =
+                                    !checkingSecurityQuestion,
 
-                            showForgotPasswordDialog =
-                                false
+                                onClick = {
 
-                            securityAnswer =
-                                ""
+                                    showForgotPasswordDialog =
+                                        false
 
-                            securityQuestionError =
-                                ""
-                        },
+                                    securityAnswer =
+                                        ""
 
-                        colors =
-                            ButtonDefaults.buttonColors(
+                                    securityQuestionError =
+                                        ""
+                                },
 
-                                containerColor =
-                                    Color.Transparent,
+                                colors =
+                                    ButtonDefaults
+                                        .buttonColors(
 
-                                disabledContainerColor =
-                                    Color.Transparent,
+                                            containerColor =
+                                                Color.Transparent,
 
-                                contentColor =
-                                    Color(0xFF7B7B7B),
+                                            disabledContainerColor =
+                                                Color.Transparent,
 
-                                disabledContentColor =
-                                    Color(0xFF7B7B7B)
-                            )
-                    ) {
+                                            contentColor =
+                                                Color(
+                                                    0xFF7B7B7B
+                                                ),
 
-                        Text(
-                            text =
-                                stringResource(
-                                    R.string.cancel
-                                ),
+                                            disabledContentColor =
+                                                Color(
+                                                    0xFF7B7B7B
+                                                )
+                                        )
+                            ) {
 
-                            color =
-                                Color(0xFF7B7B7B)
-                        )
+                                Text(
+                                    text =
+                                        stringResource(
+                                            R.string.cancel
+                                        ),
+
+                                    color =
+                                        Color(
+                                            0xFF7B7B7B
+                                        )
+                                )
+                            }
+
+                            Button(
+
+                                enabled =
+                                    !checkingSecurityQuestion,
+
+                                onClick = {
+
+                                    verifySecurityAnswer()
+                                },
+
+                                colors =
+                                    ButtonDefaults
+                                        .buttonColors(
+
+                                            containerColor =
+                                                Color.Transparent,
+
+                                            disabledContainerColor =
+                                                Color.Transparent,
+
+                                            contentColor =
+                                                backgroundColor,
+
+                                            disabledContentColor =
+                                                backgroundColor
+                                        )
+                            ) {
+
+                                Text(
+                                    text =
+                                        stringResource(
+                                            R.string.continue_text
+                                        ),
+
+                                    color =
+                                        backgroundColor
+                                )
+                            }
+                        }
                     }
                 }
-            )
+            }
         }
     }
 }
@@ -1545,10 +1662,12 @@ private fun UnlockPatternGrid(
 
                                     vibrator.vibrate(
 
-                                        VibrationEffect.createOneShot(
-                                            35L,
-                                            VibrationEffect.DEFAULT_AMPLITUDE
-                                        )
+                                        VibrationEffect
+                                            .createOneShot(
+                                                35L,
+                                                VibrationEffect
+                                                    .DEFAULT_AMPLITUDE
+                                            )
                                     )
                                 }
 
@@ -1574,10 +1693,12 @@ private fun UnlockPatternGrid(
 
                                         vibrator.vibrate(
 
-                                            VibrationEffect.createOneShot(
-                                                35L,
-                                                VibrationEffect.DEFAULT_AMPLITUDE
-                                            )
+                                            VibrationEffect
+                                                .createOneShot(
+                                                    35L,
+                                                    VibrationEffect
+                                                        .DEFAULT_AMPLITUDE
+                                                )
                                         )
 
                                     } else {
@@ -1621,10 +1742,12 @@ private fun UnlockPatternGrid(
                                         offset,
 
                                     width =
-                                        size.width.toFloat(),
+                                        size.width
+                                            .toFloat(),
 
                                     height =
-                                        size.height.toFloat()
+                                        size.height
+                                            .toFloat()
                                 )
 
                             if (
@@ -1654,15 +1777,19 @@ private fun UnlockPatternGrid(
                                         change.position,
 
                                     width =
-                                        size.width.toFloat(),
+                                        size.width
+                                            .toFloat(),
 
                                     height =
-                                        size.height.toFloat()
+                                        size.height
+                                            .toFloat()
                                 )
 
                             if (
                                 dot != null &&
-                                !currentDots.contains(dot)
+                                !currentDots.contains(
+                                    dot
+                                )
                             ) {
 
                                 currentDots.add(
@@ -1928,16 +2055,28 @@ private fun findUnlockDot(
 
     val positions =
         getUnlockPositions(
-            width = width,
-            height = height
+            width =
+                width,
+
+            height =
+                height
         )
 
     positions.forEachIndexed {
-            index, dot ->
+            index,
+            dot ->
 
-        val dx = touch.x - dot.x
-        val dy = touch.y - dot.y
-        val distance = sqrt(dx * dx + dy * dy)
+        val dx =
+            touch.x - dot.x
+
+        val dy =
+            touch.y - dot.y
+
+        val distance =
+            sqrt(
+                dx * dx +
+                        dy * dy
+            )
 
         if (
             distance <= 55f

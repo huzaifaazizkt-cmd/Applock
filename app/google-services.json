@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "491966736085",
+    "project_id": "applock-d5880",
+    "storage_bucket": "applock-d5880.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:491966736085:android:c7821d750e32d95415e45c",
+        "android_client_info": {
+          "package_name": "com.example.applock"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAhaFBe8k5UBjQcOG-S-M92PCGNPhy1UC8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

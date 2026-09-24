@@ -53,7 +53,6 @@ fun StartScreen(
     var navigationDone by remember {
         mutableStateOf(false)
     }
-
     val progress by animateLottieCompositionAsState(
         composition = composition,
         iterations = 1

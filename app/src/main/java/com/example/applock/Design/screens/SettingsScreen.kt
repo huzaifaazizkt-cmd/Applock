@@ -1,7 +1,9 @@
 package com.example.applock.Design.screens
-import androidx.compose.ui.draw.clip
 
 import android.app.Activity
+import android.view.WindowManager
+
+import androidx.compose.ui.draw.clip
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -26,6 +28,7 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,7 +37,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
@@ -73,6 +75,35 @@ fun SettingsScreen(
     onResetPasswordClick: () -> Unit
 ) {
     val context = LocalContext.current
+    val activity = context as? Activity
+
+    /*
+     * =========================================================
+     * SOFT INPUT ADJUST NOTHING
+     * =========================================================
+     *
+     * Keyboard open hone par Activity ki window resize nahi hogi.
+     *
+     * Previous soft input mode save kiya ja raha hai taake
+     * SettingsScreen se bahar jaane ke baad original behavior
+     * restore ho jaye.
+     */
+    DisposableEffect(activity) {
+
+        val previousSoftInputMode =
+            activity?.window?.attributes?.softInputMode
+                ?: WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
+
+        activity?.window?.setSoftInputMode(
+            WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING
+        )
+
+        onDispose {
+            activity?.window?.setSoftInputMode(
+                previousSoftInputMode
+            )
+        }
+    }
 
     val dataStore = remember {
         DataStoreManager(context)
@@ -284,7 +315,9 @@ fun SettingsScreen(
                 )
 
                 settingsItems.forEach { item ->
-                    val title = stringResource(item.titleRes)
+
+                    val title =
+                        stringResource(item.titleRes)
 
                     val description =
                         item.descriptionRes?.let {
@@ -300,6 +333,7 @@ fun SettingsScreen(
                         hideFromRecents = hideFromRecents,
 
                         onHideFromRecentsChange = { enabled ->
+
                             hideFromRecents = enabled
 
                             hideRecentJob?.cancel()
@@ -311,6 +345,7 @@ fun SettingsScreen(
 
                             if (enabled) {
                                 hideRecentJob = scope.launch {
+
                                     delay(10_000L)
 
                                     (context as? Activity)
@@ -335,7 +370,9 @@ fun SettingsScreen(
                         relockOption = relockOption,
 
                         onSecurityQuestionClick = {
+
                             scope.launch {
+
                                 securityQuestion =
                                     dataStore
                                         .getSecurityQuestion()
@@ -354,14 +391,20 @@ fun SettingsScreen(
                         },
 
                         onCardClick = {
+
                             when (item.key) {
+
                                 "languages" -> {
                                     onLanguageClick()
                                 }
 
                                 "lock_setting" -> {
+
                                     expandedItem =
-                                        if (expandedItem == "lock_setting") {
+                                        if (
+                                            expandedItem ==
+                                            "lock_setting"
+                                        ) {
                                             null
                                         } else {
                                             "lock_setting"
@@ -373,8 +416,12 @@ fun SettingsScreen(
                                 }
 
                                 "hide_settings" -> {
+
                                     expandedItem =
-                                        if (expandedItem == "hide_settings") {
+                                        if (
+                                            expandedItem ==
+                                            "hide_settings"
+                                        ) {
                                             null
                                         } else {
                                             "hide_settings"
@@ -382,13 +429,17 @@ fun SettingsScreen(
                                 }
 
                                 "rate_us" -> Unit
+
                                 "share" -> Unit
+
                                 "about" -> Unit
+
                                 "privacy_policy" -> Unit
                             }
                         },
 
-                        onResetPasswordClick = onResetPasswordClick
+                        onResetPasswordClick =
+                            onResetPasswordClick
                     )
 
                     Spacer(
@@ -399,6 +450,7 @@ fun SettingsScreen(
         }
 
         if (showRelockDialog) {
+
             RelockOptionDialog(
                 selectedOption = tempRelockOption,
 
@@ -412,17 +464,21 @@ fun SettingsScreen(
                 },
 
                 onConfirm = {
+
                     relockOption = tempRelockOption
                     showRelockDialog = false
 
                     scope.launch {
-                        dataStore.saveRelockOption(tempRelockOption)
+                        dataStore.saveRelockOption(
+                            tempRelockOption
+                        )
                     }
                 }
             )
         }
 
         if (showDelayDialog) {
+
             DelayToRelockDialog(
                 selectedOption = tempDelayOption,
 
@@ -436,21 +492,26 @@ fun SettingsScreen(
                 },
 
                 onConfirm = {
+
                     delayOption = tempDelayOption
                     showDelayDialog = false
 
                     scope.launch {
-                        dataStore.saveRelockDelay(tempDelayOption)
+                        dataStore.saveRelockDelay(
+                            tempDelayOption
+                        )
                     }
                 }
             )
         }
 
         if (showSecurityQuestionDialog) {
+
             SecurityQuestionSettingsDialog(
                 selectedQuestion = securityQuestion,
                 answer = securityAnswer,
-                dropdownExpanded = securityDropdownExpanded,
+                dropdownExpanded =
+                    securityDropdownExpanded,
 
                 onDropdownClick = {
                     securityDropdownExpanded =
@@ -472,16 +533,27 @@ fun SettingsScreen(
                 },
 
                 onSave = {
-                    val question = securityQuestion.trim()
-                    val answer = securityAnswer.trim()
+
+                    val question =
+                        securityQuestion.trim()
+
+                    val answer =
+                        securityAnswer.trim()
 
                     if (
                         question.isNotEmpty() &&
                         answer.isNotEmpty()
                     ) {
+
                         scope.launch {
-                            dataStore.saveSecurityQuestion(question)
-                            dataStore.saveSecurityAnswer(answer)
+
+                            dataStore.saveSecurityQuestion(
+                                question
+                            )
+
+                            dataStore.saveSecurityAnswer(
+                                answer
+                            )
 
                             securityDropdownExpanded = false
                             showSecurityQuestionDialog = false
@@ -502,7 +574,8 @@ private fun AppProtectionCard(
     enabled: Boolean,
     onEnabledChange: (Boolean) -> Unit
 ) {
-    val cardShape = RoundedCornerShape(12.dp)
+    val cardShape =
+        RoundedCornerShape(12.dp)
 
     Card(
         modifier = Modifier
@@ -511,15 +584,19 @@ private fun AppProtectionCard(
                 elevation = 5.dp,
                 shape = cardShape,
                 clip = false,
-                ambientColor = Color.Black.copy(alpha = 0.10f),
-                spotColor = Color.Black.copy(alpha = 0.10f)
+                ambientColor =
+                    Color.Black.copy(alpha = 0.10f),
+                spotColor =
+                    Color.Black.copy(alpha = 0.10f)
             )
             .clip(cardShape)
             .clickable(
                 interactionSource = remember {
                     MutableInteractionSource()
                 },
-                indication = ripple(bounded = true)
+                indication = ripple(
+                    bounded = true
+                )
             ) {
                 // Switch controls App Protection.
             },
@@ -535,6 +612,7 @@ private fun AppProtectionCard(
             pressedElevation = 1.dp
         )
     ) {
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -544,20 +622,24 @@ private fun AppProtectionCard(
                     end = 10.dp
                 ),
 
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment =
+                Alignment.CenterVertically
         ) {
+
             Image(
                 painter = painterResource(
                     R.drawable.enable
                 ),
 
-                contentDescription = stringResource(
-                    R.string.enable_app_protection
-                ),
+                contentDescription =
+                    stringResource(
+                        R.string.enable_app_protection
+                    ),
 
                 modifier = Modifier.size(38.dp),
 
-                contentScale = ContentScale.FillBounds
+                contentScale =
+                    ContentScale.FillBounds
             )
 
             Spacer(
@@ -567,11 +649,15 @@ private fun AppProtectionCard(
             Column(
                 modifier = Modifier.weight(1f)
             ) {
+
                 Text(
                     text = stringResource(
                         R.string.enable_app_protection
                     ),
-                    color = Color(0xFF333333),
+
+                    color =
+                        Color(0xFF333333),
+
                     fontSize = 15.sp
                 )
 
@@ -599,18 +685,32 @@ private fun AppProtectionCard(
             Switch(
                 checked = enabled,
 
-                onCheckedChange = onEnabledChange,
+                onCheckedChange =
+                    onEnabledChange,
 
-                modifier = Modifier.scale(0.72f),
+                modifier =
+                    Modifier.scale(0.72f),
 
-                colors = SwitchDefaults.colors(
-                    checkedThumbColor = Color.White,
-                    checkedTrackColor = Color(0xFF0396FF),
-                    uncheckedThumbColor = Color(0xFFAAAAAA),
-                    uncheckedTrackColor = Color(0xFFE3E3E3),
-                    uncheckedBorderColor = Color.Transparent,
-                    checkedBorderColor = Color.Transparent
-                )
+                colors =
+                    SwitchDefaults.colors(
+                        checkedThumbColor =
+                            Color.White,
+
+                        checkedTrackColor =
+                            Color(0xFF0396FF),
+
+                        uncheckedThumbColor =
+                            Color(0xFFAAAAAA),
+
+                        uncheckedTrackColor =
+                            Color(0xFFE3E3E3),
+
+                        uncheckedBorderColor =
+                            Color.Transparent,
+
+                        checkedBorderColor =
+                            Color.Transparent
+                    )
             )
         }
     }
@@ -637,11 +737,13 @@ private fun SettingsItem(
     onCardClick: () -> Unit,
     onResetPasswordClick: () -> Unit
 ) {
+
     val expandable =
         itemKey == "lock_setting" ||
                 itemKey == "hide_settings"
 
-    val cardShape = RoundedCornerShape(12.dp)
+    val cardShape =
+        RoundedCornerShape(12.dp)
 
     Card(
         modifier = Modifier
@@ -650,33 +752,41 @@ private fun SettingsItem(
                 elevation = 5.dp,
                 shape = cardShape,
                 clip = false,
-                ambientColor = Color.Black.copy(alpha = 0.10f),
-                spotColor = Color.Black.copy(alpha = 0.10f)
+                ambientColor =
+                    Color.Black.copy(alpha = 0.10f),
+                spotColor =
+                    Color.Black.copy(alpha = 0.10f)
             )
             .clip(cardShape)
             .clickable(
                 interactionSource = remember {
                     MutableInteractionSource()
                 },
-                indication = ripple(bounded = true)
+                indication = ripple(
+                    bounded = true
+                )
             ) {
                 onCardClick()
             },
 
         shape = cardShape,
 
-        colors = CardDefaults.cardColors(
-            containerColor = Color.White
-        ),
+        colors =
+            CardDefaults.cardColors(
+                containerColor = Color.White
+            ),
 
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 2.dp,
-            pressedElevation = 1.dp
-        )
+        elevation =
+            CardDefaults.cardElevation(
+                defaultElevation = 2.dp,
+                pressedElevation = 1.dp
+            )
     ) {
+
         Column(
             modifier = Modifier.fillMaxWidth()
         ) {
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -686,13 +796,22 @@ private fun SettingsItem(
                         end = 10.dp
                     ),
 
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment =
+                    Alignment.CenterVertically
             ) {
+
                 Image(
-                    painter = painterResource(iconRes),
-                    contentDescription = title,
-                    modifier = Modifier.size(38.dp),
-                    contentScale = ContentScale.FillBounds
+                    painter =
+                        painterResource(iconRes),
+
+                    contentDescription =
+                        title,
+
+                    modifier =
+                        Modifier.size(38.dp),
+
+                    contentScale =
+                        ContentScale.FillBounds
                 )
 
                 Spacer(
@@ -701,35 +820,46 @@ private fun SettingsItem(
 
                 Text(
                     text = title,
-                    modifier = Modifier.weight(1f),
-                    color = Color(0xFF333333),
+
+                    modifier =
+                        Modifier.weight(1f),
+
+                    color =
+                        Color(0xFF333333),
+
                     fontSize = 15.sp
                 )
 
                 Image(
-                    painter = painterResource(
-                        id = if (expandable) {
-                            if (expanded) {
-                                R.drawable.uparrow
-                            } else {
-                                R.drawable.downicon
-                            }
-                        } else {
-                            R.drawable.sidearrow
-                        }
-                    ),
+                    painter =
+                        painterResource(
+                            id =
+                                if (expandable) {
+
+                                    if (expanded) {
+                                        R.drawable.uparrow
+                                    } else {
+                                        R.drawable.downicon
+                                    }
+
+                                } else {
+                                    R.drawable.sidearrow
+                                }
+                        ),
 
                     contentDescription = null,
 
-                    modifier = Modifier.size(
-                        if (expandable) {
-                            12.dp
-                        } else {
-                            14.dp
-                        }
-                    ),
+                    modifier =
+                        Modifier.size(
+                            if (expandable) {
+                                12.dp
+                            } else {
+                                14.dp
+                            }
+                        ),
 
-                    contentScale = ContentScale.Fit
+                    contentScale =
+                        ContentScale.Fit
                 )
             }
 
@@ -737,13 +867,25 @@ private fun SettingsItem(
                 expanded &&
                 itemKey == "lock_setting"
             ) {
+
                 LockSettingExpandedContent(
-                    onRelockClick = onRelockClick,
-                    onDelayClick = onDelayClick,
-                    delayOption = delayOption,
-                    relockOption = relockOption,
-                    onResetPasswordClick = onResetPasswordClick,
-                    onSecurityQuestionClick = onSecurityQuestionClick
+                    onRelockClick =
+                        onRelockClick,
+
+                    onDelayClick =
+                        onDelayClick,
+
+                    delayOption =
+                        delayOption,
+
+                    relockOption =
+                        relockOption,
+
+                    onResetPasswordClick =
+                        onResetPasswordClick,
+
+                    onSecurityQuestionClick =
+                        onSecurityQuestionClick
                 )
             }
 
@@ -751,9 +893,13 @@ private fun SettingsItem(
                 expanded &&
                 itemKey == "hide_settings"
             ) {
+
                 HideSettingsExpandedContent(
-                    hideFromRecents = hideFromRecents,
-                    onHideFromRecentsChange = onHideFromRecentsChange
+                    hideFromRecents =
+                        hideFromRecents,
+
+                    onHideFromRecentsChange =
+                        onHideFromRecentsChange
                 )
             }
         }
@@ -769,6 +915,7 @@ private fun HideSettingsExpandedContent(
     hideFromRecents: Boolean,
     onHideFromRecentsChange: (Boolean) -> Unit
 ) {
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -779,20 +926,26 @@ private fun HideSettingsExpandedContent(
                 bottom = 8.dp
             ),
 
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment =
+            Alignment.CenterVertically
     ) {
+
         Image(
-            painter = painterResource(
-                R.drawable.eyehide
-            ),
+            painter =
+                painterResource(
+                    R.drawable.eyehide
+                ),
 
-            contentDescription = stringResource(
-                R.string.hide_from_recent_screen
-            ),
+            contentDescription =
+                stringResource(
+                    R.string.hide_from_recent_screen
+                ),
 
-            modifier = Modifier.size(22.dp),
+            modifier =
+                Modifier.size(22.dp),
 
-            contentScale = ContentScale.Fit
+            contentScale =
+                ContentScale.Fit
         )
 
         Spacer(
@@ -800,29 +953,50 @@ private fun HideSettingsExpandedContent(
         )
 
         Text(
-            text = stringResource(
-                R.string.apps_hide_from_recent_screen
-            ),
+            text =
+                stringResource(
+                    R.string.apps_hide_from_recent_screen
+                ),
 
-            color = Color(0xFF444444),
+            color =
+                Color(0xFF444444),
+
             fontSize = 14.sp,
 
-            modifier = Modifier.weight(1f)
+            modifier =
+                Modifier.weight(1f)
         )
 
         Switch(
-            checked = hideFromRecents,
-            onCheckedChange = onHideFromRecentsChange,
-            modifier = Modifier.scale(0.72f),
+            checked =
+                hideFromRecents,
 
-            colors = SwitchDefaults.colors(
-                checkedThumbColor = Color.White,
-                checkedTrackColor = Color(0xFF9C27B0),
-                uncheckedThumbColor = Color(0xFFAAAAAA),
-                uncheckedTrackColor = Color(0xFFE3E3E3),
-                uncheckedBorderColor = Color.Transparent,
-                checkedBorderColor = Color.Transparent
-            )
+            onCheckedChange =
+                onHideFromRecentsChange,
+
+            modifier =
+                Modifier.scale(0.72f),
+
+            colors =
+                SwitchDefaults.colors(
+                    checkedThumbColor =
+                        Color.White,
+
+                    checkedTrackColor =
+                        Color(0xFF9C27B0),
+
+                    uncheckedThumbColor =
+                        Color(0xFFAAAAAA),
+
+                    uncheckedTrackColor =
+                        Color(0xFFE3E3E3),
+
+                    uncheckedBorderColor =
+                        Color.Transparent,
+
+                    checkedBorderColor =
+                        Color.Transparent
+                )
         )
     }
 }
@@ -840,13 +1014,17 @@ private fun LockSettingExpandedContent(
     onResetPasswordClick: () -> Unit,
     onSecurityQuestionClick: () -> Unit
 ) {
-    val context = LocalContext.current
 
-    val dataStore = remember {
-        DataStoreManager(context)
-    }
+    val context =
+        LocalContext.current
 
-    val scope = rememberCoroutineScope()
+    val dataStore =
+        remember {
+            DataStoreManager(context)
+        }
+
+    val scope =
+        rememberCoroutineScope()
 
     var fingerprintEnabled by remember {
         mutableStateOf(false)
@@ -861,87 +1039,155 @@ private fun LockSettingExpandedContent(
     }
 
     LaunchedEffect(Unit) {
+
         fingerprintEnabled =
-            dataStore.getFingerprintEnabled().first()
+            dataStore
+                .getFingerprintEnabled()
+                .first()
 
         vibrationEnabled =
-            dataStore.getVibrationEnabled().first()
+            dataStore
+                .getVibrationEnabled()
+                .first()
 
         hideTrackEnabled =
-            dataStore.getHideTrackEnabled().first()
+            dataStore
+                .getHideTrackEnabled()
+                .first()
     }
 
     Column(
-        modifier = Modifier.fillMaxWidth()
+        modifier =
+            Modifier.fillMaxWidth()
     ) {
+
         Text(
-            text = stringResource(R.string.password),
-            color = Color(0xFF888888),
+            text =
+                stringResource(
+                    R.string.password
+                ),
+
+            color =
+                Color(0xFF888888),
+
             fontSize = 16.sp,
 
-            modifier = Modifier.padding(
-                start = 10.dp,
-                top = 6.dp,
-                bottom = 6.dp
-            )
+            modifier =
+                Modifier.padding(
+                    start = 10.dp,
+                    top = 6.dp,
+                    bottom = 6.dp
+                )
         )
 
         LockSettingRow(
-            iconRes = R.drawable.redlock,
-            title = stringResource(R.string.reset_password),
-            subtitle = stringResource(R.string.pattern),
-            onClick = onResetPasswordClick
+            iconRes =
+                R.drawable.redlock,
+
+            title =
+                stringResource(
+                    R.string.reset_password
+                ),
+
+            subtitle =
+                stringResource(
+                    R.string.pattern
+                ),
+
+            onClick =
+                onResetPasswordClick
         )
 
         SettingDivider()
 
         LockSettingRow(
-            iconRes = R.drawable.security,
-            title = stringResource(R.string.security_settings),
-            subtitle = stringResource(R.string.set_security_email),
-            onClick = onSecurityQuestionClick
+            iconRes =
+                R.drawable.security,
+
+            title =
+                stringResource(
+                    R.string.security_settings
+                ),
+
+            subtitle =
+                stringResource(
+                    R.string.set_security_email
+                ),
+
+            onClick =
+                onSecurityQuestionClick
         )
 
         SettingDivider()
 
         LockSettingSwitchRow(
-            iconRes = R.drawable.fingerprint,
-            title = stringResource(R.string.fingerprint_lock),
-            subtitle = stringResource(R.string.use_fingerprint_to_unlock),
-            checked = fingerprintEnabled,
+            iconRes =
+                R.drawable.fingerprint,
+
+            title =
+                stringResource(
+                    R.string.fingerprint_lock
+                ),
+
+            subtitle =
+                stringResource(
+                    R.string.use_fingerprint_to_unlock
+                ),
+
+            checked =
+                fingerprintEnabled,
 
             onCheckedChange = {
+
                 fingerprintEnabled = it
 
                 scope.launch {
-                    dataStore.saveFingerprintEnabled(it)
+                    dataStore
+                        .saveFingerprintEnabled(it)
                 }
             }
         )
 
         Text(
-            text = stringResource(R.string.unlock),
-            color = Color(0xFF888888),
+            text =
+                stringResource(
+                    R.string.unlock
+                ),
+
+            color =
+                Color(0xFF888888),
+
             fontSize = 16.sp,
 
-            modifier = Modifier.padding(
-                start = 10.dp,
-                top = 8.dp,
-                bottom = 6.dp
-            )
+            modifier =
+                Modifier.padding(
+                    start = 10.dp,
+                    top = 8.dp,
+                    bottom = 6.dp
+                )
         )
 
         LockSettingSwitchRow(
-            iconRes = R.drawable.vibration,
-            title = stringResource(R.string.vibration),
+            iconRes =
+                R.drawable.vibration,
+
+            title =
+                stringResource(
+                    R.string.vibration
+                ),
+
             subtitle = null,
-            checked = vibrationEnabled,
+
+            checked =
+                vibrationEnabled,
 
             onCheckedChange = {
+
                 vibrationEnabled = it
 
                 scope.launch {
-                    dataStore.saveVibrationEnabled(it)
+                    dataStore
+                        .saveVibrationEnabled(it)
                 }
             }
         )
@@ -949,16 +1195,29 @@ private fun LockSettingExpandedContent(
         SettingDivider()
 
         LockSettingSwitchRow(
-            iconRes = R.drawable.track,
-            title = stringResource(R.string.hide_track),
-            subtitle = stringResource(R.string.hide_track_description),
-            checked = hideTrackEnabled,
+            iconRes =
+                R.drawable.track,
+
+            title =
+                stringResource(
+                    R.string.hide_track
+                ),
+
+            subtitle =
+                stringResource(
+                    R.string.hide_track_description
+                ),
+
+            checked =
+                hideTrackEnabled,
 
             onCheckedChange = {
+
                 hideTrackEnabled = it
 
                 scope.launch {
-                    dataStore.saveHideTrackEnabled(it)
+                    dataStore
+                        .saveHideTrackEnabled(it)
                 }
             }
         )
@@ -966,23 +1225,46 @@ private fun LockSettingExpandedContent(
         SettingDivider()
 
         LockSettingRow(
-            iconRes = R.drawable.relock,
-            title = stringResource(R.string.relock_option),
-            subtitle = getRelockText(relockOption),
-            onClick = onRelockClick
+            iconRes =
+                R.drawable.relock,
+
+            title =
+                stringResource(
+                    R.string.relock_option
+                ),
+
+            subtitle =
+                getRelockText(
+                    relockOption
+                ),
+
+            onClick =
+                onRelockClick
         )
 
         SettingDivider()
 
         LockSettingRow(
-            iconRes = R.drawable.delay,
-            title = stringResource(R.string.delay_to_relock),
-            subtitle = getDelayText(delayOption),
-            onClick = onDelayClick
+            iconRes =
+                R.drawable.delay,
+
+            title =
+                stringResource(
+                    R.string.delay_to_relock
+                ),
+
+            subtitle =
+                getDelayText(
+                    delayOption
+                ),
+
+            onClick =
+                onDelayClick
         )
 
         Spacer(
-            modifier = Modifier.height(8.dp)
+            modifier =
+                Modifier.height(8.dp)
         )
     }
 }
@@ -998,6 +1280,7 @@ private fun LockSettingRow(
     subtitle: String?,
     onClick: () -> Unit
 ) {
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -1011,41 +1294,65 @@ private fun LockSettingRow(
                 bottom = 8.dp
             ),
 
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment =
+            Alignment.CenterVertically
     ) {
+
         Box(
-            modifier = Modifier.width(28.dp),
-            contentAlignment = Alignment.Center
+            modifier =
+                Modifier.width(28.dp),
+
+            contentAlignment =
+                Alignment.Center
         ) {
+
             Image(
-                painter = painterResource(iconRes),
-                contentDescription = title,
-                modifier = Modifier.size(19.dp),
-                contentScale = ContentScale.Fit
+                painter =
+                    painterResource(iconRes),
+
+                contentDescription =
+                    title,
+
+                modifier =
+                    Modifier.size(19.dp),
+
+                contentScale =
+                    ContentScale.Fit
             )
         }
 
         Spacer(
-            modifier = Modifier.width(8.dp)
+            modifier =
+                Modifier.width(8.dp)
         )
 
         Column(
-            modifier = Modifier.weight(1f)
+            modifier =
+                Modifier.weight(1f)
         ) {
+
             Text(
                 text = title,
-                color = Color(0xFF333333),
+
+                color =
+                    Color(0xFF333333),
+
                 fontSize = 14.sp
             )
 
             if (!subtitle.isNullOrEmpty()) {
+
                 Spacer(
-                    modifier = Modifier.height(2.dp)
+                    modifier =
+                        Modifier.height(2.dp)
                 )
 
                 Text(
                     text = subtitle,
-                    color = Color(0xFF666666),
+
+                    color =
+                        Color(0xFF666666),
+
                     fontSize = 11.sp
                 )
             }
@@ -1065,6 +1372,7 @@ private fun LockSettingSwitchRow(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit
 ) {
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -1075,59 +1383,100 @@ private fun LockSettingSwitchRow(
                 bottom = 7.dp
             ),
 
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment =
+            Alignment.CenterVertically
     ) {
+
         Box(
-            modifier = Modifier.width(28.dp),
-            contentAlignment = Alignment.Center
+            modifier =
+                Modifier.width(28.dp),
+
+            contentAlignment =
+                Alignment.Center
         ) {
+
             Image(
-                painter = painterResource(iconRes),
-                contentDescription = title,
-                modifier = Modifier.size(19.dp),
-                contentScale = ContentScale.Fit
+                painter =
+                    painterResource(iconRes),
+
+                contentDescription =
+                    title,
+
+                modifier =
+                    Modifier.size(19.dp),
+
+                contentScale =
+                    ContentScale.Fit
             )
         }
 
         Spacer(
-            modifier = Modifier.width(8.dp)
+            modifier =
+                Modifier.width(8.dp)
         )
 
         Column(
-            modifier = Modifier.weight(1f)
+            modifier =
+                Modifier.weight(1f)
         ) {
+
             Text(
                 text = title,
-                color = Color(0xFF333333),
+
+                color =
+                    Color(0xFF333333),
+
                 fontSize = 14.sp
             )
 
             if (!subtitle.isNullOrEmpty()) {
+
                 Spacer(
-                    modifier = Modifier.height(2.dp)
+                    modifier =
+                        Modifier.height(2.dp)
                 )
 
                 Text(
                     text = subtitle,
-                    color = Color(0xFF666666),
+
+                    color =
+                        Color(0xFF666666),
+
                     fontSize = 11.sp
                 )
             }
         }
 
         Switch(
-            checked = checked,
-            onCheckedChange = onCheckedChange,
-            modifier = Modifier.scale(0.72f),
+            checked =
+                checked,
 
-            colors = SwitchDefaults.colors(
-                checkedThumbColor = Color.White,
-                checkedTrackColor = Color(0xFFF45656),
-                uncheckedThumbColor = Color(0xFFAAAAAA),
-                uncheckedTrackColor = Color(0xFFE3E3E3),
-                uncheckedBorderColor = Color.Transparent,
-                checkedBorderColor = Color.Transparent
-            )
+            onCheckedChange =
+                onCheckedChange,
+
+            modifier =
+                Modifier.scale(0.72f),
+
+            colors =
+                SwitchDefaults.colors(
+                    checkedThumbColor =
+                        Color.White,
+
+                    checkedTrackColor =
+                        Color(0xFFF45656),
+
+                    uncheckedThumbColor =
+                        Color(0xFFAAAAAA),
+
+                    uncheckedTrackColor =
+                        Color(0xFFE3E3E3),
+
+                    uncheckedBorderColor =
+                        Color.Transparent,
+
+                    checkedBorderColor =
+                        Color.Transparent
+                )
         )
     }
 }
@@ -1147,29 +1496,49 @@ private fun SecurityQuestionSettingsDialog(
     onCancel: () -> Unit,
     onSave: () -> Unit
 ) {
+
     val questions = listOf(
-        stringResource(R.string.security_question_name),
-        stringResource(R.string.security_question_father),
-        stringResource(R.string.security_question_pet),
-        stringResource(R.string.security_question_job)
+
+        stringResource(
+            R.string.security_question_name
+        ),
+
+        stringResource(
+            R.string.security_question_father
+        ),
+
+        stringResource(
+            R.string.security_question_pet
+        ),
+
+        stringResource(
+            R.string.security_question_job
+        )
     )
 
     Dialog(
-        onDismissRequest = onCancel,
+        onDismissRequest =
+            onCancel,
 
-        properties = DialogProperties(
-            dismissOnBackPress = true,
-            dismissOnClickOutside = true,
-            usePlatformDefaultWidth = false
-        )
+        properties =
+            DialogProperties(
+                dismissOnBackPress = true,
+                dismissOnClickOutside = true,
+                usePlatformDefaultWidth = false
+            )
     ) {
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Transparent),
+                .background(
+                    Color.Transparent
+                ),
 
-            contentAlignment = Alignment.Center
+            contentAlignment =
+                Alignment.Center
         ) {
+
             Column(
                 modifier = Modifier
                     .fillMaxWidth(0.90f)
@@ -1185,52 +1554,71 @@ private fun SecurityQuestionSettingsDialog(
                         bottom = 30.dp
                     )
             ) {
-                Text(
-                    text = stringResource(
-                        R.string.security_questions
-                    ),
 
-                    color = Color(0xFF333333),
+                Text(
+                    text =
+                        stringResource(
+                            R.string.security_questions
+                        ),
+
+                    color =
+                        Color(0xFF333333),
+
                     fontSize = 19.sp,
 
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier =
+                        Modifier.fillMaxWidth(),
 
-                    textAlign = TextAlign.Center
+                    textAlign =
+                        TextAlign.Center
                 )
 
                 Spacer(
-                    modifier = Modifier.height(8.dp)
+                    modifier =
+                        Modifier.height(8.dp)
                 )
 
                 Text(
-                    text = stringResource(
-                        R.string.security_question_description
-                    ),
+                    text =
+                        stringResource(
+                            R.string.security_question_description
+                        ),
 
-                    color = Color(0xFFBDBDBD),
+                    color =
+                        Color(0xFFBDBDBD),
+
                     fontSize = 11.sp,
-                    lineHeight = 18.sp,
 
-                    modifier = Modifier.fillMaxWidth(),
+                    lineHeight =
+                        18.sp,
 
-                    textAlign = TextAlign.Center
+                    modifier =
+                        Modifier.fillMaxWidth(),
+
+                    textAlign =
+                        TextAlign.Center
                 )
 
                 Spacer(
-                    modifier = Modifier.height(28.dp)
+                    modifier =
+                        Modifier.height(28.dp)
                 )
 
                 Text(
-                    text = stringResource(
-                        R.string.select_security_questions
-                    ),
+                    text =
+                        stringResource(
+                            R.string.select_security_questions
+                        ),
 
-                    color = Color(0xFF333333),
+                    color =
+                        Color(0xFF333333),
+
                     fontSize = 14.sp
                 )
 
                 Spacer(
-                    modifier = Modifier.height(8.dp)
+                    modifier =
+                        Modifier.height(8.dp)
                 )
 
                 Box(
@@ -1238,6 +1626,7 @@ private fun SecurityQuestionSettingsDialog(
                         .fillMaxWidth()
                         .height(40.dp)
                 ) {
+
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -1247,13 +1636,15 @@ private fun SecurityQuestionSettingsDialog(
                                 RoundedCornerShape(15.dp)
                             )
                             .clickable(
-                                indication = ripple(
-                                    bounded = true
-                                ),
+                                indication =
+                                    ripple(
+                                        bounded = true
+                                    ),
 
-                                interactionSource = remember {
-                                    MutableInteractionSource()
-                                }
+                                interactionSource =
+                                    remember {
+                                        MutableInteractionSource()
+                                    }
                             ) {
                                 onDropdownClick()
                             }
@@ -1262,57 +1653,74 @@ private fun SecurityQuestionSettingsDialog(
                                 end = 14.dp
                             ),
 
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment =
+                            Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = if (
-                                selectedQuestion.isEmpty()
-                            ) {
-                                stringResource(
-                                    R.string.select_security_question
-                                )
-                            } else {
-                                selectedQuestion
-                            },
 
-                            color = if (
-                                selectedQuestion.isEmpty()
-                            ) {
-                                Color(0xFFBDBDBD)
-                            } else {
-                                Color(0xFF333333)
-                            },
+                        Text(
+                            text =
+                                if (
+                                    selectedQuestion.isEmpty()
+                                ) {
+
+                                    stringResource(
+                                        R.string
+                                            .select_security_question
+                                    )
+
+                                } else {
+                                    selectedQuestion
+                                },
+
+                            color =
+                                if (
+                                    selectedQuestion.isEmpty()
+                                ) {
+                                    Color(0xFFBDBDBD)
+                                } else {
+                                    Color(0xFF333333)
+                                },
 
                             fontSize = 14.sp,
+
                             maxLines = 1,
 
-                            modifier = Modifier.weight(1f)
+                            modifier =
+                                Modifier.weight(1f)
                         )
 
                         Icon(
                             imageVector =
-                                Icons.Outlined.KeyboardArrowDown,
+                                Icons.Outlined
+                                    .KeyboardArrowDown,
 
-                            contentDescription = null,
+                            contentDescription =
+                                null,
 
-                            tint = Color(0xFF8F8F8F),
+                            tint =
+                                Color(0xFF8F8F8F),
 
-                            modifier = Modifier.size(22.dp)
+                            modifier =
+                                Modifier.size(22.dp)
                         )
                     }
 
                     if (dropdownExpanded) {
+
                         Popup(
-                            alignment = Alignment.TopEnd,
+                            alignment =
+                                Alignment.TopEnd,
 
                             onDismissRequest = {
                                 onDropdownClick()
                             },
 
-                            properties = PopupProperties(
-                                focusable = true
-                            )
+                            properties =
+                                PopupProperties(
+                                    focusable = true
+                                )
                         ) {
+
                             Column(
                                 modifier = Modifier
                                     .width(210.dp)
@@ -1322,73 +1730,108 @@ private fun SecurityQuestionSettingsDialog(
                                     )
                                     .border(
                                         width = 1.dp,
-                                        color = Color(0xFFE5E5E5),
-                                        shape = RoundedCornerShape(15.dp)
+                                        color =
+                                            Color(0xFFE5E5E5),
+                                        shape =
+                                            RoundedCornerShape(15.dp)
                                     )
                             ) {
-                                questions.forEachIndexed { index, question ->
-                                    Text(
-                                        text = question,
-                                        color = Color(0xFF333333),
-                                        fontSize = 13.sp,
-                                        maxLines = 1,
 
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .clickable(
-                                                indication = ripple(
-                                                    bounded = true
-                                                ),
+                                questions
+                                    .forEachIndexed {
+                                            index,
+                                            question ->
 
-                                                interactionSource =
-                                                    remember {
-                                                        MutableInteractionSource()
+                                        Text(
+                                            text =
+                                                question,
+
+                                            color =
+                                                Color(0xFF333333),
+
+                                            fontSize = 13.sp,
+
+                                            maxLines = 1,
+
+                                            modifier =
+                                                Modifier
+                                                    .fillMaxWidth()
+                                                    .clickable(
+                                                        indication =
+                                                            ripple(
+                                                                bounded =
+                                                                    true
+                                                            ),
+
+                                                        interactionSource =
+                                                            remember {
+                                                                MutableInteractionSource()
+                                                            }
+                                                    ) {
+                                                        onQuestionSelected(
+                                                            question
+                                                        )
                                                     }
-                                            ) {
-                                                onQuestionSelected(question)
-                                            }
-                                            .padding(
-                                                horizontal = 18.dp,
-                                                vertical = 14.dp
-                                            )
-                                    )
+                                                    .padding(
+                                                        horizontal =
+                                                            18.dp,
 
-                                    if (index < questions.lastIndex) {
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .height(1.dp)
-                                                .background(
-                                                    Color(0xFFF0F0F0)
-                                                )
+                                                        vertical =
+                                                            14.dp
+                                                    )
                                         )
+
+                                        if (
+                                            index <
+                                            questions.lastIndex
+                                        ) {
+
+                                            Box(
+                                                modifier =
+                                                    Modifier
+                                                        .fillMaxWidth()
+                                                        .height(1.dp)
+                                                        .background(
+                                                            Color(
+                                                                0xFFF0F0F0
+                                                            )
+                                                        )
+                                            )
+                                        }
                                     }
-                                }
                             }
                         }
                     }
                 }
 
                 Spacer(
-                    modifier = Modifier.height(23.dp)
+                    modifier =
+                        Modifier.height(23.dp)
                 )
 
                 Text(
-                    text = stringResource(
-                        R.string.enter_security_answer
-                    ),
+                    text =
+                        stringResource(
+                            R.string.enter_security_answer
+                        ),
 
-                    color = Color(0xFF333333),
+                    color =
+                        Color(0xFF333333),
+
                     fontSize = 14.sp
                 )
 
                 Spacer(
-                    modifier = Modifier.height(8.dp)
+                    modifier =
+                        Modifier.height(8.dp)
                 )
 
                 BasicTextField(
-                    value = answer,
-                    onValueChange = onAnswerChanged,
+                    value =
+                        answer,
+
+                    onValueChange =
+                        onAnswerChanged,
 
                     modifier = Modifier
                         .fillMaxWidth()
@@ -1397,44 +1840,65 @@ private fun SecurityQuestionSettingsDialog(
                             Color(0xFFF8F8F8),
                             RoundedCornerShape(15.dp)
                         )
-                        .padding(horizontal = 15.dp),
+                        .padding(
+                            horizontal = 15.dp
+                        ),
 
                     singleLine = true,
 
-                    textStyle = TextStyle(
-                        color = Color(0xFF333333),
-                        fontSize = 12.sp,
-                        lineHeight = 16.sp
-                    ),
+                    textStyle =
+                        TextStyle(
+                            color =
+                                Color(0xFF333333),
 
-                    decorationBox = { innerTextField ->
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.CenterStart
-                        ) {
-                            if (answer.isEmpty()) {
-                                Text(
-                                    text = stringResource(
-                                        R.string.enter_your_answer
-                                    ),
+                            fontSize = 12.sp,
 
-                                    color = Color(0xFFBDBDBD),
-                                    fontSize = 12.sp,
-                                    maxLines = 1
-                                )
+                            lineHeight =
+                                16.sp
+                        ),
+
+                    decorationBox =
+                        { innerTextField ->
+
+                            Box(
+                                modifier =
+                                    Modifier.fillMaxSize(),
+
+                                contentAlignment =
+                                    Alignment.CenterStart
+                            ) {
+
+                                if (answer.isEmpty()) {
+
+                                    Text(
+                                        text =
+                                            stringResource(
+                                                R.string
+                                                    .enter_your_answer
+                                            ),
+
+                                        color =
+                                            Color(0xFFBDBDBD),
+
+                                        fontSize = 12.sp,
+
+                                        maxLines = 1
+                                    )
+                                }
+
+                                innerTextField()
                             }
-
-                            innerTextField()
                         }
-                    }
                 )
 
                 Spacer(
-                    modifier = Modifier.height(30.dp)
+                    modifier =
+                        Modifier.height(30.dp)
                 )
 
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier =
+                        Modifier.fillMaxWidth(),
 
                     horizontalArrangement =
                         Arrangement.End,
@@ -1442,32 +1906,42 @@ private fun SecurityQuestionSettingsDialog(
                     verticalAlignment =
                         Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = stringResource(R.string.cancel),
 
-                        color = Color(0xFF818181),
+                    Text(
+                        text =
+                            stringResource(
+                                R.string.cancel
+                            ),
+
+                        color =
+                            Color(0xFF818181),
+
                         fontSize = 16.sp,
 
-                        modifier = Modifier
-                            .clickable(
-                                indication = ripple(
-                                    bounded = true
-                                ),
+                        modifier =
+                            Modifier
+                                .clickable(
+                                    indication =
+                                        ripple(
+                                            bounded = true
+                                        ),
 
-                                interactionSource = remember {
-                                    MutableInteractionSource()
+                                    interactionSource =
+                                        remember {
+                                            MutableInteractionSource()
+                                        }
+                                ) {
+                                    onCancel()
                                 }
-                            ) {
-                                onCancel()
-                            }
-                            .padding(
-                                horizontal = 20.dp,
-                                vertical = 10.dp
-                            )
+                                .padding(
+                                    horizontal = 20.dp,
+                                    vertical = 10.dp
+                                )
                     )
 
                     Spacer(
-                        modifier = Modifier.width(20.dp)
+                        modifier =
+                            Modifier.width(20.dp)
                     )
 
                     val saveEnabled =
@@ -1475,34 +1949,42 @@ private fun SecurityQuestionSettingsDialog(
                                 answer.trim().isNotEmpty()
 
                     Text(
-                        text = stringResource(R.string.save),
+                        text =
+                            stringResource(
+                                R.string.save
+                            ),
 
-                        color = if (saveEnabled) {
-                            Color(0xFF2196F3)
-                        } else {
-                            Color(0xFF90CAF9)
-                        },
+                        color =
+                            if (saveEnabled) {
+                                Color(0xFF2196F3)
+                            } else {
+                                Color(0xFF90CAF9)
+                            },
 
                         fontSize = 16.sp,
 
-                        modifier = Modifier
-                            .clickable(
-                                enabled = saveEnabled,
+                        modifier =
+                            Modifier
+                                .clickable(
+                                    enabled =
+                                        saveEnabled,
 
-                                indication = ripple(
-                                    bounded = true
-                                ),
+                                    indication =
+                                        ripple(
+                                            bounded = true
+                                        ),
 
-                                interactionSource = remember {
-                                    MutableInteractionSource()
+                                    interactionSource =
+                                        remember {
+                                            MutableInteractionSource()
+                                        }
+                                ) {
+                                    onSave()
                                 }
-                            ) {
-                                onSave()
-                            }
-                            .padding(
-                                horizontal = 20.dp,
-                                vertical = 10.dp
-                            )
+                                .padding(
+                                    horizontal = 20.dp,
+                                    vertical = 10.dp
+                                )
                     )
                 }
             }
@@ -1518,7 +2000,9 @@ private fun SecurityQuestionSettingsDialog(
 private fun getRelockText(
     relockOption: String
 ): String {
+
     return when (relockOption) {
+
         "relock_after_screen_off" ->
             stringResource(
                 R.string.relock_after_screen_off
@@ -1544,30 +2028,48 @@ private fun getRelockText(
 private fun getDelayText(
     key: String
 ): String {
+
     return when (key) {
+
         "never" ->
-            stringResource(R.string.never)
+            stringResource(
+                R.string.never
+            )
 
         "five_seconds" ->
-            stringResource(R.string.five_seconds)
+            stringResource(
+                R.string.five_seconds
+            )
 
         "ten_seconds" ->
-            stringResource(R.string.ten_seconds)
+            stringResource(
+                R.string.ten_seconds
+            )
 
         "thirty_seconds" ->
-            stringResource(R.string.thirty_seconds)
+            stringResource(
+                R.string.thirty_seconds
+            )
 
         "one_minute" ->
-            stringResource(R.string.one_minute)
+            stringResource(
+                R.string.one_minute
+            )
 
         "two_minutes" ->
-            stringResource(R.string.two_minutes)
+            stringResource(
+                R.string.two_minutes
+            )
 
         "five_minutes" ->
-            stringResource(R.string.five_minutes)
+            stringResource(
+                R.string.five_minutes
+            )
 
         else ->
-            stringResource(R.string.never)
+            stringResource(
+                R.string.never
+            )
     }
 }
 
@@ -1582,13 +2084,17 @@ private fun RelockOptionDialog(
     onCancel: () -> Unit,
     onConfirm: () -> Unit
 ) {
-    Dialog(
-        onDismissRequest = onCancel,
 
-        properties = DialogProperties(
-            usePlatformDefaultWidth = false
-        )
+    Dialog(
+        onDismissRequest =
+            onCancel,
+
+        properties =
+            DialogProperties(
+                usePlatformDefaultWidth = false
+            )
     ) {
+
         Box(
             modifier = Modifier
                 .width(291.dp)
@@ -1598,6 +2104,7 @@ private fun RelockOptionDialog(
                     RoundedCornerShape(12.dp)
                 )
         ) {
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -1608,37 +2115,47 @@ private fun RelockOptionDialog(
                         bottom = 8.dp
                     )
             ) {
+
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(22.dp),
 
-                    contentAlignment = Alignment.Center
+                    contentAlignment =
+                        Alignment.Center
                 ) {
-                    Text(
-                        text = stringResource(
-                            R.string.relock
-                        ),
 
-                        color = Color(0xFF333333),
+                    Text(
+                        text =
+                            stringResource(
+                                R.string.relock
+                            ),
+
+                        color =
+                            Color(0xFF333333),
+
                         fontSize = 14.sp
                     )
                 }
 
                 Spacer(
-                    modifier = Modifier.height(7.dp)
+                    modifier =
+                        Modifier.height(7.dp)
                 )
 
                 RelockOptionRow(
-                    text = stringResource(
-                        R.string.relock_after_quitting_option
-                    ),
+                    text =
+                        stringResource(
+                            R.string
+                                .relock_after_quitting_option
+                        ),
 
                     selected =
                         selectedOption ==
                                 "relock_after_quitting",
 
                     onClick = {
+
                         onOptionSelected(
                             "relock_after_quitting"
                         )
@@ -1646,15 +2163,18 @@ private fun RelockOptionDialog(
                 )
 
                 RelockOptionRow(
-                    text = stringResource(
-                        R.string.relock_after_screen_off
-                    ),
+                    text =
+                        stringResource(
+                            R.string
+                                .relock_after_screen_off
+                        ),
 
                     selected =
                         selectedOption ==
                                 "relock_after_screen_off",
 
                     onClick = {
+
                         onOptionSelected(
                             "relock_after_screen_off"
                         )
@@ -1662,12 +2182,16 @@ private fun RelockOptionDialog(
                 )
 
                 Spacer(
-                    modifier = Modifier.weight(1f)
+                    modifier =
+                        Modifier.weight(1f)
                 )
 
                 DialogButtons(
-                    onCancel = onCancel,
-                    onConfirm = onConfirm
+                    onCancel =
+                        onCancel,
+
+                    onConfirm =
+                        onConfirm
                 )
             }
         }
@@ -1684,6 +2208,7 @@ private fun RelockOptionRow(
     selected: Boolean,
     onClick: () -> Unit
 ) {
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -1692,27 +2217,42 @@ private fun RelockOptionRow(
                 onClick()
             },
 
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment =
+            Alignment.CenterVertically
     ) {
+
         RadioButton(
-            selected = selected,
-            onClick = onClick,
+            selected =
+                selected,
 
-            modifier = Modifier.size(28.dp),
+            onClick =
+                onClick,
 
-            colors = RadioButtonDefaults.colors(
-                selectedColor = Color(0xFF0396FF),
-                unselectedColor = Color(0xFFBDBDBD)
-            )
+            modifier =
+                Modifier.size(28.dp),
+
+            colors =
+                RadioButtonDefaults.colors(
+                    selectedColor =
+                        Color(0xFF0396FF),
+
+                    unselectedColor =
+                        Color(0xFFBDBDBD)
+                )
         )
 
         Spacer(
-            modifier = Modifier.width(5.dp)
+            modifier =
+                Modifier.width(5.dp)
         )
 
         Text(
-            text = text,
-            color = Color(0xFF444444),
+            text =
+                text,
+
+            color =
+                Color(0xFF444444),
+
             fontSize = 13.sp
         )
     }
@@ -1729,23 +2269,28 @@ private fun DelayToRelockDialog(
     onCancel: () -> Unit,
     onConfirm: () -> Unit
 ) {
-    val delayOptions = listOf(
-        "never",
-        "five_seconds",
-        "ten_seconds",
-        "thirty_seconds",
-        "one_minute",
-        "two_minutes",
-        "five_minutes"
-    )
+
+    val delayOptions =
+        listOf(
+            "never",
+            "five_seconds",
+            "ten_seconds",
+            "thirty_seconds",
+            "one_minute",
+            "two_minutes",
+            "five_minutes"
+        )
 
     Dialog(
-        onDismissRequest = onCancel,
+        onDismissRequest =
+            onCancel,
 
-        properties = DialogProperties(
-            usePlatformDefaultWidth = false
-        )
+        properties =
+            DialogProperties(
+                usePlatformDefaultWidth = false
+            )
     ) {
+
         Box(
             modifier = Modifier
                 .width(291.dp)
@@ -1755,6 +2300,7 @@ private fun DelayToRelockDialog(
                     RoundedCornerShape(12.dp)
                 )
         ) {
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -1765,45 +2311,65 @@ private fun DelayToRelockDialog(
                         bottom = 8.dp
                     )
             ) {
+
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(22.dp),
 
-                    contentAlignment = Alignment.Center
+                    contentAlignment =
+                        Alignment.Center
                 ) {
-                    Text(
-                        text = stringResource(
-                            R.string.delay_to_relock
-                        ),
 
-                        color = Color(0xFF333333),
+                    Text(
+                        text =
+                            stringResource(
+                                R.string.delay_to_relock
+                            ),
+
+                        color =
+                            Color(0xFF333333),
+
                         fontSize = 14.sp
                     )
                 }
 
                 Spacer(
-                    modifier = Modifier.height(7.dp)
+                    modifier =
+                        Modifier.height(7.dp)
                 )
 
                 delayOptions.forEach { option ->
+
                     DelayOptionRow(
-                        text = getDelayText(option),
-                        selected = selectedOption == option,
+                        text =
+                            getDelayText(
+                                option
+                            ),
+
+                        selected =
+                            selectedOption ==
+                                    option,
 
                         onClick = {
-                            onOptionSelected(option)
+                            onOptionSelected(
+                                option
+                            )
                         }
                     )
                 }
 
                 Spacer(
-                    modifier = Modifier.weight(1f)
+                    modifier =
+                        Modifier.weight(1f)
                 )
 
                 DialogButtons(
-                    onCancel = onCancel,
-                    onConfirm = onConfirm
+                    onCancel =
+                        onCancel,
+
+                    onConfirm =
+                        onConfirm
                 )
             }
         }
@@ -1820,6 +2386,7 @@ private fun DelayOptionRow(
     selected: Boolean,
     onClick: () -> Unit
 ) {
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -1828,27 +2395,42 @@ private fun DelayOptionRow(
                 onClick()
             },
 
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment =
+            Alignment.CenterVertically
     ) {
+
         RadioButton(
-            selected = selected,
-            onClick = onClick,
+            selected =
+                selected,
 
-            modifier = Modifier.size(28.dp),
+            onClick =
+                onClick,
 
-            colors = RadioButtonDefaults.colors(
-                selectedColor = Color(0xFF0396FF),
-                unselectedColor = Color(0xFFBDBDBD)
-            )
+            modifier =
+                Modifier.size(28.dp),
+
+            colors =
+                RadioButtonDefaults.colors(
+                    selectedColor =
+                        Color(0xFF0396FF),
+
+                    unselectedColor =
+                        Color(0xFFBDBDBD)
+                )
         )
 
         Spacer(
-            modifier = Modifier.width(5.dp)
+            modifier =
+                Modifier.width(5.dp)
         )
 
         Text(
-            text = text,
-            color = Color(0xFF444444),
+            text =
+                text,
+
+            color =
+                Color(0xFF444444),
+
             fontSize = 13.sp
         )
     }
@@ -1863,8 +2445,10 @@ private fun DialogButtons(
     onCancel: () -> Unit,
     onConfirm: () -> Unit
 ) {
+
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier =
+            Modifier.fillMaxWidth(),
 
         horizontalArrangement =
             Arrangement.End,
@@ -1872,40 +2456,54 @@ private fun DialogButtons(
         verticalAlignment =
             Alignment.CenterVertically
     ) {
-        Text(
-            text = stringResource(R.string.cancel),
 
-            color = Color(0xFF818181),
+        Text(
+            text =
+                stringResource(
+                    R.string.cancel
+                ),
+
+            color =
+                Color(0xFF818181),
+
             fontSize = 14.sp,
 
-            modifier = Modifier
-                .clickable {
-                    onCancel()
-                }
-                .padding(
-                    horizontal = 10.dp,
-                    vertical = 6.dp
-                )
+            modifier =
+                Modifier
+                    .clickable {
+                        onCancel()
+                    }
+                    .padding(
+                        horizontal = 10.dp,
+                        vertical = 6.dp
+                    )
         )
 
         Spacer(
-            modifier = Modifier.width(4.dp)
+            modifier =
+                Modifier.width(4.dp)
         )
 
         Text(
-            text = stringResource(R.string.confirm),
+            text =
+                stringResource(
+                    R.string.confirm
+                ),
 
-            color = Color(0xFF0396FF),
+            color =
+                Color(0xFF0396FF),
+
             fontSize = 14.sp,
 
-            modifier = Modifier
-                .clickable {
-                    onConfirm()
-                }
-                .padding(
-                    horizontal = 10.dp,
-                    vertical = 6.dp
-                )
+            modifier =
+                Modifier
+                    .clickable {
+                        onConfirm()
+                    }
+                    .padding(
+                        horizontal = 10.dp,
+                        vertical = 6.dp
+                    )
         )
     }
 }
@@ -1916,10 +2514,15 @@ private fun DialogButtons(
 
 @Composable
 private fun SettingDivider() {
+
     Divider(
-        modifier = Modifier.fillMaxWidth(),
-        thickness = 0.6.dp,
-        color = Color(0xFFE8E8E8)
+        modifier =
+            Modifier.fillMaxWidth(),
+
+        thickness =
+            0.6.dp,
+
+        color =
+            Color(0xFFE8E8E8)
     )
 }
-
