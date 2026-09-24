@@ -71,6 +71,7 @@ fun PinCreateScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .statusBarsPadding()
                 .padding(
                     start = 26.dp,
                     end = 26.dp,

@@ -49,11 +49,13 @@ import com.example.applock.data.DataStoreManager
 
 import kotlinx.coroutines.launch
 
+
 data class LanguageItem(
     val name: String,
     val flagRes: Int,
     val code: String
 )
+
 
 @Composable
 fun LanguagesScreen(
@@ -181,6 +183,7 @@ fun LanguagesScreen(
     val scrollState =
         rememberScrollState()
 
+
     Box(
         modifier =
             Modifier
@@ -196,10 +199,15 @@ fun LanguagesScreen(
                     .fillMaxSize()
         ) {
 
+            // =========================================================
+            // TOP HEADER
+            // =========================================================
+
             Box(
                 modifier =
                     Modifier
                         .fillMaxWidth()
+                        .statusBarsPadding()
                         .height(90.dp)
             ) {
 
@@ -265,6 +273,11 @@ fun LanguagesScreen(
                 )
             }
 
+
+            // =========================================================
+            // LANGUAGE LIST
+            // =========================================================
+
             Column(
                 modifier =
                     Modifier
@@ -303,6 +316,11 @@ fun LanguagesScreen(
                     )
                 }
             }
+
+
+            // =========================================================
+            // SELECT BUTTON
+            // =========================================================
 
             Button(
                 onClick = {
@@ -392,6 +410,7 @@ fun LanguagesScreen(
         }
     }
 }
+
 
 @Composable
 private fun LanguageCard(
@@ -599,6 +618,7 @@ private fun LanguageCard(
         }
     }
 }
+
 
 private fun showLanguageSelectionToast(
     context: Context

@@ -59,6 +59,7 @@ import androidx.compose.runtime.setValue
 
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
@@ -140,11 +141,6 @@ fun IntruderScreen(
 
     // =========================================================
     // OBSERVATION ATTEMPTS
-    //
-    // 0  = Never
-    // 3  = 3 Attempts
-    // 5  = 5 Attempts
-    // 10 = 10 Attempts
     // =========================================================
 
     var observationAttempts by remember {
@@ -283,28 +279,12 @@ fun IntruderScreen(
                 .first()
 
 
-        /*
-         * IMPORTANT:
-         *
-         * Attempts ke liye observation TIME nahi,
-         * observation ATTEMPTS read karna hai.
-         */
         val savedAttempts =
             dataStore
                 .getIntruderObservationAttempts()
                 .first()
 
 
-        /*
-         * Sirf valid values allow hain.
-         *
-         * 0  = Never
-         * 3  = 3 Attempts
-         * 5  = 5 Attempts
-         * 10 = 10 Attempts
-         *
-         * Invalid value = Never
-         */
         observationAttempts =
             when (savedAttempts) {
 
@@ -628,6 +608,7 @@ fun IntruderScreen(
                 modifier =
                     Modifier
                         .fillMaxWidth()
+                        .statusBarsPadding()
                         .height(
                             64.dp
                         )
@@ -836,10 +817,6 @@ fun IntruderScreen(
                     }
 
                 } else {
-
-                    // =========================================
-                    // ATTEMPTS SETTINGS BUTTON
-                    // =========================================
 
                     IconButton(
                         onClick = {
@@ -1185,10 +1162,6 @@ fun IntruderScreen(
 
             } else {
 
-                // =============================================
-                // IMAGE GRID
-                // =============================================
-
                 Column(
                     modifier =
                         Modifier
@@ -1347,6 +1320,7 @@ fun IntruderScreen(
                         .align(
                             Alignment.BottomCenter
                         )
+                        .navigationBarsPadding()
                         .fillMaxWidth()
                         .padding(
                             start = 16.dp,
@@ -1483,12 +1457,7 @@ fun IntruderScreen(
                         Modifier.fillMaxWidth()
                 ) {
 
-                    // =========================================
-                    // NEVER
-                    // =========================================
-
                     ObservationAttemptsOption(
-
                         text =
                             neverText,
 
@@ -1507,12 +1476,7 @@ fun IntruderScreen(
                     )
 
 
-                    // =========================================
-                    // 3 ATTEMPTS
-                    // =========================================
-
                     ObservationAttemptsOption(
-
                         text =
                             threeAttemptsText,
 
@@ -1531,12 +1495,7 @@ fun IntruderScreen(
                     )
 
 
-                    // =========================================
-                    // 5 ATTEMPTS
-                    // =========================================
-
                     ObservationAttemptsOption(
-
                         text =
                             fiveAttemptsText,
 
@@ -1555,12 +1514,7 @@ fun IntruderScreen(
                     )
 
 
-                    // =========================================
-                    // 10 ATTEMPTS
-                    // =========================================
-
                     ObservationAttemptsOption(
-
                         text =
                             tenAttemptsText,
 
@@ -2359,6 +2313,7 @@ private fun IntruderImagePreviewScreen(
                 modifier =
                     Modifier
                         .fillMaxWidth()
+                        .statusBarsPadding()
                         .height(
                             64.dp
                         )
@@ -2503,10 +2458,11 @@ private fun IntruderImagePreviewScreen(
                 modifier =
                     Modifier
                         .fillMaxWidth()
+                        .navigationBarsPadding()
                         .padding(
                             start = 10.dp,
                             end = 10.dp,
-                            bottom = 54.dp
+                            bottom = 20.dp
                         )
                         .height(
                             46.dp

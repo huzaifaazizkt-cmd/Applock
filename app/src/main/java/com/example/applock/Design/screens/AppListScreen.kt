@@ -8,7 +8,6 @@ import android.content.pm.PackageManager
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -53,12 +52,14 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
+
 data class AppItem(
     val applicationInfo: ApplicationInfo,
     val appName: String,
     val searchName: String,
     val iconBitmap: androidx.compose.ui.graphics.ImageBitmap?
 )
+
 
 object AppListCache {
 
@@ -84,74 +85,105 @@ object AppListCache {
             }
 
             try {
-                val appContext = context.applicationContext
 
-                val result = withContext(Dispatchers.IO) {
+                val appContext =
+                    context.applicationContext
 
-                    val pm = appContext.packageManager
+                val result =
+                    withContext(Dispatchers.IO) {
 
-                    val launcherIntent =
-                        Intent(Intent.ACTION_MAIN).apply {
-                            addCategory(Intent.CATEGORY_LAUNCHER)
-                        }
+                        val pm =
+                            appContext.packageManager
 
-                    val launcherApps =
-                        pm.queryIntentActivities(
-                            launcherIntent,
-                            PackageManager.MATCH_ALL
-                        )
-
-                    launcherApps.mapNotNull { resolveInfo ->
-
-                        try {
-
-                            val applicationInfo =
-                                resolveInfo.activityInfo?.applicationInfo
-                                    ?: return@mapNotNull null
-
-                            val packageName =
-                                applicationInfo.packageName
-
-                            if (packageName == appContext.packageName) {
-                                return@mapNotNull null
+                        val launcherIntent =
+                            Intent(Intent.ACTION_MAIN).apply {
+                                addCategory(
+                                    Intent.CATEGORY_LAUNCHER
+                                )
                             }
 
-                            val appName =
-                                resolveInfo.loadLabel(pm).toString()
-
-                            val iconBitmap =
-                                try {
-                                    pm.getApplicationIcon(
-                                        applicationInfo
-                                    )
-                                        .toBitmap(64, 64)
-                                        .asImageBitmap()
-                                } catch (e: Exception) {
-                                    null
-                                }
-
-                            AppItem(
-                                applicationInfo = applicationInfo,
-                                appName = appName,
-                                searchName = appName.lowercase(),
-                                iconBitmap = iconBitmap
+                        val launcherApps =
+                            pm.queryIntentActivities(
+                                launcherIntent,
+                                PackageManager.MATCH_ALL
                             )
 
-                        } catch (e: Exception) {
-                            null
+                        launcherApps.mapNotNull { resolveInfo ->
+
+                            try {
+
+                                val applicationInfo =
+                                    resolveInfo.activityInfo
+                                        ?.applicationInfo
+                                        ?: return@mapNotNull null
+
+                                val packageName =
+                                    applicationInfo.packageName
+
+                                if (
+                                    packageName ==
+                                    appContext.packageName
+                                ) {
+                                    return@mapNotNull null
+                                }
+
+                                val appName =
+                                    resolveInfo
+                                        .loadLabel(pm)
+                                        .toString()
+
+                                val iconBitmap =
+                                    try {
+
+                                        pm.getApplicationIcon(
+                                            applicationInfo
+                                        )
+                                            .toBitmap(
+                                                64,
+                                                64
+                                            )
+                                            .asImageBitmap()
+
+                                    } catch (
+                                        e: Exception
+                                    ) {
+
+                                        null
+                                    }
+
+                                AppItem(
+                                    applicationInfo =
+                                        applicationInfo,
+                                    appName =
+                                        appName,
+                                    searchName =
+                                        appName.lowercase(),
+                                    iconBitmap =
+                                        iconBitmap
+                                )
+
+                            } catch (
+                                e: Exception
+                            ) {
+
+                                null
+                            }
                         }
+                            .distinctBy {
+                                it.applicationInfo
+                                    .packageName
+                            }
+                            .sortedBy {
+                                it.searchName
+                            }
                     }
-                        .distinctBy {
-                            it.applicationInfo.packageName
-                        }
-                        .sortedBy {
-                            it.searchName
-                        }
-                }
 
                 apps = result
 
-            } catch (e: Exception) {
+            } catch (
+                e: Exception
+            ) {
+
                 e.printStackTrace()
             }
         }
@@ -161,21 +193,28 @@ object AppListCache {
         packageName: String,
         icon: androidx.compose.ui.graphics.ImageBitmap
     ) {
-        val currentApps = apps ?: return
 
-        apps = currentApps.map { appItem ->
+        val currentApps =
+            apps ?: return
 
-            if (
-                appItem.applicationInfo.packageName ==
-                packageName
-            ) {
-                appItem.copy(
-                    iconBitmap = icon
-                )
-            } else {
-                appItem
+        apps =
+            currentApps.map { appItem ->
+
+                if (
+                    appItem.applicationInfo
+                        .packageName ==
+                    packageName
+                ) {
+
+                    appItem.copy(
+                        iconBitmap = icon
+                    )
+
+                } else {
+
+                    appItem
+                }
             }
-        }
     }
 
     fun clear() {
@@ -183,10 +222,12 @@ object AppListCache {
     }
 }
 
+
 @Composable
 fun AppListScreen(
     context: Context
 ) {
+
     val appContext =
         remember {
             context.applicationContext
@@ -209,8 +250,10 @@ fun AppListScreen(
     }
 
     var apps by remember {
+
         mutableStateOf(
-            AppListCache.getApps() ?: emptyList()
+            AppListCache.getApps()
+                ?: emptyList()
         )
     }
 
@@ -225,11 +268,15 @@ fun AppListScreen(
 
         } else {
 
-            AppListCache.preload(appContext)
+            AppListCache.preload(
+                appContext
+            )
 
-            AppListCache.getApps()?.let { loadedApps ->
-                apps = loadedApps
-            }
+            AppListCache.getApps()
+                ?.let { loadedApps ->
+
+                    apps = loadedApps
+                }
         }
     }
 
@@ -240,7 +287,10 @@ fun AppListScreen(
 
     val normalizedSearch =
         remember(searchText) {
-            searchText.trim().lowercase()
+
+            searchText
+                .trim()
+                .lowercase()
         }
 
     val filteredApps =
@@ -252,30 +302,38 @@ fun AppListScreen(
         ) {
 
             val tabApps =
+
                 if (selectedTab == 0) {
 
                     apps.filter { appItem ->
+
                         !lockedApps.contains(
-                            appItem.applicationInfo.packageName
+                            appItem.applicationInfo
+                                .packageName
                         )
                     }
 
                 } else {
 
                     apps.filter { appItem ->
+
                         lockedApps.contains(
-                            appItem.applicationInfo.packageName
+                            appItem.applicationInfo
+                                .packageName
                         )
                     }
                 }
 
-            if (normalizedSearch.isEmpty()) {
+            if (
+                normalizedSearch.isEmpty()
+            ) {
 
                 tabApps
 
             } else {
 
                 tabApps.filter { appItem ->
+
                     appItem.searchName.contains(
                         normalizedSearch
                     )
@@ -283,13 +341,34 @@ fun AppListScreen(
             }
         }
 
+
+    /*
+     * =========================================================
+     * MAIN SCREEN
+     * =========================================================
+     *
+     * statusBarsPadding() added here.
+     *
+     * This moves the complete AppList content below
+     * the Android status bar.
+     *
+     * =========================================================
+     */
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(
                 Color(0xFFF7F7F7)
             )
+            .statusBarsPadding()
     ) {
+
+        /*
+         * =====================================================
+         * TOP TITLE
+         * =====================================================
+         */
 
         Row(
             modifier = Modifier
@@ -298,161 +377,282 @@ fun AppListScreen(
                     start = 20.dp,
                     top = 15.dp
                 ),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment =
+                Alignment.CenterVertically
         ) {
 
             Image(
-                painter = painterResource(
-                    R.drawable.applock
-                ),
+                painter =
+                    painterResource(
+                        R.drawable.applock
+                    ),
                 contentDescription = null,
-                modifier = Modifier.size(24.dp)
+                modifier =
+                    Modifier.size(24.dp)
             )
 
             Spacer(
-                modifier = Modifier.width(8.dp)
+                modifier =
+                    Modifier.width(8.dp)
             )
 
             Text(
-                text = stringResource(
-                    R.string.app_lock
-                ),
-                color = Color.Black,
-                fontSize = 20.sp
+                text =
+                    stringResource(
+                        R.string.app_lock
+                    ),
+                color =
+                    Color.Black,
+                fontSize =
+                    20.sp
             )
         }
 
+
+        /*
+         * =====================================================
+         * TABS
+         * =====================================================
+         */
+
         TabRow(
-            selectedTabIndex = selectedTab,
-            containerColor = Color(0xFFF7F7F7),
-            contentColor = Color(0xFF0396FF),
-            modifier = Modifier.padding(
-                top = 18.dp
-            ),
+            selectedTabIndex =
+                selectedTab,
+
+            containerColor =
+                Color(0xFFF7F7F7),
+
+            contentColor =
+                Color(0xFF0396FF),
+
+            modifier =
+                Modifier.padding(
+                    top = 18.dp
+                ),
+
             indicator = { tabPositions ->
 
-                if (selectedTab < tabPositions.size) {
+                if (
+                    selectedTab <
+                    tabPositions.size
+                ) {
 
                     TabRowDefaults.Indicator(
+
                         modifier =
                             Modifier.tabIndicatorOffset(
-                                tabPositions[selectedTab]
+                                tabPositions[
+                                    selectedTab
+                                ]
                             ),
-                        color = Color(0xFF0396FF),
-                        height = 2.dp
+
+                        color =
+                            Color(0xFF0396FF),
+
+                        height =
+                            2.dp
                     )
                 }
             }
         ) {
 
+
+            /*
+             * =================================================
+             * UNLOCKED TAB
+             * =================================================
+             */
+
             Tab(
-                selected = selectedTab == 0,
+                selected =
+                    selectedTab == 0,
+
                 onClick = {
                     selectedTab = 0
                 },
-                modifier = Modifier.height(42.dp)
+
+                modifier =
+                    Modifier.height(42.dp)
             ) {
 
                 Row(
                     verticalAlignment =
                         Alignment.CenterVertically,
+
                     horizontalArrangement =
                         Arrangement.Center
                 ) {
 
                     Image(
-                        painter = painterResource(
-                            R.drawable.unlock
-                        ),
+                        painter =
+                            painterResource(
+                                R.drawable.unlock
+                            ),
+
                         contentDescription =
                             stringResource(
                                 R.string.unlocked
                             ),
+
                         colorFilter =
                             ColorFilter.tint(
-                                if (selectedTab == 0) {
-                                    Color(0xFF0396FF)
+
+                                if (
+                                    selectedTab == 0
+                                ) {
+
+                                    Color(
+                                        0xFF0396FF
+                                    )
+
                                 } else {
-                                    Color(0xFFBDBDBD)
+
+                                    Color(
+                                        0xFFBDBDBD
+                                    )
                                 }
                             ),
+
                         modifier =
                             Modifier.size(18.dp)
                     )
 
                     Spacer(
-                        modifier = Modifier.width(5.dp)
+                        modifier =
+                            Modifier.width(5.dp)
                     )
 
                     Text(
-                        text = stringResource(
-                            R.string.unlocked
-                        ),
+                        text =
+                            stringResource(
+                                R.string.unlocked
+                            ),
+
                         color =
-                            if (selectedTab == 0) {
-                                Color(0xFF0396FF)
+
+                            if (
+                                selectedTab == 0
+                            ) {
+
+                                Color(
+                                    0xFF0396FF
+                                )
+
                             } else {
-                                Color(0xFFBDBDBD)
+
+                                Color(
+                                    0xFFBDBDBD
+                                )
                             },
-                        fontSize = 16.sp
+
+                        fontSize =
+                            16.sp
                     )
                 }
             }
 
+
+            /*
+             * =================================================
+             * LOCKED TAB
+             * =================================================
+             */
+
             Tab(
-                selected = selectedTab == 1,
+                selected =
+                    selectedTab == 1,
+
                 onClick = {
                     selectedTab = 1
                 },
-                modifier = Modifier.height(42.dp)
+
+                modifier =
+                    Modifier.height(42.dp)
             ) {
 
                 Row(
                     verticalAlignment =
                         Alignment.CenterVertically,
+
                     horizontalArrangement =
                         Arrangement.Center
                 ) {
 
                     Image(
-                        painter = painterResource(
-                            R.drawable.locked
-                        ),
+                        painter =
+                            painterResource(
+                                R.drawable.locked
+                            ),
+
                         contentDescription =
                             stringResource(
                                 R.string.locked
                             ),
+
                         colorFilter =
                             ColorFilter.tint(
-                                if (selectedTab == 1) {
-                                    Color(0xFF0396FF)
+
+                                if (
+                                    selectedTab == 1
+                                ) {
+
+                                    Color(
+                                        0xFF0396FF
+                                    )
+
                                 } else {
-                                    Color(0xFFBDBDBD)
+
+                                    Color(
+                                        0xFFBDBDBD
+                                    )
                                 }
                             ),
+
                         modifier =
                             Modifier.size(18.dp)
                     )
 
                     Spacer(
-                        modifier = Modifier.width(5.dp)
+                        modifier =
+                            Modifier.width(5.dp)
                     )
 
                     Text(
-                        text = stringResource(
-                            R.string.locked
-                        ),
+                        text =
+                            stringResource(
+                                R.string.locked
+                            ),
+
                         color =
-                            if (selectedTab == 1) {
-                                Color(0xFF0396FF)
+
+                            if (
+                                selectedTab == 1
+                            ) {
+
+                                Color(
+                                    0xFF0396FF
+                                )
+
                             } else {
-                                Color(0xFFBDBDBD)
+
+                                Color(
+                                    0xFFBDBDBD
+                                )
                             },
-                        fontSize = 16.sp
+
+                        fontSize =
+                            16.sp
                     )
                 }
             }
         }
+
+
+        /*
+         * =====================================================
+         * SEARCH BAR
+         * =====================================================
+         */
 
         Box(
             modifier = Modifier
@@ -464,7 +664,9 @@ fun AppListScreen(
                 )
                 .height(39.dp)
                 .clip(
-                    RoundedCornerShape(22.dp)
+                    RoundedCornerShape(
+                        22.dp
+                    )
                 )
                 .background(
                     Color(0xFFF7F7F7)
@@ -472,7 +674,10 @@ fun AppListScreen(
                 .border(
                     width = 2.dp,
                     color = Color.White,
-                    shape = RoundedCornerShape(22.dp)
+                    shape =
+                        RoundedCornerShape(
+                            22.dp
+                        )
                 )
         ) {
 
@@ -483,59 +688,88 @@ fun AppListScreen(
                         start = 12.dp,
                         end = 12.dp
                     ),
+
                 verticalAlignment =
                     Alignment.CenterVertically
             ) {
 
                 Icon(
-                    imageVector = Icons.Default.Search,
+                    imageVector =
+                        Icons.Default.Search,
+
                     contentDescription =
                         stringResource(
                             R.string.search
                         ),
-                    tint = Color(0xFFBDBDBD),
-                    modifier = Modifier.size(19.dp)
+
+                    tint =
+                        Color(0xFFBDBDBD),
+
+                    modifier =
+                        Modifier.size(19.dp)
                 )
 
                 Spacer(
-                    modifier = Modifier.width(8.dp)
+                    modifier =
+                        Modifier.width(8.dp)
                 )
 
                 BasicTextField(
-                    value = searchText,
+                    value =
+                        searchText,
+
                     onValueChange = {
                         searchText = it
                     },
+
                     singleLine = true,
-                    textStyle = TextStyle(
-                        color = Color(0xFF555555),
-                        fontSize = 14.sp
-                    ),
+
+                    textStyle =
+                        TextStyle(
+                            color =
+                                Color(0xFF555555),
+                            fontSize =
+                                14.sp
+                        ),
+
                     cursorBrush =
                         SolidColor(
                             Color(0xFF0396FF)
                         ),
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(),
-                    decorationBox = { innerTextField ->
+
+                    modifier =
+                        Modifier
+                            .weight(1f)
+                            .fillMaxHeight(),
+
+                    decorationBox = {
+                            innerTextField ->
 
                         Box(
-                            modifier = Modifier
-                                .fillMaxSize(),
+                            modifier =
+                                Modifier.fillMaxSize(),
+
                             contentAlignment =
                                 Alignment.CenterStart
                         ) {
 
-                            if (searchText.isEmpty()) {
+                            if (
+                                searchText.isEmpty()
+                            ) {
 
                                 Text(
-                                    text = stringResource(
-                                        R.string.search
-                                    ),
+                                    text =
+                                        stringResource(
+                                            R.string.search
+                                        ),
+
                                     color =
-                                        Color(0xFFBDBDBD),
-                                    fontSize = 14.sp
+                                        Color(
+                                            0xFFBDBDBD
+                                        ),
+
+                                    fontSize =
+                                        14.sp
                                 )
                             }
 
@@ -546,26 +780,51 @@ fun AppListScreen(
             }
         }
 
+
         Spacer(
-            modifier = Modifier.height(10.dp)
+            modifier =
+                Modifier.height(10.dp)
         )
+
+
+        /*
+         * =====================================================
+         * GENERAL TITLE
+         * =====================================================
+         */
 
         Text(
-            text = stringResource(
-                R.string.general
-            ),
-            color = Color(0xFF878585),
-            fontSize = 14.sp,
-            modifier = Modifier.padding(
-                start = 18.dp,
-                top = 7.dp,
-                bottom = 3.dp
-            )
+            text =
+                stringResource(
+                    R.string.general
+                ),
+
+            color =
+                Color(0xFF878585),
+
+            fontSize =
+                14.sp,
+
+            modifier =
+                Modifier.padding(
+                    start = 18.dp,
+                    top = 7.dp,
+                    bottom = 3.dp
+                )
         )
 
+
         Spacer(
-            modifier = Modifier.height(18.dp)
+            modifier =
+                Modifier.height(18.dp)
         )
+
+
+        /*
+         * =====================================================
+         * EMPTY LOCKED APP SCREEN
+         * =====================================================
+         */
 
         if (
             selectedTab == 1 &&
@@ -573,12 +832,15 @@ fun AppListScreen(
         ) {
 
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .navigationBarsPadding(),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .navigationBarsPadding(),
+
                 horizontalAlignment =
                     Alignment.CenterHorizontally,
+
                 verticalArrangement =
                     Arrangement.Center
             ) {
@@ -588,30 +850,51 @@ fun AppListScreen(
                         painterResource(
                             R.drawable.applistlock
                         ),
-                    contentDescription = null,
+
+                    contentDescription =
+                        null,
+
                     modifier =
                         Modifier.size(90.dp)
                 )
 
                 Spacer(
-                    modifier = Modifier.height(12.dp)
+                    modifier =
+                        Modifier.height(12.dp)
                 )
 
                 Text(
-                    text = "No locked app found",
-                    color = Color(0xFF878585),
-                    fontSize = 15.sp
+                    text =
+                        "No locked app found",
+
+                    color =
+                        Color(0xFF878585),
+
+                    fontSize =
+                        15.sp
                 )
             }
 
         } else {
 
+
+            /*
+             * =================================================
+             * APP LIST
+             * =================================================
+             */
+
             LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+
                 verticalArrangement =
-                    Arrangement.spacedBy(10.dp),
+                    Arrangement.spacedBy(
+                        10.dp
+                    ),
+
                 contentPadding =
                     PaddingValues(
                         start = 14.dp,
@@ -622,10 +905,13 @@ fun AppListScreen(
             ) {
 
                 items(
-                    items = filteredApps,
-                    key = {
-                            appItem ->
-                        appItem.applicationInfo.packageName
+                    items =
+                        filteredApps,
+
+                    key = { appItem ->
+
+                        appItem.applicationInfo
+                            .packageName
                     }
                 ) { appItem ->
 
@@ -633,7 +919,8 @@ fun AppListScreen(
                         appItem.appName
 
                     val packageName =
-                        appItem.applicationInfo.packageName
+                        appItem.applicationInfo
+                            .packageName
 
                     val isLocked =
                         lockedApps.contains(
@@ -641,49 +928,80 @@ fun AppListScreen(
                         )
 
                     val cardShape =
-                        RoundedCornerShape(12.dp)
+                        RoundedCornerShape(
+                            12.dp
+                        )
+
+
+                    /*
+                     * =========================================
+                     * APP CARD
+                     * =========================================
+                     */
 
                     Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .shadow(
-                                elevation = 5.dp,
-                                shape = cardShape,
-                                clip = false,
-                                ambientColor =
-                                    Color.Black.copy(
-                                        alpha = 0.10f
-                                    ),
-                                spotColor =
-                                    Color.Black.copy(
-                                        alpha = 0.10f
-                                    )
-                            )
-                            .clip(cardShape),
-                        shape = cardShape,
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .shadow(
+                                    elevation = 5.dp,
+                                    shape =
+                                        cardShape,
+                                    clip = false,
+
+                                    ambientColor =
+                                        Color.Black.copy(
+                                            alpha = 0.10f
+                                        ),
+
+                                    spotColor =
+                                        Color.Black.copy(
+                                            alpha = 0.10f
+                                        )
+                                )
+                                .clip(
+                                    cardShape
+                                ),
+
+                        shape =
+                            cardShape,
+
                         colors =
                             CardDefaults.cardColors(
                                 containerColor =
                                     Color.White
                             ),
+
                         elevation =
                             CardDefaults.cardElevation(
-                                defaultElevation = 2.dp,
-                                pressedElevation = 1.dp
+                                defaultElevation =
+                                    2.dp,
+
+                                pressedElevation =
+                                    1.dp
                             )
                     ) {
 
                         Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(58.dp)
-                                .padding(
-                                    start = 12.dp,
-                                    end = 10.dp
-                                ),
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .height(58.dp)
+                                    .padding(
+                                        start = 12.dp,
+                                        end = 10.dp
+                                    ),
+
                             verticalAlignment =
                                 Alignment.CenterVertically
                         ) {
+
+
+                            /*
+                             * =================================
+                             * APP ICON
+                             * =================================
+                             */
 
                             if (
                                 appItem.iconBitmap != null
@@ -692,33 +1010,66 @@ fun AppListScreen(
                                 Image(
                                     bitmap =
                                         appItem.iconBitmap,
-                                    contentDescription = null,
+
+                                    contentDescription =
+                                        null,
+
                                     modifier =
-                                        Modifier.size(32.dp)
+                                        Modifier.size(
+                                            32.dp
+                                        )
                                 )
 
                             } else {
 
                                 Spacer(
                                     modifier =
-                                        Modifier.size(32.dp)
+                                        Modifier.size(
+                                            32.dp
+                                        )
                                 )
                             }
 
+
                             Spacer(
                                 modifier =
-                                    Modifier.width(18.dp)
+                                    Modifier.width(
+                                        18.dp
+                                    )
                             )
 
+
+                            /*
+                             * =================================
+                             * APP NAME
+                             * =================================
+                             */
+
                             Text(
-                                text = appName,
+                                text =
+                                    appName,
+
                                 modifier =
-                                    Modifier.weight(1f),
+                                    Modifier.weight(
+                                        1f
+                                    ),
+
                                 color =
                                     Color(0xFF555555),
-                                fontSize = 15.sp,
-                                maxLines = 1
+
+                                fontSize =
+                                    15.sp,
+
+                                maxLines =
+                                    1
                             )
+
+
+                            /*
+                             * =================================
+                             * LOCK / UNLOCK BUTTON
+                             * =================================
+                             */
 
                             IconButton(
                                 onClick = {
@@ -726,48 +1077,71 @@ fun AppListScreen(
                                     if (isLocked) {
 
                                         scope.launch {
-                                            dataStore.removeLockedApp(
-                                                packageName
-                                            )
+
+                                            dataStore
+                                                .removeLockedApp(
+                                                    packageName
+                                                )
                                         }
 
                                     } else {
 
                                         scope.launch {
-                                            dataStore.saveLockedApp(
-                                                packageName
-                                            )
+
+                                            dataStore
+                                                .saveLockedApp(
+                                                    packageName
+                                                )
                                         }
                                     }
                                 },
+
                                 modifier =
-                                    Modifier.size(30.dp)
+                                    Modifier.size(
+                                        30.dp
+                                    )
                             ) {
 
                                 Image(
                                     painter =
                                         painterResource(
+
                                             id =
-                                                if (isLocked) {
+                                                if (
+                                                    isLocked
+                                                ) {
+
                                                     R.drawable.locked
+
                                                 } else {
+
                                                     R.drawable.unlock
                                                 }
                                         ),
+
                                     contentDescription =
-                                        if (isLocked) {
+
+                                        if (
+                                            isLocked
+                                        ) {
+
                                             stringResource(
                                                 R.string.unlock_app,
                                                 appName
                                             )
+
                                         } else {
+
                                             stringResource(
                                                 R.string.lock_app,
                                                 appName
                                             )
                                         },
+
                                     modifier =
-                                        Modifier.size(21.dp)
+                                        Modifier.size(
+                                            21.dp
+                                        )
                                 )
                             }
                         }

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.navigationBars
@@ -38,32 +39,63 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.applock.R
 
 @Composable
-fun StartScreen(navController: NavController, appInitialized: Boolean) {
-    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.loadingbar))
-    var navigationDone by remember { mutableStateOf(false) }
-    val progress by animateLottieCompositionAsState(composition = composition, iterations = 1)
+fun StartScreen(
+    navController: NavController,
+    appInitialized: Boolean
+) {
+
+    val composition by rememberLottieComposition(
+        LottieCompositionSpec.RawRes(
+            R.raw.loadingbar
+        )
+    )
+
+    var navigationDone by remember {
+        mutableStateOf(false)
+    }
+
+    val progress by animateLottieCompositionAsState(
+        composition = composition,
+        iterations = 1
+    )
 
     LaunchedEffect(
         progress,
         appInitialized
     ) {
+
         if (
             composition != null &&
             progress >= 1f &&
             !navigationDone
         ) {
+
             navigationDone = true
 
             if (appInitialized) {
-                navController.navigate("unlockScreen") {
-                    popUpTo("startScreen") {
+
+                navController.navigate(
+                    "unlockScreen"
+                ) {
+
+                    popUpTo(
+                        "startScreen"
+                    ) {
                         inclusive = true
                     }
+
                     launchSingleTop = true
                 }
+
             } else {
-                navController.navigate("welcomeScreen") {
-                    popUpTo("startScreen") {
+
+                navController.navigate(
+                    "welcomeScreen"
+                ) {
+
+                    popUpTo(
+                        "startScreen"
+                    ) {
                         inclusive = true
                     }
                 }
@@ -71,85 +103,168 @@ fun StartScreen(navController: NavController, appInitialized: Boolean) {
         }
     }
 
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(
-                Color.White.copy(alpha = 0.9f)
+                Color.White.copy(
+                    alpha = 0.9f
+                )
             )
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.startscreen),
-                contentDescription = "App Lock",
-                modifier = Modifier.size(270.dp)
-            )
 
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Text(
-                text = buildAnnotatedString {
-                    withStyle(
-                        style = SpanStyle(
-                            color = Color(0xFF333333),
-                            fontWeight = FontWeight.Bold
-                        )
-                    ) {
-                        append("App ")
-                    }
-
-                    withStyle(
-                        style = SpanStyle(
-                            color = Color(0xFF2196F3),
-                            fontWeight = FontWeight.Bold
-                        )
-                    ) {
-                        append("Lock")
-                    }
-                },
-                fontSize = 34.sp
-            )
-
-            Spacer(modifier = Modifier.height(9.dp))
-
-            Text(
-                text = "Secure your apps. Protect your privacy.",
-                fontSize = 13.sp,
-                color = Color.Gray
-            )
-        }
+        // =============================================================
+        // TOP / CENTER CONTENT
+        // =============================================================
 
         Column(
             modifier = Modifier
-                .align(Alignment.BottomCenter)
+                .fillMaxSize()
+                .statusBarsPadding(),
+
+            horizontalAlignment =
+                Alignment.CenterHorizontally
+        ) {
+
+            Image(
+                painter =
+                    painterResource(
+                        id = R.drawable.startscreen
+                    ),
+
+                contentDescription =
+                    "App Lock",
+
+                modifier =
+                    Modifier.size(
+                        270.dp
+                    )
+            )
+
+
+            Spacer(
+                modifier =
+                    Modifier.height(
+                        10.dp
+                    )
+            )
+
+
+            Text(
+                text =
+                    buildAnnotatedString {
+
+                        withStyle(
+                            style =
+                                SpanStyle(
+                                    color =
+                                        Color(0xFF333333),
+
+                                    fontWeight =
+                                        FontWeight.Bold
+                                )
+                        ) {
+                            append("App ")
+                        }
+
+                        withStyle(
+                            style =
+                                SpanStyle(
+                                    color =
+                                        Color(0xFF2196F3),
+
+                                    fontWeight =
+                                        FontWeight.Bold
+                                )
+                        ) {
+                            append("Lock")
+                        }
+                    },
+
+                fontSize =
+                    34.sp
+            )
+
+
+            Spacer(
+                modifier =
+                    Modifier.height(
+                        9.dp
+                    )
+            )
+
+
+            Text(
+                text =
+                    "Secure your apps. Protect your privacy.",
+
+                fontSize =
+                    13.sp,
+
+                color =
+                    Color.Gray
+            )
+        }
+
+
+        // =============================================================
+        // BOTTOM CONTENT
+        // =============================================================
+
+        Column(
+            modifier = Modifier
+                .align(
+                    Alignment.BottomCenter
+                )
                 .fillMaxWidth()
-                .windowInsetsPadding(WindowInsets.navigationBars)
+                .windowInsetsPadding(
+                    WindowInsets.navigationBars
+                )
                 .padding(
                     start = 100.dp,
                     end = 100.dp,
                     bottom = 20.dp
                 ),
-            horizontalAlignment = Alignment.CenterHorizontally
+
+            horizontalAlignment =
+                Alignment.CenterHorizontally
         ) {
+
             LottieAnimation(
-                composition = composition,
+                composition =
+                    composition,
+
                 progress = {
                     progress
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(25.dp)
+
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(
+                            25.dp
+                        )
             )
 
-            Spacer(modifier = Modifier.height(10.dp))
+
+            Spacer(
+                modifier =
+                    Modifier.height(
+                        10.dp
+                    )
+            )
+
 
             Text(
-                text = "This action may contain ads",
-                fontSize = 14.sp,
-                color = Color.Gray
+                text =
+                    "This action may contain ads",
+
+                fontSize =
+                    14.sp,
+
+                color =
+                    Color.Gray
             )
         }
     }

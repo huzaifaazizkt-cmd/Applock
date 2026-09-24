@@ -135,6 +135,87 @@ fun showCustomToast(
 }
 
 
+// =====================================================================
+// VIBRATION HELPER
+// =====================================================================
+
+private fun performUnlockVibration(
+    context: Context,
+    duration: Long = 70L
+) {
+
+    try {
+
+        if (
+            Build.VERSION.SDK_INT >=
+            Build.VERSION_CODES.S
+        ) {
+
+            val vibratorManager =
+                context.getSystemService(
+                    Context.VIBRATOR_MANAGER_SERVICE
+                ) as VibratorManager
+
+            val vibrator =
+                vibratorManager.defaultVibrator
+
+            if (
+                vibrator.hasVibrator()
+            ) {
+
+                vibrator.vibrate(
+                    VibrationEffect.createOneShot(
+                        duration,
+                        VibrationEffect.DEFAULT_AMPLITUDE
+                    )
+                )
+            }
+
+        } else {
+
+            @Suppress("DEPRECATION")
+            val vibrator =
+                context.getSystemService(
+                    Context.VIBRATOR_SERVICE
+                ) as Vibrator
+
+            if (
+                vibrator.hasVibrator()
+            ) {
+
+                if (
+                    Build.VERSION.SDK_INT >=
+                    Build.VERSION_CODES.O
+                ) {
+
+                    vibrator.vibrate(
+                        VibrationEffect.createOneShot(
+                            duration,
+                            VibrationEffect.DEFAULT_AMPLITUDE
+                        )
+                    )
+
+                } else {
+
+                    @Suppress("DEPRECATION")
+                    vibrator.vibrate(
+                        duration
+                    )
+                }
+            }
+        }
+
+    } catch (e: Exception) {
+
+        android.util.Log.e(
+            "UNLOCK_VIBRATION",
+            "VIBRATION ERROR",
+            e
+        )
+    }
+}
+
+
 @Composable
 fun UnlockScreen(
     onUnlockSuccess: () -> Unit,
@@ -331,6 +412,14 @@ fun UnlockScreen(
     // =========================================================
 
     fun registerWrongAttempt() {
+
+        if (vibrationEnabled) {
+
+            performUnlockVibration(
+                context = context,
+                duration = 100L
+            )
+        }
 
         scope.launch {
 
@@ -592,6 +681,14 @@ fun UnlockScreen(
     // =========================================================
 
     fun showPatternError() {
+
+        if (vibrationEnabled) {
+
+            performUnlockVibration(
+                context = context,
+                duration = 100L
+            )
+        }
 
         registerWrongAttempt()
 
@@ -1438,15 +1535,22 @@ private fun UnlockPatternGrid(
                                         Context.VIBRATOR_MANAGER_SERVICE
                                     ) as VibratorManager
 
-                                vibratorManager
-                                    .defaultVibrator
-                                    .vibrate(
+                                val vibrator =
+                                    vibratorManager
+                                        .defaultVibrator
+
+                                if (
+                                    vibrator.hasVibrator()
+                                ) {
+
+                                    vibrator.vibrate(
 
                                         VibrationEffect.createOneShot(
                                             35L,
                                             VibrationEffect.DEFAULT_AMPLITUDE
                                         )
                                     )
+                                }
 
                             } else {
 
@@ -1460,27 +1564,32 @@ private fun UnlockPatternGrid(
                                     ) as Vibrator
 
                                 if (
-                                    Build.VERSION.SDK_INT >=
-                                    Build.VERSION_CODES.O
+                                    vibrator.hasVibrator()
                                 ) {
 
-                                    vibrator.vibrate(
+                                    if (
+                                        Build.VERSION.SDK_INT >=
+                                        Build.VERSION_CODES.O
+                                    ) {
 
-                                        VibrationEffect.createOneShot(
-                                            35L,
-                                            VibrationEffect.DEFAULT_AMPLITUDE
+                                        vibrator.vibrate(
+
+                                            VibrationEffect.createOneShot(
+                                                35L,
+                                                VibrationEffect.DEFAULT_AMPLITUDE
+                                            )
                                         )
-                                    )
 
-                                } else {
+                                    } else {
 
-                                    @Suppress(
-                                        "DEPRECATION"
-                                    )
+                                        @Suppress(
+                                            "DEPRECATION"
+                                        )
 
-                                    vibrator.vibrate(
-                                        35L
-                                    )
+                                        vibrator.vibrate(
+                                            35L
+                                        )
+                                    }
                                 }
                             }
 
@@ -1631,7 +1740,6 @@ private fun UnlockPatternGrid(
                         size.height
                 )
 
-
             if (
                 !hideTrack &&
                 selectedDots.size >= 2
@@ -1672,7 +1780,6 @@ private fun UnlockPatternGrid(
                 }
             }
 
-
             positions.forEachIndexed {
                     index,
                     position ->
@@ -1683,7 +1790,6 @@ private fun UnlockPatternGrid(
                     )
 
                 drawCircle(
-
                     color =
                         dotColor,
 
@@ -1695,7 +1801,6 @@ private fun UnlockPatternGrid(
                 )
 
                 drawCircle(
-
                     color =
                         backgroundColor,
 
@@ -1713,15 +1818,12 @@ private fun UnlockPatternGrid(
 
                             selected &&
                                     isError ->
-
                                 errorColor
 
                             selected ->
-
                                 Color.White
 
                             else ->
-
                                 dotColor
                         },
 
@@ -1826,28 +1928,16 @@ private fun findUnlockDot(
 
     val positions =
         getUnlockPositions(
-            width =
-                width,
-
-            height =
-                height
+            width = width,
+            height = height
         )
 
     positions.forEachIndexed {
-            index,
-            dot ->
+            index, dot ->
 
-        val dx =
-            touch.x - dot.x
-
-        val dy =
-            touch.y - dot.y
-
-        val distance =
-            sqrt(
-                dx * dx +
-                        dy * dy
-            )
+        val dx = touch.x - dot.x
+        val dy = touch.y - dot.y
+        val distance = sqrt(dx * dx + dy * dy)
 
         if (
             distance <= 55f
