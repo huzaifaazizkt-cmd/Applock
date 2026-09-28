@@ -1,3 +1,4 @@
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -15,10 +16,18 @@ android {
         applicationId = "com.example.applock"
         minSdk = 26
         targetSdk = 37
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.0.1"
+        testInstrumentationRunner =
+            "androidx.test.runner.AndroidJUnitRunner"
     }
-
+    buildTypes {
+        release {
+            optimization {
+                enable = false
+            }
+        }
+    }
     buildFeatures {
         compose = true
     }
@@ -63,8 +72,9 @@ dependencies {
 
     implementation("com.google.firebase:firebase-crashlytics")
 
-
     implementation("com.google.android.gms:play-services-ads:24.6.0")
+
+    implementation("com.google.ads.mediation:facebook:6.22.0.0")
 
     implementation("androidx.biometric:biometric:1.1.0")
 
@@ -74,9 +84,7 @@ dependencies {
 
     val billing_version = "9.1.0"
 
-    implementation(
-        "com.android.billingclient:billing-ktx:$billing_version"
-    )
+    implementation("com.android.billingclient:billing-ktx:$billing_version")
 
     implementation("com.google.android.play:review:2.0.2")
 
@@ -86,6 +94,6 @@ dependencies {
 
     implementation("androidx.camera:camera-core:1.5.0")
 
-
     debugImplementation("androidx.compose.ui:ui-tooling")
 }
+

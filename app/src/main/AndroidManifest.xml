@@ -1,42 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.applock">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
 
-    <uses-permission
-        android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.CAMERA" />
 
-    <uses-permission
-        android:name="android.permission.QUERY_ALL_PACKAGES" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
-    <uses-permission
-        android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
 
-    <uses-permission
-        android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.VIBRATE" />
 
-    <uses-permission
-        android:name="android.permission.USE_BIOMETRIC" />
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
 
-    <uses-permission
-        android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
-    <uses-permission
-        android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
 
-    <uses-permission
-        android:name="android.permission.READ_MEDIA_VIDEO" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
 
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
 
-    <uses-permission
-        android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <uses-permission
         android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
@@ -53,11 +49,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppLock">
 
-        <!-- Google AdMob Test App ID -->
-        <meta-data
-            android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3940256099942544~3347511713" />
+        <!-- Google AdMob App ID -->
 
+
+        <!-- Main Activity -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -76,6 +71,7 @@
 
         </activity>
 
+        <!-- Lock Screen Activity -->
         <activity
             android:name=".Design.screens.LockScreenActivity"
             android:exported="false"
@@ -86,6 +82,7 @@
             android:showWhenLocked="true"
             android:turnScreenOn="true" />
 
+        <!-- App Lock Accessibility Service -->
         <service
             android:name=".service.AppLockService"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
@@ -109,6 +106,7 @@
 
         </service>
 
+        <!-- Boot Receiver -->
         <receiver
             android:name=".BootReceiver"
             android:enabled="true"
@@ -130,6 +128,7 @@
 
         </receiver>
 
+        <!-- File Provider -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
@@ -141,8 +140,9 @@
                 android:resource="@xml/file_paths" />
 
         </provider>
-
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3940256099942544~3347511713" />
     </application>
 
 </manifest>
-
