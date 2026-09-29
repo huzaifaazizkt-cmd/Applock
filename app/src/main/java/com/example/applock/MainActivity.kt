@@ -203,3 +203,82 @@ class MainActivity : AppCompatActivity() {
         }
     }
 }
+
+
+// next with out ads
+package com.example.applock
+
+import android.content.Intent
+import android.os.Bundle
+import android.util.Log
+
+import androidx.activity.compose.setContent
+import androidx.appcompat.app.AppCompatActivity
+
+import com.example.applock.navigation.NavGraph
+import com.google.android.gms.ads.MobileAds
+
+private const val TAG = "MainActivity"
+
+class MainActivity : AppCompatActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        // Initialize AdMob.
+        MobileAds.initialize(this) {
+            Log.d(TAG, "AdMob initialized successfully")
+        }
+
+        // Check for reset password request.
+        val openResetPassword =
+            intent.getBooleanExtra("openResetPassword", false)
+
+        // Start with reset screen or splash screen.
+        val startDestination =
+            if (openResetPassword) {
+                "resetCreate"
+            } else {
+                "startScreen"
+            }
+
+        Log.d(TAG, "MainActivity created: $startDestination")
+
+        setContent {
+            NavGraph(
+                context = this,
+                startDestination = startDestination
+            )
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+
+        setIntent(intent)
+
+        // Check for reset password request.
+        val openResetPassword =
+            intent.getBooleanExtra("openResetPassword", false)
+
+        Log.d(TAG, "MainActivity reopened")
+
+        if (openResetPassword) {
+            setContent {
+                NavGraph(
+                    context = this,
+                    startDestination = "resetCreate"
+                )
+            }
+            return
+        }
+
+        // Reopen directly on unlock screen.
+        setContent {
+            NavGraph(
+                context = this,
+                startDestination = "unlockScreen"
+            )
+        }
+    }
+}
