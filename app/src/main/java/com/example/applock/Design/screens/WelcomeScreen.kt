@@ -829,7 +829,9 @@ fun WelcomeScreen(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .background(Color.White)
+                    .background(
+                        Color.White.copy(alpha = 0.9f)
+                    )
         ) {
 
             /*

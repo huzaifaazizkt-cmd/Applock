@@ -1,4 +1,3 @@
-
 package com.example.applock
 
 import android.content.Intent
@@ -9,7 +8,6 @@ import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 
 import com.example.applock.navigation.NavGraph
-
 import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.ads.RequestConfiguration
 
@@ -18,11 +16,17 @@ private const val TAG = "AppLockAdMob"
 private const val TEST_DEVICE_ID =
     "E5CA263188C38AF6BD96C4C84E9600BB"
 
+private const val PREFS_NAME =
+    "applock_session"
+
+private const val KEY_REQUIRE_UNLOCK =
+    "require_unlock_on_next_open"
+
 class MainActivity : AppCompatActivity() {
 
-    override fun onCreate(
-        savedInstanceState: Bundle?
-    ) {
+    private var appWasStopped = false
+
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         /*
@@ -67,7 +71,7 @@ class MainActivity : AppCompatActivity() {
 
         /*
          * ====================================================
-         * INITIALIZE GOOGLE MOBILE ADS SDK
+         * INITIALIZE ADMOB
          * ====================================================
          */
 
@@ -82,16 +86,11 @@ class MainActivity : AppCompatActivity() {
                 TAG,
                 "AdMob initialized successfully"
             )
-
-            Log.d(
-                TAG,
-                "================================"
-            )
         }
 
         /*
          * ====================================================
-         * OPEN RESET PASSWORD
+         * RESET PASSWORD
          * ====================================================
          */
 
@@ -103,7 +102,68 @@ class MainActivity : AppCompatActivity() {
 
         /*
          * ====================================================
-         * COMPOSE / NAVIGATION
+         * CHECK IF APP MUST SHOW UNLOCK SCREEN
+         * ====================================================
+         */
+
+        val preferences =
+            getSharedPreferences(
+                PREFS_NAME,
+                MODE_PRIVATE
+            )
+
+        val requireUnlock =
+            preferences.getBoolean(
+                KEY_REQUIRE_UNLOCK,
+                false
+            )
+
+        /*
+         * ====================================================
+         * START DESTINATION
+         * ====================================================
+         */
+
+        val startDestination =
+
+            when {
+
+                openResetPassword -> {
+                    "resetCreate"
+                }
+
+                requireUnlock -> {
+                    "unlockScreen"
+                }
+
+                else -> {
+                    "startScreen"
+                }
+            }
+
+        /*
+         * ====================================================
+         * CLEAR PENDING UNLOCK
+         *
+         * It is cleared here because UnlockScreen will now
+         * be shown during this app launch.
+         * ====================================================
+         */
+
+        if (requireUnlock) {
+
+            preferences
+                .edit()
+                .putBoolean(
+                    KEY_REQUIRE_UNLOCK,
+                    false
+                )
+                .apply()
+        }
+
+        /*
+         * ====================================================
+         * COMPOSE
          * ====================================================
          */
 
@@ -111,22 +171,49 @@ class MainActivity : AppCompatActivity() {
 
             NavGraph(
                 context = this,
-
-                startDestination =
-                    if (openResetPassword) {
-                        "resetCreate"
-                    } else {
-                        "startScreen"
-                    }
+                startDestination = startDestination
             )
         }
     }
 
     /*
      * ========================================================
-     * NEW INTENT
+     * APP GOES INTO BACKGROUND
+     * ========================================================
+     *
+     * When user leaves the app, mark that the next app
+     * opening should require UnlockScreen.
+     *
      * ========================================================
      */
+
+    override fun onStop() {
+        super.onStop()
+
+        if (!isChangingConfigurations) {
+
+            val preferences =
+                getSharedPreferences(
+                    PREFS_NAME,
+                    MODE_PRIVATE
+                )
+
+            preferences
+                .edit()
+                .putBoolean(
+                    KEY_REQUIRE_UNLOCK,
+                    true
+                )
+                .apply()
+
+            Log.d(
+                TAG,
+                "App stopped - unlock required on next open"
+            )
+
+            appWasStopped = true
+        }
+    }
 
     override fun onNewIntent(
         intent: Intent
@@ -141,19 +228,15 @@ class MainActivity : AppCompatActivity() {
                 false
             )
 
-        setContent {
+        if (openResetPassword) {
 
-            NavGraph(
-                context = this,
+            setContent {
 
-                startDestination =
-                    if (openResetPassword) {
-                        "resetCreate"
-                    } else {
-                        "unlockScreen"
-                    }
-            )
+                NavGraph(
+                    context = this,
+                    startDestination = "resetCreate"
+                )
+            }
         }
     }
 }
-
