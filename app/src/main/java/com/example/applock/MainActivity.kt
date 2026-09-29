@@ -16,33 +16,21 @@ private const val TAG = "AppLockAdMob"
 private const val TEST_DEVICE_ID =
     "E5CA263188C38AF6BD96C4C84E9600BB"
 
-private const val PREFS_NAME =
-    "applock_session"
-
-private const val KEY_REQUIRE_UNLOCK =
-    "require_unlock_on_next_open"
-
 class MainActivity : AppCompatActivity() {
-
-    private var appWasStopped = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        /*
-         * ====================================================
-         * CONFIGURE ADMOB TEST DEVICE
-         * ====================================================
-         */
+        // ====================================================
+        // CONFIGURE ADMOB TEST DEVICE
+        // ====================================================
 
         try {
 
             val requestConfiguration =
                 RequestConfiguration.Builder()
                     .setTestDeviceIds(
-                        listOf(
-                            TEST_DEVICE_ID
-                        )
+                        listOf(TEST_DEVICE_ID)
                     )
                     .build()
 
@@ -69,11 +57,9 @@ class MainActivity : AppCompatActivity() {
             )
         }
 
-        /*
-         * ====================================================
-         * INITIALIZE ADMOB
-         * ====================================================
-         */
+        // ====================================================
+        // INITIALIZE ADMOB
+        // ====================================================
 
         Log.d(
             TAG,
@@ -88,11 +74,9 @@ class MainActivity : AppCompatActivity() {
             )
         }
 
-        /*
-         * ====================================================
-         * RESET PASSWORD
-         * ====================================================
-         */
+        // ====================================================
+        // RESET PASSWORD
+        // ====================================================
 
         val openResetPassword =
             intent.getBooleanExtra(
@@ -100,72 +84,48 @@ class MainActivity : AppCompatActivity() {
                 false
             )
 
-        /*
-         * ====================================================
-         * CHECK IF APP MUST SHOW UNLOCK SCREEN
-         * ====================================================
-         */
-
-        val preferences =
-            getSharedPreferences(
-                PREFS_NAME,
-                MODE_PRIVATE
-            )
-
-        val requireUnlock =
-            preferences.getBoolean(
-                KEY_REQUIRE_UNLOCK,
-                false
-            )
-
-        /*
-         * ====================================================
-         * START DESTINATION
-         * ====================================================
-         */
+        // ====================================================
+        // FIRST / FRESH ACTIVITY CREATION
+        // ====================================================
+        //
+        // Fresh MainActivity always starts with StartScreen.
+        //
+        // StartScreen itself decides:
+        //
+        // Existing app:
+        // StartScreen -> UnlockScreen
+        //
+        // First installation:
+        // StartScreen -> WelcomeScreen
+        //
+        // ====================================================
 
         val startDestination =
-
-            when {
-
-                openResetPassword -> {
-                    "resetCreate"
-                }
-
-                requireUnlock -> {
-                    "unlockScreen"
-                }
-
-                else -> {
-                    "startScreen"
-                }
+            if (openResetPassword) {
+                "resetCreate"
+            } else {
+                "startScreen"
             }
 
-        /*
-         * ====================================================
-         * CLEAR PENDING UNLOCK
-         *
-         * It is cleared here because UnlockScreen will now
-         * be shown during this app launch.
-         * ====================================================
-         */
+        Log.d(
+            TAG,
+            "================================"
+        )
 
-        if (requireUnlock) {
+        Log.d(
+            TAG,
+            "MAIN ACTIVITY CREATED"
+        )
 
-            preferences
-                .edit()
-                .putBoolean(
-                    KEY_REQUIRE_UNLOCK,
-                    false
-                )
-                .apply()
-        }
+        Log.d(
+            TAG,
+            "START DESTINATION = $startDestination"
+        )
 
-        /*
-         * ====================================================
-         * COMPOSE
-         * ====================================================
-         */
+        Log.d(
+            TAG,
+            "================================"
+        )
 
         setContent {
 
@@ -176,44 +136,18 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /*
-     * ========================================================
-     * APP GOES INTO BACKGROUND
-     * ========================================================
-     *
-     * When user leaves the app, mark that the next app
-     * opening should require UnlockScreen.
-     *
-     * ========================================================
-     */
-
-    override fun onStop() {
-        super.onStop()
-
-        if (!isChangingConfigurations) {
-
-            val preferences =
-                getSharedPreferences(
-                    PREFS_NAME,
-                    MODE_PRIVATE
-                )
-
-            preferences
-                .edit()
-                .putBoolean(
-                    KEY_REQUIRE_UNLOCK,
-                    true
-                )
-                .apply()
-
-            Log.d(
-                TAG,
-                "App stopped - unlock required on next open"
-            )
-
-            appWasStopped = true
-        }
-    }
+    // ========================================================
+    // EXISTING ACTIVITY REOPENED
+    // ========================================================
+    //
+    // This happens when MainActivity is still alive and the
+    // user opens AppLock again.
+    //
+    // Do NOT show StartScreen here.
+    //
+    // Directly show UnlockScreen.
+    //
+    // ========================================================
 
     override fun onNewIntent(
         intent: Intent
@@ -228,6 +162,21 @@ class MainActivity : AppCompatActivity() {
                 false
             )
 
+        Log.d(
+            TAG,
+            "================================"
+        )
+
+        Log.d(
+            TAG,
+            "MAIN ACTIVITY NEW INTENT"
+        )
+
+        Log.d(
+            TAG,
+            "================================"
+        )
+
         if (openResetPassword) {
 
             setContent {
@@ -237,6 +186,20 @@ class MainActivity : AppCompatActivity() {
                     startDestination = "resetCreate"
                 )
             }
+
+            return
+        }
+
+        // ====================================================
+        // NORMAL REOPEN
+        // ====================================================
+
+        setContent {
+
+            NavGraph(
+                context = this,
+                startDestination = "unlockScreen"
+            )
         }
     }
 }
